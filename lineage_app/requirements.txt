@@ -1,0 +1,6 @@
+anthropic>=0.109.0
+dotenv>=0.9.9
+flask>=3.0.0
+networkx>=3.0.0
+sqlparse>=0.5.0
+google-genai>=0.8.0

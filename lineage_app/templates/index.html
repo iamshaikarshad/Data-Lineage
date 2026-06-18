@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Lineage Explorer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<style>
+:root {
+  --bg:       #0f1117;
+  --surface:  #1a1d27;
+  --surface2: #242736;
+  --border:   #2d3147;
+  --accent:   #4f8ef7;
+  --accent2:  #22c55e;
+  --warn:     #f59e0b;
+  --danger:   #ef4444;
+  --text:     #e2e8f0;
+  --muted:    #8892a4;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+
+/* Header */
+header { display:flex; align-items:center; padding:8px 16px; background:var(--surface); border-bottom:1px solid var(--border); gap:12px; flex-shrink:0; }
+.logo { font-size:18px; font-weight:700; background:linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.badge { display:inline-flex; align-items:center; padding:2px 10px; border-radius:12px; font-size:12px; font-weight:600; }
+.badge-stats { background:var(--surface2); color:var(--muted); }
+.badge-failures { background:rgba(239,68,68,.15); color:var(--danger); cursor:pointer; display:none; }
+.badge-failures.visible { display:inline-flex; }
+.btn { padding:6px 14px; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; transition:all .15s; }
+.btn-primary { background:var(--accent); color:#fff; }
+.btn-primary:hover { filter:brightness(1.1); }
+.btn-primary:disabled { opacity:.5; cursor:not-allowed; }
+.btn-outline { background:transparent; color:var(--text); border:1px solid var(--border); }
+.btn-outline:hover { border-color:var(--accent); }
+.spinner { display:inline-block; width:14px; height:14px; border:2px solid rgba(255,255,255,.3); border-top-color:#fff; border-radius:50%; animation:spin .6s linear infinite; margin-right:6px; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* Toolbar */
+.toolbar { display:flex; align-items:center; padding:8px 16px; background:var(--surface2); border-bottom:1px solid var(--border); gap:10px; flex-shrink:0; flex-wrap:wrap; }
+.search-wrap { position:relative; flex:1; min-width:180px; max-width:360px; }
+.search-input { width:100%; padding:6px 10px; background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); font-size:13px; outline:none; }
+.search-input:focus { border-color:var(--accent); }
+.suggestions { position:absolute; top:100%; left:0; right:0; background:var(--surface); border:1px solid var(--border); border-radius:0 0 6px 6px; max-height:240px; overflow-y:auto; z-index:20; display:none; }
+.suggestions.open { display:block; }
+.suggestion { padding:6px 10px; cursor:pointer; font-size:13px; }
+.suggestion:hover, .suggestion.active { background:var(--surface2); }
+.suggestion mark { background:transparent; color:var(--warn); font-weight:700; }
+.dir-group { display:flex; border:1px solid var(--border); border-radius:6px; overflow:hidden; }
+.dir-btn { padding:5px 12px; font-size:12px; cursor:pointer; background:transparent; color:var(--muted); border:none; border-right:1px solid var(--border); }
+.dir-btn:last-child { border-right:none; }
+.dir-btn.active { background:var(--accent); color:#fff; }
+.depth-wrap { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); }
+.depth-wrap input[type=range] { width:80px; accent-color:var(--accent); }
+.depth-val { min-width:16px; text-align:center; color:var(--text); font-weight:600; }
+
+/* Main layout */
+.main { display:flex; flex:1; overflow:hidden; }
+
+/* Sidebar */
+.sidebar { width:340px; min-width:340px; background:var(--surface); border-right:1px solid var(--border); display:flex; flex-direction:column; overflow:hidden; }
+.tab-bar { display:flex; border-bottom:1px solid var(--border); }
+.tab-btn { flex:1; padding:8px; text-align:center; font-size:12px; font-weight:600; color:var(--muted); background:transparent; border:none; cursor:pointer; border-bottom:2px solid transparent; }
+.tab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+.tab-content { flex:1; overflow-y:auto; padding:12px; }
+.stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:16px; }
+.stat-card { background:var(--surface2); border-radius:8px; padding:10px; text-align:center; }
+.stat-val { font-size:22px; font-weight:700; color:var(--text); }
+.stat-label { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-top:2px; }
+.detail-section { margin-bottom:12px; }
+.detail-title { font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); margin-bottom:6px; }
+.table-name { font-family:monospace; font-size:16px; font-weight:700; }
+.qualified-name { font-size:11px; color:var(--muted); margin-top:2px; }
+.clickable { cursor:pointer; color:var(--accent); }
+.clickable:hover { text-decoration:underline; }
+.source-item { display:flex; align-items:center; gap:6px; padding:4px 0; font-size:13px; }
+.source-item .arrow { color:var(--accent2); font-weight:700; }
+.target-item .arrow { color:var(--danger); font-weight:700; }
+.pill { display:inline-block; padding:1px 8px; border-radius:10px; font-size:10px; font-weight:600; }
+.pill-regex { background:rgba(34,197,94,.15); color:#22c55e; }
+.pill-claude { background:rgba(79,142,247,.15); color:#4f8ef7; }
+.pill-gemini { background:rgba(167,139,250,.15); color:#a78bfa; }
+.pill-direct_copy { background:rgba(34,197,94,.15); color:#22c55e; }
+.pill-aggregation { background:rgba(245,158,11,.15); color:#f59e0b; }
+.pill-calculation { background:rgba(167,139,250,.15); color:#a78bfa; }
+.pill-conditional { background:rgba(236,72,153,.15); color:#ec4899; }
+.pill-constant { background:rgba(100,116,139,.15); color:#64748b; }
+.column-row { padding:6px 0; border-bottom:1px solid var(--border); }
+.column-row:last-child { border-bottom:none; }
+.col-name { font-family:monospace; font-size:13px; font-weight:600; }
+.col-type { color:var(--muted); font-size:11px; margin-left:8px; }
+.col-pk { color:var(--warn); font-size:10px; margin-left:4px; }
+.mapping-card { background:var(--surface2); border-radius:6px; padding:8px 10px; margin-bottom:8px; }
+.mapping-src { font-family:monospace; font-size:12px; color:var(--accent2); }
+.mapping-arrow { color:var(--muted); margin:0 4px; }
+.mapping-tgt { font-family:monospace; font-size:12px; color:var(--text); }
+.mapping-logic { font-size:11px; color:var(--muted); margin-top:4px; }
+.empty-state { text-align:center; padding:32px 16px; color:var(--muted); }
+
+/* Graph area */
+.graph-area { flex:1; display:flex; position:relative; overflow:hidden; }
+.graph-canvas { flex:1; transition:flex .3s; }
+.graph-canvas.shrunk { flex:1; }
+svg { width:100%; height:100%; display:block; }
+
+/* Column panel */
+.column-panel { width:0; overflow:hidden; background:var(--surface); border-left:1px solid var(--border); transition:width .3s; display:flex; flex-direction:column; }
+.column-panel.open { width:420px; }
+.panel-header { display:flex; align-items:center; padding:10px 12px; border-bottom:1px solid var(--border); gap:8px; flex-shrink:0; }
+.panel-title { font-weight:700; font-size:14px; font-family:monospace; flex:1; }
+.panel-close { background:none; border:none; color:var(--muted); font-size:18px; cursor:pointer; padding:4px; }
+.panel-close:hover { color:var(--text); }
+.panel-body { flex:1; overflow-y:auto; padding:12px; }
+.section-divider { height:1px; background:var(--border); margin:12px 0; }
+.target-col-row { padding:8px 0; border-bottom:1px solid var(--border); }
+.target-col-name { font-family:monospace; font-size:13px; font-weight:600; }
+.target-col-type { color:var(--muted); font-size:11px; margin-left:8px; }
+.target-col-pk { color:var(--warn); font-size:10px; margin-left:4px; }
+.mapping-source { padding:4px 0 4px 12px; font-size:12px; }
+.no-mapping { color:var(--muted); font-style:italic; font-size:11px; padding:4px 0 4px 12px; }
+.source-section { margin-bottom:12px; }
+.source-name { font-family:monospace; font-weight:600; color:var(--accent2); font-size:13px; }
+.join-badge { font-size:10px; color:var(--muted); margin-left:8px; }
+.source-mapping { padding:2px 0 2px 16px; font-size:12px; font-family:monospace; }
+
+/* Legend + zoom */
+.zoom-controls { position:absolute; bottom:16px; right:16px; display:flex; flex-direction:column; gap:4px; }
+.zoom-btn { width:32px; height:32px; border-radius:6px; background:var(--surface); border:1px solid var(--border); color:var(--text); font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.zoom-btn:hover { background:var(--surface2); }
+.legend { position:absolute; bottom:16px; left:16px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:10px 14px; font-size:11px; }
+.legend-item { display:flex; align-items:center; gap:6px; margin:3px 0; }
+.legend-dot { width:10px; height:10px; border-radius:3px; }
+
+/* Node styles */
+.node-rect { rx:6; ry:6; stroke-width:1; cursor:pointer; }
+.node-label { font-family:monospace; font-size:12px; fill:#fff; pointer-events:none; text-anchor:middle; dominant-baseline:central; }
+.node-schema { font-size:9px; fill:var(--muted); pointer-events:none; text-anchor:middle; }
+.node-badge { font-size:9px; fill:rgba(255,255,255,.6); pointer-events:none; text-anchor:end; }
+.node-expand { font-size:14px; fill:var(--muted); cursor:pointer; }
+.node-expand:hover { fill:var(--warn); }
+.edge-path { fill:none; stroke:var(--accent); stroke-width:1.5; opacity:.6; }
+.edge-path.highlighted { stroke:var(--warn); stroke-width:2.5; opacity:1; }
+.edge-path-bg { fill:none; stroke:transparent; stroke-width:12; }
+
+/* Overlay */
+.overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(15,17,23,.85); display:flex; align-items:center; justify-content:center; z-index:30; }
+.overlay-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:40px; text-align:center; max-width:440px; }
+.overlay-card h2 { font-size:22px; margin-bottom:8px; }
+.overlay-card p { color:var(--muted); font-size:14px; margin-bottom:20px; }
+.overlay.hidden { display:none; }
+
+/* Modal */
+.modal-backdrop { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,.6); z-index:40; display:flex; align-items:center; justify-content:center; }
+.modal-backdrop.hidden { display:none; }
+.modal { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:24px; max-width:600px; width:90%; max-height:80vh; overflow-y:auto; }
+.modal h3 { margin-bottom:16px; }
+.failure-card { background:var(--surface2); border-radius:8px; padding:10px 12px; margin-bottom:10px; }
+.failure-file { font-family:monospace; font-weight:700; font-size:13px; margin-bottom:4px; }
+.failure-reason { font-size:12px; color:var(--danger); margin-bottom:6px; }
+.failure-steps { font-size:11px; color:var(--muted); }
+.failure-steps summary { cursor:pointer; color:var(--accent); }
+.failure-snippet { font-family:monospace; font-size:11px; background:var(--bg); padding:8px; border-radius:4px; margin-top:6px; white-space:pre-wrap; word-break:break-all; max-height:80px; overflow:hidden; }
+
+/* Toast */
+#toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--surface2); color:var(--text); padding:10px 20px; border-radius:8px; font-size:13px; opacity:0; transition:opacity .3s; z-index:50; pointer-events:none; border:1px solid var(--border); }
+#toast.visible { opacity:1; }
+
+/* Narrow viewport */
+@media (max-width:900px) {
+  .sidebar { width:260px; min-width:260px; }
+  .column-panel.open { position:absolute; right:0; top:0; bottom:0; width:380px; z-index:25; box-shadow:-4px 0 20px rgba(0,0,0,.4); }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="logo">&#x2B21; Data Lineage Explorer</span>
+  <span class="badge badge-stats" id="statsBadge">0 tables &middot; 0 procedures</span>
+  <span class="badge badge-failures" id="failuresBadge" onclick="openFailuresModal()">&#x26A0; <span id="failCount">0</span> failed</span>
+  <span style="flex:1"></span>
+  <button class="btn btn-primary" id="runBtn" onclick="runAgents(true)">&#x26A1; Run Agents</button>
+  <button class="btn btn-outline" id="fullGraphBtn" onclick="fetchAndRenderFull()" disabled>Full Graph</button>
+</header>
+
+<div class="toolbar">
+  <div class="search-wrap">
+    <input class="search-input" id="searchInput" type="text" placeholder="Search table name&hellip;" autocomplete="off">
+    <div class="suggestions" id="suggestions"></div>
+  </div>
+  <div class="dir-group">
+    <button class="dir-btn active" data-dir="both" onclick="setDirection('both',this)">Both</button>
+    <button class="dir-btn" data-dir="upstream" onclick="setDirection('upstream',this)">&#x2191; Upstream</button>
+    <button class="dir-btn" data-dir="downstream" onclick="setDirection('downstream',this)">&#x2193; Downstream</button>
+  </div>
+  <div class="depth-wrap">
+    Depth <input type="range" id="depthSlider" min="1" max="8" value="5">
+    <span class="depth-val" id="depthVal">5</span>
+  </div>
+  <button class="btn btn-primary" onclick="doSearch()">Search</button>
+  <button class="btn btn-outline" onclick="clearSearch()">&#x2715; Clear</button>
+</div>
+
+<div class="main">
+  <div class="sidebar">
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
+      <button class="tab-btn" onclick="switchTab('columns')">Columns</button>
+      <button class="tab-btn" onclick="switchTab('mappings')">Mappings</button>
+    </div>
+    <div class="tab-content" id="tabContent">
+      <div id="overviewTab">
+        <div class="stats-grid" id="statsGrid"></div>
+        <div id="detailSection"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="graph-area">
+    <div class="graph-canvas" id="graphCanvas">
+      <svg id="graphSvg"></svg>
+    </div>
+    <div class="column-panel" id="columnPanel">
+      <div class="panel-header">
+        <span class="panel-title" id="panelTitle"></span>
+        <button class="panel-close" onclick="closeColumnPanel()">&#x2715;</button>
+      </div>
+      <div class="panel-body" id="panelBody"></div>
+    </div>
+
+    <div class="zoom-controls">
+      <button class="zoom-btn" onclick="zoomIn()">+</button>
+      <button class="zoom-btn" onclick="zoomOut()">&minus;</button>
+      <button class="zoom-btn" onclick="fitGraph()">&#x229E;</button>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--accent2)"></div>Source</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div>Both</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--danger)"></div>Target</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--warn)"></div>Selected</div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="overlay-card">
+    <h2>&#x1F44B; Welcome to Data Lineage Explorer</h2>
+    <p>Place stored procedures in <code>data/sp/</code> and schema files in <code>data/schemas/</code>, then click Run Agents to build the lineage graph.</p>
+    <button class="btn btn-primary" onclick="runAgents(true); hideOverlay();">Run Agents Now</button>
+  </div>
+</div>
+
+<div class="modal-backdrop hidden" id="failuresModal">
+  <div class="modal">
+    <h3>&#x26A0; Extraction Failures &mdash; Human Review Required</h3>
+    <div id="failuresList"></div>
+    <button class="btn btn-outline" style="margin-top:16px" onclick="closeFailuresModal()">Close</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── Global state ──
+let allTables = [];
+let currentGraph = null;
+let selectedTable = null;
+let expandedTable = null;
+let direction = 'both';
+let simulation = null;
+let svgZoom = null;
+let columnPanelOpen = false;
+let failuresList = [];
+let catalogue = {};
+
+// ── API helpers ──
+async function api(url, opts) {
+  const r = await fetch(url, opts);
+  return r.json();
+}
+
+// ── Agent interaction ──
+async function runAgents(force = false) {
+  const btn = document.getElementById('runBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Running&hellip;';
+  try {
+    const res = await api('/api/analyse', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ force }) });
+    if (res.status === 'ok') {
+      updateStatsCards(res.statistics);
+      showToast('Analysis complete');
+    } else {
+      showToast('Error: ' + (res.message || 'Unknown error'));
+    }
+    await loadStats();
+    await loadTables();
+    await loadFailures();
+    if (allTables.length > 0) {
+      hideOverlay();
+      await fetchAndRenderFull();
+    }
+  } catch (e) { showToast('Error: ' + e.message); }
+  finally { btn.disabled = false; btn.innerHTML = '&#x26A1; Run Agents'; }
+}
+
+async function loadStats() {
+  const s = await api('/api/stats');
+  updateStatsCards(s);
+}
+
+async function loadTables() {
+  const r = await api('/api/tables');
+  allTables = r.tables || [];
+  document.getElementById('fullGraphBtn').disabled = allTables.length === 0;
+  const parts = document.getElementById('statsBadge');
+  // We'll update after stats call
+}
+
+async function loadFailures() {
+  const r = await api('/api/failures');
+  failuresList = r.failures || [];
+  const badge = document.getElementById('failuresBadge');
+  if (failuresList.length > 0) {
+    badge.classList.add('visible');
+    document.getElementById('failCount').textContent = failuresList.length;
+  } else {
+    badge.classList.remove('visible');
+  }
+}
+
+async function fetchAndRenderFull() {
+  const data = await api('/api/full');
+  if (data.nodes) {
+    currentGraph = data;
+    // Store catalogue info from nodes
+    for (const n of data.nodes) {
+      catalogue[n.id] = n;
+    }
+    renderGraph(data, null);
+    document.getElementById('fullGraphBtn').disabled = false;
+  }
+}
+
+async function searchLineage(table) {
+  const depth = document.getElementById('depthSlider').value;
+  const d = direction;
+  const data = await api(`/api/lineage/${encodeURIComponent(table)}?depth=${depth}&direction=${d}`);
+  if (data.error) {
+    showToast(data.error);
+    return;
+  }
+  currentGraph = data;
+  renderGraph(data, table);
+  selectedTable = table;
+  highlightNode(table);
+  await loadSidebarDetail(table);
+}
+
+// ── Sidebar ──
+async function loadSidebarDetail(table) {
+  selectedTable = table;
+  const node = currentGraph ? currentGraph.nodes.find(n => n.id === table) : null;
+  renderOverviewDetail(table, node);
+  renderColumnsTab(node);
+  const colData = await api(`/api/column/${encodeURIComponent(table)}`);
+  renderMappingsTab(table, colData);
+}
+
+function renderOverviewDetail(table, node) {
+  const sec = document.getElementById('detailSection');
+  if (!node && !table) { sec.innerHTML = ''; return; }
+  const inD = currentGraph ? currentGraph.edges.filter(e => e.target === table).length : 0;
+  const outD = currentGraph ? currentGraph.edges.filter(e => e.source === table).length : 0;
+  let html = `<div class="detail-section"><div class="table-name">${table}</div>`;
+  if (node && node.qualified_name) html += `<div class="qualified-name">${node.qualified_name}</div>`;
+  if (node && node.database) html += `<div style="font-size:11px;color:var(--muted)">${node.database}.${node.schema || 'dbo'}</div>`;
+  html += `</div>`;
+  // Sources
+  const sources = currentGraph ? [...new Set(currentGraph.edges.filter(e => e.target === table).map(e => e.source))] : [];
+  const targets = currentGraph ? [...new Set(currentGraph.edges.filter(e => e.source === table).map(e => e.target))] : [];
+  if (sources.length) {
+    html += `<div class="detail-section"><div class="detail-title">Sources</div>`;
+    sources.forEach(s => { html += `<div class="source-item"><span class="arrow">&uarr;</span><span class="clickable" onclick="selectAndSearch('${s}')">${s}</span></div>`; });
+    html += `</div>`;
+  }
+  if (targets.length) {
+    html += `<div class="detail-section"><div class="detail-title">Targets</div>`;
+    targets.forEach(t => { html += `<div class="source-item target-item"><span class="arrow">&darr;</span><span class="clickable" onclick="selectAndSearch('${t}')">${t}</span></div>`; });
+    html += `</div>`;
+  }
+  // Procedures
+  const procs = currentGraph ? [...new Set(currentGraph.edges.filter(e => e.source === table || e.target === table).flatMap(e => e.procedures || []))] : [];
+  if (procs.length) {
+    html += `<div class="detail-section"><div class="detail-title">Procedures</div>`;
+    procs.forEach(p => { html += `<span class="pill pill-regex" style="margin:2px">${p}</span> `; });
+    html += `</div>`;
+  }
+  // Extraction method
+  const methods = currentGraph ? [...new Set(currentGraph.edges.filter(e => e.source === table || e.target === table).flatMap(e => e.extraction_methods || []))] : [];
+  if (methods.length) {
+    html += `<div class="detail-section"><div class="detail-title">Extraction</div>`;
+    methods.forEach(m => { html += `<span class="pill pill-${m}" style="margin:2px">${m}</span> `; });
+    html += `</div>`;
+  }
+  sec.innerHTML = html;
+}
+
+function renderColumnsTab(node) {
+  // Rendered on tab switch
+}
+
+function renderMappingsTab(table, colData) {
+  // Rendered on tab switch
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.tab-btn:nth-child(${name === 'overview' ? 1 : name === 'columns' ? 2 : 3})`).classList.add('active');
+  const tc = document.getElementById('tabContent');
+  if (name === 'overview') {
+    if (selectedTable) {
+      const node = currentGraph ? currentGraph.nodes.find(n => n.id === selectedTable) : null;
+      renderOverviewDetail(selectedTable, node);
+    }
+    tc.innerHTML = `<div id="overviewTab"><div class="stats-grid" id="statsGrid"></div><div id="detailSection"></div></div>`;
+    updateStatsCardsFromGlobal();
+    if (selectedTable) {
+      const node = currentGraph ? currentGraph.nodes.find(n => n.id === selectedTable) : null;
+      renderOverviewDetail(selectedTable, node);
+    }
+  } else if (name === 'columns') {
+    if (!selectedTable) { tc.innerHTML = '<div class="empty-state">Select a table to view columns</div>'; return; }
+    const node = currentGraph ? currentGraph.nodes.find(n => n.id === selectedTable) : null;
+    if (!node || !node.column_details || !node.column_details.length) { tc.innerHTML = '<div class="empty-state">No schema information available</div>'; return; }
+    let html = '';
+    node.column_details.forEach(c => {
+      html += `<div class="column-row"><span class="col-name">${c.name}</span><span class="col-type">${c.type}</span>${c.primary_key ? '<span class="col-pk">[PK]</span>' : ''}</div>`;
+    });
+    tc.innerHTML = html;
+  } else if (name === 'mappings') {
+    if (!selectedTable) { tc.innerHTML = '<div class="empty-state">Select a table to view mappings</div>'; return; }
+    api(`/api/column/${encodeURIComponent(selectedTable)}`).then(colData => {
+      let html = '<div class="detail-title">Incoming</div>';
+      (colData.incoming || []).forEach(m => {
+        html += `<div class="mapping-card"><span class="mapping-src">${m.source_table}.${m.source_column}</span><span class="mapping-arrow">&rarr;</span><span class="mapping-tgt">${m.target_column}</span> <span class="pill pill-${m.transformation_type}" style="margin-left:6px">${m.transformation_type}</span><div class="mapping-logic">${m.transformation_logic}</div></div>`;
+      });
+      if (!(colData.incoming || []).length) html += '<div style="color:var(--muted);font-size:12px">None</div>';
+      html += '<div class="detail-title" style="margin-top:12px">Outgoing</div>';
+      (colData.outgoing || []).forEach(m => {
+        html += `<div class="mapping-card"><span class="mapping-tgt">${m.source_column}</span><span class="mapping-arrow">&rarr;</span><span class="mapping-src" style="color:var(--danger)">${m.target_table}.${m.target_column}</span> <span class="pill pill-${m.transformation_type}" style="margin-left:6px">${m.transformation_type}</span><div class="mapping-logic">${m.transformation_logic}</div></div>`;
+      });
+      if (!(colData.outgoing || []).length) html += '<div style="color:var(--muted);font-size:12px">None</div>';
+      tc.innerHTML = html;
+    });
+  }
+}
+
+function updateStatsCards(stats) {
+  const badge = document.getElementById('statsBadge');
+  badge.textContent = `${stats.total_tables || 0} tables · ${stats.procedures || 0} procedures`;
+}
+
+function updateStatsCardsFromGlobal() {
+  // Reuse last stats
+}
+
+function selectAndSearch(table) {
+  document.getElementById('searchInput').value = table;
+  searchLineage(table);
+}
+
+// ── Graph rendering ──
+function initZoom() {
+  const svg = d3.select('#graphSvg');
+  svgZoom = d3.zoom().scaleExtent([0.1, 4]).on('zoom', (event) => {
+    svg.select('g.root').attr('transform', event.transform);
+  });
+  svg.call(svgZoom);
+  svg.append('g').attr('class', 'root');
+}
+
+function fitGraph() {
+  const svg = d3.select('#graphSvg');
+  const root = svg.select('g.root');
+  const bounds = root.node().getBBox();
+  if (!bounds.width || !bounds.height) return;
+  const svgEl = svg.node();
+  const w = svgEl.clientWidth;
+  const h = svgEl.clientHeight;
+  const scale = Math.min(w / (bounds.width + 40), h / (bounds.height + 40)) * 0.9;
+  const tx = w / 2 - (bounds.x + bounds.width / 2) * scale;
+  const ty = h / 2 - (bounds.y + bounds.height / 2) * scale;
+  svg.transition().duration(500).call(svgZoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+}
+
+function zoomIn() { d3.select('#graphSvg').transition().duration(300).call(svgZoom.scaleBy, 1.3); }
+function zoomOut() { d3.select('#graphSvg').transition().duration(300).call(svgZoom.scaleBy, 0.7); }
+
+function nodeColor(nodeId) {
+  const inD = currentGraph.edges.filter(e => e.target === nodeId).length;
+  const outD = currentGraph.edges.filter(e => e.source === nodeId).length;
+  if (nodeId === selectedTable) return 'var(--warn)';
+  if (inD > 0 && outD > 0) return '#3b82f6';
+  if (inD > 0) return 'var(--danger)';
+  if (outD > 0) return 'var(--accent2)';
+  return 'var(--accent)';
+}
+
+function renderGraph(graphData, focusTable) {
+  if (simulation) simulation.stop();
+  const root = d3.select('#graphSvg g.root');
+  root.selectAll('*').remove();
+
+  if (!graphData || !graphData.nodes || !graphData.nodes.length) return;
+
+  const nodes = graphData.nodes.map(n => ({ ...n }));
+  const edges = graphData.edges.map(e => ({ ...e, source: e.source, target: e.target }));
+
+  // Arrow marker
+  const defs = root.append('defs');
+  defs.append('marker').attr('id', 'arrowhead').attr('viewBox', '0 -5 10 10').attr('refX', 28).attr('refY', 0).attr('markerWidth', 6).attr('markerHeight', 6).attr('orient', 'auto').append('path').attr('d', 'M0,-5L10,0L0,5').attr('fill', 'var(--accent)');
+
+  // Edges
+  const edgeGroup = root.append('g').attr('class', 'edges');
+  edgeGroup.selectAll('.edge-path-bg').data(edges).join('path').attr('class', 'edge-path-bg').attr('data-source', d => d.source).attr('data-target', d => d.target);
+  const edgePaths = edgeGroup.selectAll('.edge-path').data(edges).join('path').attr('class', d => {
+    const hl = (selectedTable && (d.source === selectedTable || d.target === selectedTable)) ? ' highlighted' : '';
+    return 'edge-path' + hl;
+  }).attr('data-source', d => d.source).attr('data-target', d => d.target).attr('marker-end', 'url(#arrowhead)');
+
+  // Nodes
+  const nodeGroup = root.append('g').attr('class', 'nodes');
+  const nodeGs = nodeGroup.selectAll('g').data(nodes).join('g').attr('class', 'node').call(d3.drag()
+    .on('start', (event, d) => { if (!event.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+    .on('drag', (event, d) => { d.fx = event.x; d.fy = event.y; })
+    .on('end', (event, d) => { if (!event.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; })
+  );
+
+  nodeGs.each(function(d) {
+    const labelLen = d.id.length;
+    const w = Math.max(140, labelLen * 8 + 20);
+    const h = 44;
+    d._w = w; d._h = h;
+
+    const g = d3.select(this);
+    g.append('rect').attr('class', 'node-rect').attr('width', w).attr('height', h).attr('x', -w / 2).attr('y', -h / 2).attr('fill', 'var(--surface2)').attr('stroke', nodeColor(d.id)).attr('stroke-width', 2);
+
+    // Left color strip
+    g.append('rect').attr('width', 4).attr('height', h).attr('x', -w / 2).attr('y', -h / 2).attr('fill', nodeColor(d.id)).attr('rx', 2);
+
+    // Label
+    g.append('text').attr('class', 'node-label').attr('y', -2).text(d.id);
+
+    // Schema below
+    if (d.schema) g.append('text').attr('class', 'node-schema').attr('y', 14).text(d.schema);
+
+    // Column count badge
+    const cols = d.columns ? d.columns.length : 0;
+    if (cols > 0) g.append('text').attr('class', 'node-badge').attr('x', w / 2 - 6).attr('y', -h / 2 + 12).text(cols + ' cols');
+
+    // Expand icon
+    g.append('text').attr('class', 'node-expand').attr('x', w / 2 - 16).attr('y', h / 2 - 8).text('⊞');
+  });
+
+  // Click handler
+  nodeGs.on('click', (event, d) => {
+    event.stopPropagation();
+    if (expandedTable === d.id && columnPanelOpen) {
+      closeColumnPanel();
+    } else {
+      selectedTable = d.id;
+      highlightNode(d.id);
+      openColumnPanel(d.id);
+      loadSidebarDetail(d.id);
+    }
+  });
+
+  // Simulation
+  simulation = d3.forceSimulation(nodes)
+    .force('link', d3.forceLink(edges).id(d => d.id || d.source).distance(180).strength(0.6))
+    .force('charge', d3.forceManyBody().strength(-500))
+    .force('center', d3.forceCenter())
+    .force('x', d3.forceX().strength(0.04))
+    .force('y', d3.forceY().strength(0.04))
+    .force('collide', d3.forceCollide().radius(90))
+    .on('tick', () => {
+      edgePaths.attr('d', d => {
+        const dx = d.target.x - d.source.x;
+        const dy = d.target.y - d.source.y;
+        const dr = Math.sqrt(dx * dx + dy * dy) * 0.5;
+        return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+      });
+      edgeGroup.selectAll('.edge-path-bg').attr('d', d => {
+        const dx = d.target.x - d.source.x;
+        const dy = d.target.y - d.source.y;
+        const dr = Math.sqrt(dx * dx + dy * dy) * 0.5;
+        return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+      });
+      nodeGs.attr('transform', d => `translate(${d.x},${d.y})`);
+    });
+
+  // Centre after layout
+  setTimeout(() => fitGraph(), 600);
+}
+
+function highlightNode(tableId) {
+  d3.selectAll('.node-rect').attr('stroke', d => nodeColor(d.id)).attr('stroke-width', 2);
+  d3.selectAll('.edge-path').attr('class', d => {
+    const hl = (selectedTable && (d.source.id === selectedTable || d.target.id === selectedTable || d.source === selectedTable || d.target === selectedTable)) ? ' highlighted' : '';
+    return 'edge-path' + hl;
+  });
+}
+
+// ── Column panel ──
+async function openColumnPanel(tableId) {
+  expandedTable = tableId;
+  columnPanelOpen = true;
+  document.getElementById('columnPanel').classList.add('open');
+  document.getElementById('panelTitle').textContent = tableId;
+  await renderColumnPanel(tableId);
+}
+
+function closeColumnPanel() {
+  columnPanelOpen = false;
+  expandedTable = null;
+  document.getElementById('columnPanel').classList.remove('open');
+}
+
+async function renderColumnPanel(tableId) {
+  const body = document.getElementById('panelBody');
+  try {
+    const colData = await api(`/api/column/${encodeURIComponent(tableId)}`);
+    const node = catalogue[tableId] || {};
+    const columns = node.column_details || [];
+    const incoming = colData.incoming || [];
+
+    // Group incoming by target column
+    const byTarget = {};
+    incoming.forEach(m => {
+      if (!byTarget[m.target_column]) byTarget[m.target_column] = [];
+      byTarget[m.target_column].push(m);
+    });
+
+    // Section A: Target columns
+    let html = '<div class="detail-title">Target Columns</div>';
+    if (columns.length === 0) {
+      html += '<div class="empty-state" style="padding:12px">No schema information available</div>';
+    } else {
+      columns.forEach(col => {
+        const maps = byTarget[col.name] || [];
+        html += `<div class="target-col-row"><span class="target-col-name">${col.name}</span><span class="target-col-type">${col.type}</span>${col.primary_key ? '<span class="target-col-pk">[PK]</span>' : ''}`;
+        if (maps.length) {
+          maps.forEach(m => {
+            html += `<div class="mapping-source"><span style="color:var(--accent2)">${m.source_table}</span>.${m.source_column} <span class="pill pill-${m.transformation_type}">${m.transformation_type}</span><div class="mapping-logic" style="margin-left:12px">${m.transformation_logic}</div></div>`;
+          });
+        } else {
+          html += `<div class="no-mapping">&mdash; no mapping found</div>`;
+        }
+        html += '</div>';
+      });
+    }
+
+    // Section B: Source table summary
+    html += '<div class="section-divider"></div><div class="detail-title">Source Tables</div>';
+    const bySource = {};
+    incoming.forEach(m => {
+      if (!bySource[m.source_table]) bySource[m.source_table] = [];
+      bySource[m.source_table].push(m);
+    });
+
+    if (Object.keys(bySource).length === 0) {
+      html += '<div style="color:var(--muted);font-size:12px">None</div>';
+    } else {
+      // Get join info from edges
+      const edges = currentGraph ? currentGraph.edges.filter(e => e.target === tableId) : [];
+      for (const [src, maps] of Object.entries(bySource)) {
+        const edge = edges.find(e => e.source === src);
+        const joins = edge ? edge.joins : [];
+        const joinType = joins.length ? joins[0].join_type : '';
+        html += `<div class="source-section"><div class="source-name">&uarr; ${src}</div>`;
+        if (joinType) html += `<span class="join-badge pill" style="background:var(--surface2);color:var(--muted)">${joinType}</span>`;
+        maps.forEach(m => {
+          html += `<div class="source-mapping">${m.source_column} &rarr; ${m.target_column} <span class="pill pill-${m.transformation_type}" style="margin-left:4px">${m.transformation_type}</span></div>`;
+        });
+        html += '</div>';
+      }
+    }
+
+    body.innerHTML = html;
+  } catch (e) {
+    body.innerHTML = '<div class="empty-state" style="color:var(--danger)">Failed to load column data</div>';
+  }
+}
+
+// ── Failures modal ──
+function openFailuresModal() {
+  const list = document.getElementById('failuresList');
+  let html = '';
+  failuresList.forEach(f => {
+    html += `<div class="failure-card"><div class="failure-file">${f.source_file}</div><div class="failure-reason">${f.failure_reason}</div><details class="failure-steps"><summary>Step details</summary><div style="margin-top:6px">Step 1: ${f.step1_error}<br>Step 2: ${f.step2_error}<br>Step 3: ${f.step3_error}</div></details>`;
+    if (f.sp_snippet) html += `<div class="failure-snippet">${f.sp_snippet}</div>`;
+    html += '</div>';
+  });
+  list.innerHTML = html;
+  document.getElementById('failuresModal').classList.remove('hidden');
+}
+
+function closeFailuresModal() {
+  document.getElementById('failuresModal').classList.add('hidden');
+}
+
+// Click outside modal to close
+document.getElementById('failuresModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeFailuresModal(); });
+
+// ── UI utilities ──
+function hideOverlay() { document.getElementById('overlay').classList.add('hidden'); }
+function showToast(msg, ms = 3500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('visible');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('visible'), ms);
+}
+
+function showSuggestions(query) {
+  const box = document.getElementById('suggestions');
+  if (!query) { box.classList.remove('open'); return; }
+  const q = query.toUpperCase();
+  const matches = allTables.filter(t => t.includes(q)).slice(0, 12);
+  if (!matches.length) { box.classList.remove('open'); return; }
+  let html = '';
+  matches.forEach((m, i) => {
+    const highlighted = m.replace(new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'), '<mark>$1</mark>');
+    html += `<div class="suggestion${i === 0 ? ' active' : ''}" data-table="${m}">${highlighted}</div>`;
+  });
+  box.innerHTML = html;
+  box.classList.add('open');
+  box.querySelectorAll('.suggestion').forEach(s => {
+    s.addEventListener('click', () => {
+      document.getElementById('searchInput').value = s.dataset.table;
+      box.classList.remove('open');
+      searchLineage(s.dataset.table);
+    });
+  });
+}
+
+function setDirection(dir, btn) {
+  direction = dir;
+  document.querySelectorAll('.dir-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function doSearch() {
+  const table = document.getElementById('searchInput').value.trim();
+  if (!table) { showToast('Enter a table name'); return; }
+  if (!allTables.includes(table.toUpperCase())) { showToast(`Table '${table}' not found`); return; }
+  searchLineage(table.toUpperCase());
+}
+
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('suggestions').classList.remove('open');
+  selectedTable = null;
+  expandedTable = null;
+  closeColumnPanel();
+  if (currentGraph) renderGraph(currentGraph, null);
+}
+
+function bindEvents() {
+  const input = document.getElementById('searchInput');
+  input.addEventListener('input', () => showSuggestions(input.value));
+  input.addEventListener('keydown', e => {
+    const items = document.querySelectorAll('.suggestion');
+    const active = document.querySelector('.suggestion.active');
+    const idx = Array.from(items).indexOf(active);
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (active) { active.classList.remove('active'); items[(idx + 1) % items.length]?.classList.add('active'); }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (active) { active.classList.remove('active'); items[(idx - 1 + items.length) % items.length]?.classList.add('active'); }
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (active) { active.click(); }
+      else { doSearch(); }
+    } else if (e.key === 'Escape') {
+      document.getElementById('suggestions').classList.remove('open');
+    }
+  });
+
+  document.getElementById('depthSlider').addEventListener('input', e => {
+    document.getElementById('depthVal').textContent = e.target.value;
+  });
+
+  // Click on SVG background to deselect
+  d3.select('#graphSvg').on('click', () => {
+    selectedTable = null;
+    closeColumnPanel();
+    if (currentGraph) highlightNode(null);
+  });
+}
+
+// ── Init ──
+document.addEventListener('DOMContentLoaded', async () => {
+  initZoom();
+  await loadStats();
+  await loadTables();
+  await loadFailures();
+  bindEvents();
+  if (allTables.length > 0) {
+    hideOverlay();
+    await fetchAndRenderFull();
+  }
+});
+</script>
+</body>
+</html>

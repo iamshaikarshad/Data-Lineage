@@ -1,0 +1,9 @@
+# Ignore SQL data directories
+lineage_app/data/sp/
+lineage_app/data/schemas/
+# Ignore logs
+lineage_app/logs/
+# Ignore cache files
+lineage_cache.json
+# Ignore environment files
+.env

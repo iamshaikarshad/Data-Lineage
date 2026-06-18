@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m py_compile agents/__init__.py agents/schema_agent.py agents/sp_parser.py agents/sp_agent.py agents/lineage_agent.py app.py run.py)",
+      "Bash(python *)"
+    ]
+  }
+}
