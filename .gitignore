@@ -7,3 +7,5 @@ lineage_app/logs/
 lineage_cache.json
 # Ignore environment files
 .env
+# cache files
+*.pyc
