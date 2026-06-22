@@ -406,7 +406,7 @@ class LineageAgent:
             procedures.update(edge_data.get("procedures", []))
 
         # Count by extraction method
-        method_counts = {"regex": 0, "claude": 0, "gemini": 0, "failed": 0}
+        method_counts = {"regex": 0, "claude": 0, "gemini": 0, "nvidia": 0, "failed": 0}
         for _, _, edge_data in self.graph.edges(data=True):
             for method in edge_data.get("extraction_methods", []):
                 if method in method_counts:
@@ -424,7 +424,7 @@ class LineageAgent:
 
 if __name__ == "__main__":
     # For testing
-    logging.basicConfiguration(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO)
     # Mock normalised SP results
     mock_results = [
         {

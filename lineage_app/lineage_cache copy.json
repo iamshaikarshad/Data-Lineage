@@ -1,0 +1,2011 @@
+{
+  "sp_results": [
+    {
+      "procedure_name": "[Vault].[LoadPatient]",
+      "target_table": "vault.Patient",
+      "source_tables": [
+        "[SLAMBI].[raw].tblPatient",
+        "[SLAMBI].[raw].tblCNDocument",
+        "[SLAMBI].[raw].tblLanguageValues",
+        "[SLAMBI].[raw].tblGenderValues",
+        "[SLAMBI].[raw].tblTitleValues",
+        "[SLAMBI].[raw].tblReligionValues",
+        "[SLAMBI].[raw].tblMaritalStatusValues",
+        "[SLAMBI].[raw].tblLivesWithValues",
+        "[SLAMBI].[raw].tblEthnicityValues",
+        "[SLAMBI].[raw].tblCountryValues",
+        "[SLAMBI].[raw].tblEmploymentValues",
+        "[SLAMBI].[raw].tblYesNoValues",
+        "[SLAMBI].[raw].tblPatientMobilityProblemValues",
+        "[SLAMBI].[raw].tblPatientHearingImpairmentValues",
+        "[SLAMBI].[raw].tblPatientVisualImpairmentValues",
+        "[SLAMBI].[raw].tblDATValues",
+        "[SLAMBI].[raw].tblOccupationValues",
+        "[SLAMBI].[raw].tblAsylumSeekerValues",
+        "[SLAMBI].[raw].tblHasATwinValues",
+        "[SLAMBI].[raw].tblSpell",
+        "[SLAMBI].raw.tblSexualityValues",
+        "[vault].[HubPatient]",
+        "[Raw].tblExternalCodeMapping",
+        "[Raw].tblExternalCodeMappingDataSource",
+        "[Raw].tblExternalCodeMappingContextValues",
+        "[Raw].[tblGenderIdentitySameAtBirthValues]",
+        "[Raw].[tblPersonStatedGenderIdentityValues]",
+        "[Raw].tblAddress",
+        "[Raw].tblPCT",
+        "[Raw].tblGPDetail",
+        "[Raw].tblPractice",
+        "[Raw].tblGP"
+      ],
+      "column_mappings": [
+        {
+          "target_column": "HubPatientPK",
+          "source_table": "[vault].[HubPatient]",
+          "source_column": "HubPatientPK",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [vault].[HubPatient]"
+        },
+        {
+          "target_column": "RecordSource",
+          "source_table": "N/A",
+          "source_column": "'PJS'",
+          "transformation_type": "constant",
+          "transformation_logic": "Hardcoded string 'PJS'"
+        },
+        {
+          "target_column": "NHS_Number",
+          "source_table": "[SLAMBI].[raw].tblPatient",
+          "source_column": "NHS_Number",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblPatient"
+        },
+        {
+          "target_column": "Shared_Id",
+          "source_table": "[SLAMBI].[raw].tblPatient",
+          "source_column": "SUBSTRING(sys.fn_sqlvarbasetostr(HASHBYTES('SHA1', pat.NHS_Number + '031tai303')), 3, 60)",
+          "transformation_type": "calculation",
+          "transformation_logic": "SHA1 hash of NHS_Number concatenated with '031tai303', converted to string, then substring from 3rd character for 60 length."
+        },
+        {
+          "target_column": "Title_ID",
+          "source_table": "[SLAMBI].[raw].tblTitleValues",
+          "source_column": "Title_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblTitleValues"
+        },
+        {
+          "target_column": "Forename",
+          "source_table": "[SLAMBI].[raw].tblPatient",
+          "source_column": "Forename",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblPatient"
+        },
+        {
+          "target_column": "Middle_Name",
+          "source_table": "[SLAMBI].[raw].tblPatient",
+          "source_column": "Middle_Name",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblPatient"
+        },
+        {
+          "target_column": "Surname",
+          "source_table": "[SLAMBI].[raw].tblPatient",
+          "source_column": "Surname",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblPatient"
+        },
+        {
+          "target_column": "Date_Of_Birth",
+          "source_table": "[SLAMBI].[raw].tblPatient",
+          "source_column": "Date_Of_Birth",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblPatient"
+        },
+        {
+          "target_column": "cleaneddateofbirth",
+          "source_table": "[SLAMBI].[raw].tblPatient",
+          "source_column": "dateadd(mm, datediff(mm, 0, pat.Date_Of_Birth), 0)",
+          "transformation_type": "calculation",
+          "transformation_logic": "Calculates the first day of the month for the patient's Date_Of_Birth."
+        },
+        {
+          "target_column": "Date_Of_Death",
+          "source_table": "[SLAMBI].[raw].tblPatient",
+          "source_column": "Date_Of_Death",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblPatient"
+        },
+        {
+          "target_column": "First_Year_Of_Care_Date",
+          "source_table": "[SLAMBI].[raw].tblPatient",
+          "source_column": "First_Year_Of_Care_Date",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblPatient"
+        },
+        {
+          "target_column": "First_Year_Of_Care_Text",
+          "source_table": "[SLAMBI].[raw].tblPatient",
+          "source_column": "First_Year_Of_Care_Text",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblPatient"
+        },
+        {
+          "target_column": "First_Language_ID",
+          "source_table": "[SLAMBI].[raw].tblLanguageValues",
+          "source_column": "Language_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblLanguageValues"
+        },
+        {
+          "target_column": "Gender_ID",
+          "source_table": "[SLAMBI].[raw].tblGenderValues",
+          "source_column": "Gender_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblGenderValues"
+        },
+        {
+          "target_column": "Gender",
+          "source_table": "[Raw].tblGenderValues",
+          "source_column": "Gender_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Gender_ID column of [Raw].tblGenderValues via GV subquery."
+        },
+        {
+          "target_column": "Religion_ID",
+          "source_table": "[SLAMBI].[raw].tblReligionValues",
+          "source_column": "Religion_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblReligionValues"
+        },
+        {
+          "target_column": "Marital_Status_ID",
+          "source_table": "[SLAMBI].[raw].tblMaritalStatusValues",
+          "source_column": "Marital_Status_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblMaritalStatusValues"
+        },
+        {
+          "target_column": "Lives_With_ID",
+          "source_table": "[SLAMBI].[raw].tblLivesWithValues",
+          "source_column": "Lives_With_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblLivesWithValues"
+        },
+        {
+          "target_column": "Ethnicitycleaned",
+          "source_table": "[SLAMBI].[raw].tblEthnicityValues",
+          "source_column": "CASE WHEN pateth.Ethnicity_Desc = 'British (A)' THEN 'White - British' WHEN pateth.Ethnicity_Desc = 'White - British' THEN 'White - British' WHEN pateth.Ethnicity_Desc = 'English (CA)' THEN 'White - British' WHEN pateth.Ethnicity_Desc = 'Northern Irish (C2)' THEN 'White - British' WHEN pateth.Ethnicity_Desc = 'Northen Irish (C2)' THEN 'White - British' WHEN pateth.Ethnicity_Desc = 'Scottish (CB)' THEN 'White - British' WHEN pateth.Ethnicity_Desc = 'Welsh (CC)' THEN 'White - British' WHEN pateth.Ethnicity_Desc = 'Irish (B)' THEN 'White - Irish' WHEN pateth.Ethnicity_Desc = 'White - Irish' THEN 'White - Irish' WHEN pateth.Ethnicity_Desc = 'Gypsy/Romany (CN)' THEN 'White \u2013 Gypsy or Irish Traveller' WHEN pateth.Ethnicity_Desc = 'Irish Traveller (CL)' THEN 'White \u2013 Gypsy or Irish Traveller' WHEN pateth.Ethnicity_Desc = 'Traveller (CM)' THEN 'White \u2013 Gypsy or Irish Traveller' WHEN pateth.Ethnicity_Desc = 'White \u2013 Gypsy or Irish Traveller' THEN 'White \u2013 Gypsy or Irish Traveller' WHEN pateth.Ethnicity_Desc = 'Albanian (CS)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'All former USSR Republics (CQ)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Bosnian (CT)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Croatian (CU)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Cypriot (part not stated) (CE)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Greek (CF)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Greek Cypriot (CG)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Italian (CK)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Kosovan (CR)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Other former Yugoslavia (CW)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Other White Unspecified (C3)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Other White/Mixed European (CY)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Polish (CP)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Portuguese (C4)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Serbian (CV)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Turkish (CH)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'White \u2013 Other' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Turkish Cypriot (CJ)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'White and Black Caribbean (D)' THEN 'Mixed Race - White and Black Caribbean' WHEN pateth.Ethnicity_Desc = 'Mixed Race - White and Black Caribbean' THEN 'Mixed Race - White and Black Caribbean' WHEN pateth.Ethnicity_Desc = 'Mixed Race - White and Black African' THEN 'Mixed Race - White and Black African' WHEN pateth.Ethnicity_Desc = 'White and Black African (E)' THEN 'Mixed Race - White and Black African' WHEN pateth.Ethnicity_Desc = 'Mixed Race - White and Asian' THEN 'Mixed Race - White and Asian' WHEN pateth.Ethnicity_Desc = 'White and Asian (F)' THEN 'Mixed Race - White and Asian' WHEN pateth.Ethnicity_Desc = 'Mixed Race - Other' THEN 'Mixed/Multiple ethnic groups - Other' WHEN pateth.Ethnicity_Desc = 'Asian and Chinese (GE)' THEN 'Mixed/Multiple ethnic groups - Other' WHEN pateth.Ethnicity_Desc = 'Black and Asian (GA)' THEN 'Mixed/Multiple ethnic groups - Other' WHEN pateth.Ethnicity_Desc = 'Black and Chinese (GB)' THEN 'Mixed/Multiple ethnic groups - Other' WHEN pateth.Ethnicity_Desc = 'Black and White (GC)' THEN 'Mixed/Multiple ethnic groups - Other' WHEN pateth.Ethnicity_Desc = 'Chinese and White (GD)' THEN 'Mixed/Multiple ethnic groups - Other' WHEN pateth.Ethnicity_Desc = 'Mixed/Multiple ethnic groups - Other' THEN 'Mixed/Multiple ethnic groups - Other' WHEN pateth.Ethnicity_Desc = 'Other mixed or mixed unspecified (GF)' THEN 'Mixed/Multiple ethnic groups - Other' WHEN pateth.Ethnicity_Desc = 'Indian/British Indian (H)' THEN 'Asian/Asian British - Indian' WHEN pateth.Ethnicity_Desc = 'Asian/Asian British - Indian' THEN 'Asian/Asian British - Indian' WHEN pateth.Ethnicity_Desc = 'Pakistani/British Pakistani (J)' THEN 'Asian/Asian British - Pakistani' WHEN pateth.Ethnicity_Desc = 'Asian/Asian British - Pakistani' THEN 'Asian/Asian British - Pakistani' WHEN pateth.Ethnicity_Desc = 'Bangladeshi/British Bangladeshi (K)' THEN 'Asian/Asian British - Bangladeshi' WHEN pateth.Ethnicity_Desc = 'Asian/Asian British - Bangladeshi' THEN 'Asian/Asian British - Bangladeshi' WHEN pateth.Ethnicity_Desc = 'Caribbean (M)' THEN 'Black/Black British - Caribbean' WHEN pateth.Ethnicity_Desc = 'Black/Black British - Caribbean' THEN 'Black/Black British - Caribbean' WHEN pateth.Ethnicity_Desc = 'Algerian (PP)' THEN 'Black/Black British - African' WHEN pateth.Ethnicity_Desc = 'African' THEN 'Black/Black British - African' WHEN pateth.Ethnicity_Desc = 'Black/Black British - African' THEN 'Black/Black British - African' WHEN pateth.Ethnicity_Desc = 'Angolan (PJ)' THEN 'Black/Black British - African' WHEN pateth.Ethnicity_Desc = 'Ethiopian (PL)' THEN 'Black/Black British - African' WHEN pateth.Ethnicity_Desc = 'Ghanaian (PM)' THEN 'Black/Black British - African' WHEN pateth.Ethnicity_Desc = 'Nigerian (PC)' THEN 'Black/Black British - African' WHEN pateth.Ethnicity_Desc = 'Other African (N)' THEN 'Black/Black British - African' WHEN pateth.Ethnicity_Desc = 'Somali (PA)' THEN 'Black/Black British - African' WHEN pateth.Ethnicity_Desc = 'Sudanese (PH)' THEN 'Black/Black British - African' WHEN pateth.Ethnicity_Desc = 'Ugandan (PQ)' THEN 'Black/Black British - African' WHEN pateth.Ethnicity_Desc = 'Eritrean (PK)' THEN 'Black/Black British - African' WHEN pateth.Ethnicity_Desc = 'Ethnicity is unknown' THEN 'Not known' WHEN pateth.Ethnicity_Desc = 'Not known' THEN 'Not known' WHEN pateth.Ethnicity_Desc = 'Black British (PD)' THEN 'Black/Black British - Other' WHEN pateth.Ethnicity_Desc = 'Black/Black British - Other' THEN 'Black/Black British - Other' WHEN pateth.Ethnicity_Desc = 'Mixed Black (PB)' THEN 'Black/Black British - Other' WHEN pateth.Ethnicity_Desc = 'Other Black British (PD)' THEN 'Black/Black British - Other' WHEN pateth.Ethnicity_Desc = 'Other Black Unspecified (PE)' THEN 'Black/Black British - Other' WHEN pateth.Ethnicity_Desc = 'Chinese (R)' THEN 'Asian/Asian British - Chinese' WHEN pateth.Ethnicity_Desc = 'Chinese' THEN 'Asian/Asian British - Chinese' WHEN pateth.Ethnicity_Desc = 'Kurdish (C5)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Iraqi (SJ)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Middle Eastern (SF)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'British Asian (LH)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Asian/Asian British - Chinese' THEN 'Asian/Asian British - Chinese' WHEN pateth.Ethnicity_Desc = 'Asian/Asian British \u2013 Other' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Caribbean Asian (LJ)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'East African Asian (LD)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Kashmiri (LC)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Mixed Asian (LA)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Other Asian Unspecified (LK)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Punjabi (LB)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Sinhalese (LG)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Sri Lankan (LE)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Tamil (LF)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Filipino (SC)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Japanese (SB)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Malaysian (SD)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Vietnamese (SA)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Arab (SG)' THEN 'Other ethnic group - Arab' WHEN pateth.Ethnicity_Desc = 'Other ethnic group - Arab' THEN 'Other ethnic group - Arab' WHEN pateth.Ethnicity_Desc = 'Any Other Group (SE)' THEN 'Other ethnic group \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Other ethnic group \u2013 Other' THEN 'Other ethnic group \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Colombian (SK)' THEN 'Other ethnic group \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Columbian (SK)' THEN 'Other ethnic group \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Ecuadorian (SL)' THEN 'Other ethnic group \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Iranian (SH)' THEN 'Other ethnic group \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Other Latin American (SM)' THEN 'Other ethnic group \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Not Stated (Z)' THEN 'Not Stated' WHEN pateth.Ethnicity_Desc = 'Not Known (99)' THEN 'Not Stated' WHEN pateth.Ethnicity_Desc = 'Not Stated' THEN 'Not Stated' END",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maps various Ethnicity_Desc values from [SLAMBI].[raw].tblEthnicityValues to a standardized 'cleaned' ethnicity string."
+        },
+        {
+          "target_column": "Country_Of_Origin_ID",
+          "source_table": "[SLAMBI].[raw].tblCountryValues",
+          "source_column": "Country_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblCountryValues"
+        },
+        {
+          "target_column": "Employment_ID",
+          "source_table": "[SLAMBI].[raw].tblEmploymentValues",
+          "source_column": "Employment_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblEmploymentValues"
+        },
+        {
+          "target_column": "Welfare_Benefits_Client_ID",
+          "source_table": "[SLAMBI].[raw].tblYesNoValues",
+          "source_column": "Yes_No_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblYesNoValues"
+        },
+        {
+          "target_column": "Mobility_Problem_ID",
+          "source_table": "[SLAMBI].[raw].tblPatientMobilityProblemValues",
+          "source_column": "Patient_Mobility_Problem_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblPatientMobilityProblemValues"
+        },
+        {
+          "target_column": "Hearing_Impairment_ID",
+          "source_table": "[SLAMBI].[raw].tblPatientHearingImpairmentValues",
+          "source_column": "Patient_Hearing_Impairment_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblPatientHearingImpairmentValues"
+        },
+        {
+          "target_column": "Visual_Impairment_ID",
+          "source_table": "[SLAMBI].[raw].tblPatientVisualImpairmentValues",
+          "source_column": "Patient_Visual_Impairment_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblPatientVisualImpairmentValues"
+        },
+        {
+          "target_column": "DAT_Of_Residence_ID",
+          "source_table": "[SLAMBI].[raw].tblDATValues",
+          "source_column": "DAT_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblDATValues"
+        },
+        {
+          "target_column": "Housing_Status",
+          "source_table": "[SLAMBI].[raw].tblPatient",
+          "source_column": "Housing_Status",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblPatient"
+        },
+        {
+          "target_column": "Is_Interpreter_Needed_ID",
+          "source_table": "[SLAMBI].[raw].tblYesNoValues",
+          "source_column": "Yes_No_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblYesNoValues"
+        },
+        {
+          "target_column": "Occupation_ID",
+          "source_table": "[SLAMBI].[raw].tblOccupationValues",
+          "source_column": "Occupation_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblOccupationValues"
+        },
+        {
+          "target_column": "Overseas_Visitor_ID",
+          "source_table": "[SLAMBI].[raw].tblYesNoValues",
+          "source_column": "Yes_No_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblYesNoValues"
+        },
+        {
+          "target_column": "Asylum_Seeker_ID",
+          "source_table": "[SLAMBI].[raw].tblAsylumSeekerValues",
+          "source_column": "Asylum_Seeker_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblAsylumSeekerValues"
+        },
+        {
+          "target_column": "Has_A_Twin_ID",
+          "source_table": "[SLAMBI].[raw].tblHasATwinValues",
+          "source_column": "Has_A_Twin_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblHasATwinValues"
+        },
+        {
+          "target_column": "Create_Dttm",
+          "source_table": "[SLAMBI].[raw].tblPatient",
+          "source_column": "Create_Dttm",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblPatient"
+        },
+        {
+          "target_column": "Updated_Dttm",
+          "source_table": "[SLAMBI].[raw].tblPatient",
+          "source_column": "Updated_Dttm",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblPatient"
+        },
+        {
+          "target_column": "ViewDate",
+          "source_table": "[SLAMBI].[raw].tblCNDocument",
+          "source_column": "ViewDate",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblCNDocument"
+        },
+        {
+          "target_column": "Is_Active",
+          "source_table": "[SLAMBI].[raw].tblYesNoValues",
+          "source_column": "Yes_No_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblYesNoValues"
+        },
+        {
+          "target_column": "Spell_Number",
+          "source_table": "[SLAMBI].[raw].tblSpell",
+          "source_column": "Spell_Number",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblSpell"
+        },
+        {
+          "target_column": "ViewText",
+          "source_table": "[SLAMBI].[raw].tblCNDocument",
+          "source_column": "ViewText",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblCNDocument"
+        },
+        {
+          "target_column": "Patient_ID",
+          "source_table": "[SLAMBI].[raw].tblPatient",
+          "source_column": "Patient_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblPatient"
+        },
+        {
+          "target_column": "Other_ID1",
+          "source_table": "[SLAMBI].[raw].tblPatient",
+          "source_column": "Other_ID1",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblPatient"
+        },
+        {
+          "target_column": "TrustID",
+          "source_table": "[SLAMBI].[raw].tblPatient",
+          "source_column": "REPLACE(pat.Other_ID1, '-', '')",
+          "transformation_type": "calculation",
+          "transformation_logic": "Removes hyphens from the Other_ID1 column of [SLAMBI].[raw].tblPatient"
+        },
+        {
+          "target_column": "CN_Doc_ID",
+          "source_table": "[SLAMBI].[raw].tblCNDocument",
+          "source_column": "CN_Doc_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblCNDocument"
+        },
+        {
+          "target_column": "QualityInd",
+          "source_table": "[SLAMBI].[raw].tblPatient",
+          "source_column": "CASE WHEN pat.surname like 'XYX%' THEN 'N' WHEN pat.surname like 'XXX%' THEN 'N' WHEN pat.surname like 'tkest%' THEN 'N' WHEN pat.Surname like '%deletion%' THEN 'N' ELSE 'Y' END",
+          "transformation_type": "conditional",
+          "transformation_logic": "Indicates data quality ('N' for specific surname patterns, 'Y' otherwise)."
+        },
+        {
+          "target_column": "Ethnicity_Desc",
+          "source_table": "[SLAMBI].[raw].tblEthnicityValues",
+          "source_column": "Ethnicity_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblEthnicityValues"
+        },
+        {
+          "target_column": "Ethnicity_ID",
+          "source_table": "[SLAMBI].[raw].tblPatient",
+          "source_column": "Ethnicity_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblPatient"
+        },
+        {
+          "target_column": "GenderCode",
+          "source_table": "[Raw].tblExternalCodeMapping",
+          "source_column": "External_Code",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Looks up External_Code based on Gender_Desc from [Raw].tblGenderValues through a mapping table."
+        },
+        {
+          "target_column": "MaritalCode",
+          "source_table": "[Raw].tblExternalCodeMapping",
+          "source_column": "External_Code",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Looks up External_Code based on Marital_Status_Desc from [Raw].tblMaritalStatusValues through a mapping table."
+        },
+        {
+          "target_column": "EthnicityCode",
+          "source_table": "[Raw].tblExternalCodeMapping",
+          "source_column": "External_Code",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Looks up External_Code based on Ethnicity_Desc from [Raw].tblEthnicityValues through a mapping table."
+        },
+        {
+          "target_column": "LanguageCode",
+          "source_table": "[Raw].tblExternalCodeMapping",
+          "source_column": "External_code",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Looks up External_code based on Language_Desc from [Raw].tblLanguageValues through a mapping table."
+        },
+        {
+          "target_column": "LatestPostCode",
+          "source_table": "[Raw].tblAddress",
+          "source_column": "Post_Code",
+          "transformation_type": "conditional",
+          "transformation_logic": "Retrieves the Post_Code from the most recent permanent address ([Raw].tblAddress) for the patient."
+        },
+        {
+          "target_column": "LatestPractiseCode",
+          "source_table": "[Raw].tblPractice",
+          "source_column": "Practice_Code",
+          "transformation_type": "conditional",
+          "transformation_logic": "Retrieves the Practice_Code from the most recent GP detail ([Raw].tblGPDetail, [Raw].tblPractice) for the patient."
+        },
+        {
+          "target_column": "Sexual_Orientation_ID",
+          "source_table": "[SLAMBI].raw.tblSexualityValues",
+          "source_column": "Sexuality_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].raw.tblSexualityValues"
+        },
+        {
+          "target_column": "Stated_Gender_Identity_ID",
+          "source_table": "[SLAMBI].[raw].tblPatient",
+          "source_column": "[Stated_Gender_Identity_ID]",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblPatient"
+        },
+        {
+          "target_column": "Gender_Identity_Same_At_Birth_ID",
+          "source_table": "[SLAMBI].[raw].tblPatient",
+          "source_column": "[Gender_Identity_Same_At_Birth_ID]",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblPatient"
+        },
+        {
+          "target_column": "GenderIdentitySameAtBirthCode",
+          "source_table": "[Raw].tblExternalCodeMapping",
+          "source_column": "External_code",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Looks up External_code based on Gender_Identity_Same_At_Birth_ID from [Raw].[tblGenderIdentitySameAtBirthValues] through a mapping table."
+        },
+        {
+          "target_column": "PersonStatedGenderID",
+          "source_table": "[Raw].tblExternalCodeMapping",
+          "source_column": "External_code",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Looks up External_code based on Person_Stated_Gender_Identity_ID from [Raw].[tblPersonStatedGenderIdentityValues] through a mapping table."
+        },
+        {
+          "target_column": "Ex_British_Armed_Forces_ID",
+          "source_table": "[SLAMBI].[raw].tblPatient",
+          "source_column": "Ex_British_Armed_Forces_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from [SLAMBI].[raw].tblPatient"
+        },
+        {
+          "target_column": "VaultLoaddate",
+          "source_table": "N/A",
+          "source_column": "GETDATE()",
+          "transformation_type": "constant",
+          "transformation_logic": "System current date and time at load."
+        },
+        {
+          "target_column": "VaultUpdateDate",
+          "source_table": "N/A",
+          "source_column": "GETDATE()",
+          "transformation_type": "constant",
+          "transformation_logic": "System current date and time at update/load."
+        },
+        {
+          "target_column": "IsDeleted",
+          "source_table": "[SLAMBI].[raw].tblPatient",
+          "source_column": "case when PAT.surname like 'XYX%' then 'Y' when PAT.surname like 'XXX%' then 'Y' else 'N' end",
+          "transformation_type": "conditional",
+          "transformation_logic": "Flag 'Y' if patient surname starts with 'XYX%' or 'XXX%', otherwise 'N'."
+        },
+        {
+          "target_column": "TestRecord",
+          "source_table": "[SLAMBI].[raw].tblPatient",
+          "source_column": "case when PAT.surname like 'tkest%' then 'Y' when PAT.surname like 'XXtest%' then 'Y' when PAT.surname like 'XXXtest%' then 'Y' else 'N' end",
+          "transformation_type": "conditional",
+          "transformation_logic": "Flag 'Y' if patient surname starts with 'tkest%', 'XXtest%', or 'XXXtest%', otherwise 'N'."
+        }
+      ],
+      "joins": [
+        {
+          "left_table": "[SLAMBI].[raw].tblPatient",
+          "right_table": "[SLAMBI].[raw].tblCNDocument",
+          "join_type": "INNER",
+          "condition": "pat.Patient_ID = patcndoc.Patient_ID"
+        },
+        {
+          "left_table": "[SLAMBI].[raw].tblPatient",
+          "right_table": "[SLAMBI].[raw].tblLanguageValues",
+          "join_type": "INNER",
+          "condition": "pat.First_Language_ID = patlang.Language_ID"
+        },
+        {
+          "left_table": "[SLAMBI].[raw].tblPatient",
+          "right_table": "[SLAMBI].[raw].tblGenderValues",
+          "join_type": "LEFT",
+          "condition": "pat.Gender_ID = patgen.Gender_ID"
+        },
+        {
+          "left_table": "[SLAMBI].[raw].tblPatient",
+          "right_table": "[SLAMBI].[raw].tblTitleValues",
+          "join_type": "LEFT",
+          "condition": "pat.Title_ID = pattitle.Title_ID"
+        },
+        {
+          "left_table": "[SLAMBI].[raw].tblPatient",
+          "right_table": "[SLAMBI].[raw].tblReligionValues",
+          "join_type": "LEFT",
+          "condition": "pat.Religion_ID = patrel.Religion_ID"
+        },
+        {
+          "left_table": "[SLAMBI].[raw].tblPatient",
+          "right_table": "[SLAMBI].[raw].tblMaritalStatusValues",
+          "join_type": "LEFT",
+          "condition": "pat.Marital_Status_ID = patmar.Marital_Status_ID"
+        },
+        {
+          "left_table": "[SLAMBI].[raw].tblPatient",
+          "right_table": "[SLAMBI].[raw].tblLivesWithValues",
+          "join_type": "LEFT",
+          "condition": "pat.Lives_With_ID = patlives.Lives_With_ID"
+        },
+        {
+          "left_table": "[SLAMBI].[raw].tblPatient",
+          "right_table": "[SLAMBI].[raw].tblEthnicityValues",
+          "join_type": "LEFT",
+          "condition": "pat.Ethnicity_ID = pateth.Ethnicity_ID"
+        },
+        {
+          "left_table": "[SLAMBI].[raw].tblPatient",
+          "right_table": "[SLAMBI].[raw].tblCountryValues",
+          "join_type": "LEFT",
+          "condition": "pat.Country_Of_Origin_ID = patorig.Country_ID"
+        },
+        {
+          "left_table": "[SLAMBI].[raw].tblPatient",
+          "right_table": "[SLAMBI].[raw].tblEmploymentValues",
+          "join_type": "LEFT",
+          "condition": "pat.Employment_ID = patemp.Employment_ID"
+        },
+        {
+          "left_table": "[SLAMBI].[raw].tblPatient",
+          "right_table": "[SLAMBI].[raw].tblYesNoValues",
+          "join_type": "INNER",
+          "condition": "pat.Welfare_Benefits_Client_ID = patben.Yes_No_ID"
+        },
+        {
+          "left_table": "[SLAMBI].[raw].tblPatient",
+          "right_table": "[SLAMBI].[raw].tblPatientMobilityProblemValues",
+          "join_type": "INNER",
+          "condition": "pat.Mobility_Problem_ID = patmob.Patient_Mobility_Problem_ID"
+        },
+        {
+          "left_table": "[SLAMBI].[raw].tblPatient",
+          "right_table": "[SLAMBI].[raw].tblPatientHearingImpairmentValues",
+          "join_type": "INNER",
+          "condition": "pat.Hearing_Impairment_ID = pathear.Patient_Hearing_Impairment_ID"
+        },
+        {
+          "left_table": "[SLAMBI].[raw].tblPatient",
+          "right_table": "[SLAMBI].[raw].tblPatientVisualImpairmentValues",
+          "join_type": "INNER",
+          "condition": "pat.Visual_Impairment_ID = patvis.Patient_Visual_Impairment_ID"
+        },
+        {
+          "left_table": "[SLAMBI].[raw].tblPatient",
+          "right_table": "[SLAMBI].[raw].tblYesNoValues",
+          "join_type": "INNER",
+          "condition": "pat.Is_Interpreter_Needed_ID = patint.Yes_No_ID"
+        },
+        {
+          "left_table": "[SLAMBI].[raw].tblPatient",
+          "right_table": "[SLAMBI].[raw].tblDATValues",
+          "join_type": "LEFT",
+          "condition": "pat.DAT_Of_Residence_ID = patdat.DAT_ID"
+        },
+        {
+          "left_table": "[SLAMBI].[raw].tblPatient",
+          "right_table": "[SLAMBI].[raw].tblOccupationValues",
+          "join_type": "INNER",
+          "condition": "pat.Occupation_ID = patocc.Occupation_ID"
+        },
+        {
+          "left_table": "[SLAMBI].[raw].tblPatient",
+          "right_table": "[SLAMBI].[raw].tblYesNoValues",
+          "join_type": "INNER",
+          "condition": "pat.Overseas_Visitor_ID = patover.Yes_No_ID"
+        },
+        {
+          "left_table": "[SLAMBI].[raw].tblPatient",
+          "right_table": "[SLAMBI].[raw].tblAsylumSeekerValues",
+          "join_type": "LEFT",
+          "condition": "pat.Asylum_Seeker_ID = patasy.Asylum_Seeker_ID"
+        },
+        {
+          "left_table": "[SLAMBI].[raw].tblPatient",
+          "right_table": "[SLAMBI].[raw].tblHasATwinValues",
+          "join_type": "LEFT",
+          "condition": "pat.Has_A_Twin_ID = pattwin.Has_A_Twin_ID"
+        },
+        {
+          "left_table": "[SLAMBI].[raw].tblCNDocument",
+          "right_table": "[SLAMBI].[raw].tblYesNoValues",
+          "join_type": "INNER",
+          "condition": "patcndoc.Is_Active = patisact.Yes_No_ID"
+        },
+        {
+          "left_table": "[SLAMBI].[raw].tblCNDocument",
+          "right_table": "[SLAMBI].[raw].tblSpell",
+          "join_type": "LEFT",
+          "condition": "patcndoc.Referral_ID = patspell.Referral_ID"
+        },
+        {
+          "left_table": "[SLAMBI].[raw].tblPatient",
+          "right_table": "[SLAMBI].raw.tblSexualityValues",
+          "join_type": "LEFT",
+          "condition": "pat.Sexuality_ID = patsex.Sexuality_ID"
+        },
+        {
+          "left_table": "[SLAMBI].[raw].tblPatient",
+          "right_table": "[vault].[HubPatient]",
+          "join_type": "INNER",
+          "condition": "HP.PatientID = PAT.Patient_ID"
+        },
+        {
+          "left_table": "Patient",
+          "right_table": "[Raw].tblGenderValues",
+          "join_type": "LEFT",
+          "condition": "GV.Gender_Desc = pat.Gender_ID"
+        },
+        {
+          "left_table": "[Raw].tblGenderValues",
+          "right_table": "[Raw].tblExternalCodeMapping",
+          "join_type": "LEFT",
+          "condition": "esm.Internal_Data_Key = esv.Gender_ID"
+        },
+        {
+          "left_table": "[Raw].tblExternalCodeMapping",
+          "right_table": "[Raw].tblExternalCodeMappingDataSource",
+          "join_type": "LEFT",
+          "condition": "esmd.External_Code_Mapping_Data_Source_ID = esm.External_Code_Mapping_Data_Source_ID AND esmd.External_Code_Mapping_Data_Source_Key = 'Gender'"
+        },
+        {
+          "left_table": "[Raw].tblExternalCodeMappingDataSource",
+          "right_table": "[Raw].tblExternalCodeMappingContextValues",
+          "join_type": "INNER",
+          "condition": "esmc.External_Code_Mapping_Context_ID = esmd.External_Code_Mapping_Context_ID AND esmc.External_Code_Mapping_Context_Key = 'MHMDS'"
+        },
+        {
+          "left_table": "Patient",
+          "right_table": "[Raw].tblMaritalStatusValues",
+          "join_type": "LEFT",
+          "condition": "MS.Marital_Status_Desc = pat.Marital_Status_ID"
+        },
+        {
+          "left_table": "[Raw].tblMaritalStatusValues",
+          "right_table": "[Raw].tblExternalCodeMapping",
+          "join_type": "LEFT",
+          "condition": "esm.Internal_Data_Key = esv.Marital_Status_ID"
+        },
+        {
+          "left_table": "[Raw].tblExternalCodeMapping",
+          "right_table": "[Raw].tblExternalCodeMappingDataSource",
+          "join_type": "LEFT",
+          "condition": "esmd.External_Code_Mapping_Data_Source_ID = esm.External_Code_Mapping_Data_Source_ID AND esmd.External_Code_Mapping_Data_Source_Key = 'Marital_Status'"
+        },
+        {
+          "left_table": "[Raw].tblExternalCodeMappingDataSource",
+          "right_table": "[Raw].tblExternalCodeMappingContextValues",
+          "join_type": "INNER",
+          "condition": "esmc.External_Code_Mapping_Context_ID = esmd.External_Code_Mapping_Context_ID AND esmc.External_Code_Mapping_Context_Key = 'MHMDS'"
+        },
+        {
+          "left_table": "Patient",
+          "right_table": "[Raw].tblEthnicityValues",
+          "join_type": "LEFT",
+          "condition": "EV.Ethnicity_DESC = pat.Ethnicity_Desc"
+        },
+        {
+          "left_table": "[Raw].tblEthnicityValues",
+          "right_table": "[Raw].tblExternalCodeMapping",
+          "join_type": "LEFT",
+          "condition": "esm.Internal_Data_Key = esv.Ethnicity_ID"
+        },
+        {
+          "left_table": "[Raw].tblExternalCodeMapping",
+          "right_table": "[Raw].tblExternalCodeMappingDataSource",
+          "join_type": "LEFT",
+          "condition": "esmd.External_Code_Mapping_Data_Source_ID = esm.External_Code_Mapping_Data_Source_ID AND esmd.External_Code_Mapping_Data_Source_Key = 'Ethnicity'"
+        },
+        {
+          "left_table": "[Raw].tblExternalCodeMappingDataSource",
+          "right_table": "[Raw].tblExternalCodeMappingContextValues",
+          "join_type": "INNER",
+          "condition": "esmc.External_Code_Mapping_Context_ID = esmd.External_Code_Mapping_Context_ID AND esmc.External_Code_Mapping_Context_Key = 'MHMDS'"
+        },
+        {
+          "left_table": "Patient",
+          "right_table": "[Raw].tblLanguageValues",
+          "join_type": "LEFT",
+          "condition": "LC.Language_Desc = pat.First_Language_ID"
+        },
+        {
+          "left_table": "[Raw].tblLanguageValues",
+          "right_table": "[Raw].tblExternalCodeMapping",
+          "join_type": "LEFT",
+          "condition": "esm.Internal_Data_Key = esv.Language_ID"
+        },
+        {
+          "left_table": "[Raw].tblExternalCodeMapping",
+          "right_table": "[Raw].tblExternalCodeMappingDataSource",
+          "join_type": "LEFT",
+          "condition": "esmd.External_Code_Mapping_Data_Source_ID = esm.External_Code_Mapping_Data_Source_ID AND esmd.External_Code_Mapping_Data_Source_Key = 'Language'"
+        },
+        {
+          "left_table": "[Raw].tblExternalCodeMappingDataSource",
+          "right_table": "[Raw].tblExternalCodeMappingContextValues",
+          "join_type": "INNER",
+          "condition": "esmc.External_Code_Mapping_Context_ID = esmd.External_Code_Mapping_Context_ID AND esmc.External_Code_Mapping_Context_Key = 'MHMDS'"
+        },
+        {
+          "left_table": "Patient",
+          "right_table": "[Raw].[tblGenderIdentitySameAtBirthValues]",
+          "join_type": "LEFT",
+          "condition": "GI.Gender_Identity_Same_At_Birth_ID = pat.Gender_Identity_Same_At_Birth_ID"
+        },
+        {
+          "left_table": "[Raw].[tblGenderIdentitySameAtBirthValues]",
+          "right_table": "[Raw].tblExternalCodeMapping",
+          "join_type": "LEFT",
+          "condition": "esm.Internal_Data_Key = esv.Gender_Identity_Same_At_Birth_ID"
+        },
+        {
+          "left_table": "[Raw].tblExternalCodeMapping",
+          "right_table": "[Raw].tblExternalCodeMappingDataSource",
+          "join_type": "LEFT",
+          "condition": "esmd.External_Code_Mapping_Data_Source_ID = esm.External_Code_Mapping_Data_Source_ID AND esmd.External_Code_Mapping_Data_Source_Key = 'Gender_Identity_Same_At_Birth'"
+        },
+        {
+          "left_table": "[Raw].tblExternalCodeMappingDataSource",
+          "right_table": "[Raw].tblExternalCodeMappingContextValues",
+          "join_type": "INNER",
+          "condition": "esmc.External_Code_Mapping_Context_ID = esmd.External_Code_Mapping_Context_ID AND esmc.External_Code_Mapping_Context_Key = 'MHMDS'"
+        },
+        {
+          "left_table": "Patient",
+          "right_table": "[Raw].[tblPersonStatedGenderIdentityValues]",
+          "join_type": "LEFT",
+          "condition": "PG.Person_Stated_Gender_Identity_ID = pat.[Stated_Gender_Identity_ID]"
+        },
+        {
+          "left_table": "[Raw].[tblPersonStatedGenderIdentityValues]",
+          "right_table": "[Raw].tblExternalCodeMapping",
+          "join_type": "LEFT",
+          "condition": "esm.Internal_Data_Key = esv.Person_Stated_Gender_Identity_ID"
+        },
+        {
+          "left_table": "[Raw].tblExternalCodeMapping",
+          "right_table": "[Raw].tblExternalCodeMappingDataSource",
+          "join_type": "LEFT",
+          "condition": "esmd.External_Code_Mapping_Data_Source_ID = esm.External_Code_Mapping_Data_Source_ID AND esmd.External_Code_Mapping_Data_Source_Key = 'Person_Stated_Gender_Identity'"
+        },
+        {
+          "left_table": "[Raw].tblExternalCodeMappingDataSource",
+          "right_table": "[Raw].tblExternalCodeMappingContextValues",
+          "join_type": "INNER",
+          "condition": "esmc.External_Code_Mapping_Context_ID = esmd.External_Code_Mapping_Context_ID AND esmc.External_Code_Mapping_Context_Key = 'MHMDS'"
+        },
+        {
+          "left_table": "Patient",
+          "right_table": "[Raw].tblAddress",
+          "join_type": "LEFT",
+          "condition": "PC.patient_id = pat.patient_id"
+        },
+        {
+          "left_table": "[Raw].tblAddress",
+          "right_table": "[Raw].tblPCT",
+          "join_type": "LEFT",
+          "condition": "PCT.PCT_ID = ADDR.Residence_PCT_ID"
+        },
+        {
+          "left_table": "Patient",
+          "right_table": "[Raw].tblGPDetail",
+          "join_type": "LEFT",
+          "condition": "GPD.patient_id = pat.patient_id"
+        },
+        {
+          "left_table": "[Raw].tblGPDetail",
+          "right_table": "[Raw].tblPractice",
+          "join_type": "INNER",
+          "condition": "Prac.Practice_ID = GPDetail.Practice_ID"
+        },
+        {
+          "left_table": "[Raw].tblGPDetail",
+          "right_table": "[Raw].tblGP",
+          "join_type": "LEFT",
+          "condition": "GP.GP_ID = GPDetail.GP_ID"
+        },
+        {
+          "left_table": "[Raw].tblPractice",
+          "right_table": "[Raw].tblPCT",
+          "join_type": "LEFT",
+          "condition": "PCT.PCT_ID = Prac.PCT_ID"
+        },
+        {
+          "left_table": "vault.Patient",
+          "right_table": "VaultInterim.Patient_Interim",
+          "join_type": "ON",
+          "condition": "SRC.[Patient_ID] = TGT.[Patient_ID]"
+        }
+      ],
+      "filters": [
+        "(patcndoc.Object_Type_ID = 253)",
+        "ADDR.Address_Type_ID = '0'",
+        "Address_ID = (select top 1 Address_ID from [Raw].tblAddress ADDR2 where ADDR2.Address_Type_ID = '0' and ADDR2.patient_id = ADDR.patient_id order by ADDR2.[Start_Date] desc)",
+        "GP_Detail_ID = (select top 1 GP_Detail_ID from [Raw].tblGPDetail (nolock) GPDetail2 where GPDetail2.patient_id = GPDetail.patient_id order by GPDetail2.[Start_Date] desc)",
+        "esmd.External_Code_Mapping_Data_Source_Key = 'Gender'",
+        "esmc.External_Code_Mapping_Context_Key = 'MHMDS'",
+        "esmd.External_Code_Mapping_Data_Source_Key = 'Marital_Status'",
+        "esmc.External_Code_Mapping_Context_Key = 'MHMDS'",
+        "esmd.External_Code_Mapping_Data_Source_Key = 'Ethnicity'",
+        "esmc.External_Code_Mapping_Context_Key = 'MHMDS'",
+        "esmd.External_Code_Mapping_Data_Source_Key = 'Language'",
+        "esmc.External_Code_Mapping_Context_Key = 'MHMDS'",
+        "esmd.External_Code_Mapping_Data_Source_Key = 'Gender_Identity_Same_At_Birth'",
+        "esmc.External_Code_Mapping_Context_Key = 'MHMDS'",
+        "esmd.External_Code_Mapping_Data_Source_Key = 'Person_Stated_Gender_Identity'",
+        "esmc.External_Code_Mapping_Context_Key = 'MHMDS'"
+      ],
+      "grouping": [],
+      "extraction_method": "gemini",
+      "source_file": "Vault.Loadpatient.sql"
+    },
+    {
+      "procedure_name": "[Vault].[LoadTrustAccessWaits]",
+      "target_table": "[SLAMBI].[Vault].[TrustAccessWaits]",
+      "source_tables": [
+        "SLAMBI.Vault.WaitingTimes",
+        "SLAMBI.Vault.Patient",
+        "SLAMBI.Vault.Episode",
+        "SLAMBI.Vault.TrustAccessWaitingTimes",
+        "SLAMBI.Vault.DimSD",
+        "SLAMBI.Dim.Priority",
+        "SLAMBI.Vault.ReferralStatusValues"
+      ],
+      "column_mappings": [
+        {
+          "target_column": "[Backup Date]",
+          "source_table": null,
+          "source_column": "Getdate()",
+          "transformation_type": "calculation",
+          "transformation_logic": "Current system date and time"
+        },
+        {
+          "target_column": "Trust_Id",
+          "source_table": "SLAMBI.Vault.WaitingTimes",
+          "source_column": "wt.Trust_Id",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from WaitingTimes"
+        },
+        {
+          "target_column": "Gender_ID",
+          "source_table": "SLAMBI.Vault.Patient",
+          "source_column": "vp.Gender_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Patient"
+        },
+        {
+          "target_column": "Ethnicitycleaned",
+          "source_table": "SLAMBI.Vault.Patient",
+          "source_column": "vp.Ethnicity_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Patient"
+        },
+        {
+          "target_column": "[Trust Referral Received Date]",
+          "source_table": "SLAMBI.Vault.TrustAccessWaitingTimes",
+          "source_column": "ta.[RTT Start Date]",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from TrustAccessWaitingTimes"
+        },
+        {
+          "target_column": "[Trust Referral Priority]",
+          "source_table": "SLAMBI.Vault.TrustAccessWaitingTimes",
+          "source_column": "ta.[Referral Priority]",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from TrustAccessWaitingTimes"
+        },
+        {
+          "target_column": "[Trust Access Wait flag]",
+          "source_table": "SLAMBI.Vault.TrustAccessWaitingTimes",
+          "source_column": "ta.[Waiting For First Contact]",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from TrustAccessWaitingTimes"
+        },
+        {
+          "target_column": "[Trust Access Wait Weeks]",
+          "source_table": "SLAMBI.Vault.TrustAccessWaitingTimes",
+          "source_column": "ta.[Weeks Waited For First Contact]",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from TrustAccessWaitingTimes"
+        },
+        {
+          "target_column": "[Team]",
+          "source_table": "SLAMBI.Vault.DimSD",
+          "source_column": "wtsd.[Team Name]",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from DimSD (aliased as wtsd)"
+        },
+        {
+          "target_column": "[Team Name]",
+          "source_table": "SLAMBI.Vault.DimSD",
+          "source_column": "epsd.[Team Name]",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from DimSD (aliased as epsd)"
+        },
+        {
+          "target_column": "[Directorate]",
+          "source_table": "SLAMBI.Vault.DimSD",
+          "source_column": "wtsd.Directorate",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from DimSD (aliased as wtsd)"
+        },
+        {
+          "target_column": "[Division]",
+          "source_table": "SLAMBI.Vault.DimSD",
+          "source_column": "wtsd.Division",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from DimSD (aliased as wtsd)"
+        },
+        {
+          "target_column": "[Sub Service Line]",
+          "source_table": "SLAMBI.Vault.DimSD",
+          "source_column": "wtsd.[Sub Service Line]",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from DimSD (aliased as wtsd)"
+        },
+        {
+          "target_column": "[Episode Priority]",
+          "source_table": "SLAMBI.Dim.Priority",
+          "source_column": "pri.PriorityDescription",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Dim.Priority"
+        },
+        {
+          "target_column": "[Latest Team Flag]",
+          "source_table": "SLAMBI.Vault.TrustAccessWaitingTimes, SLAMBI.Vault.DimSD",
+          "source_column": "case when ta.[Latest Active Episode Team] = wtsd.[Team Name] then 'YES' else 'NO' end",
+          "transformation_type": "conditional",
+          "transformation_logic": "Conditional check if latest active episode team matches team name from wtsd"
+        },
+        {
+          "target_column": "[Episode Referral Received Date]",
+          "source_table": "SLAMBI.Vault.WaitingTimes",
+          "source_column": "wt.Episode_Referral_Received_Date",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from WaitingTimes"
+        },
+        {
+          "target_column": "[Team Wait Flag]",
+          "source_table": "SLAMBI.Vault.WaitingTimes",
+          "source_column": "case when wt.First_Attended_Date is null and Episode_Referral_Rejection_Date is null then 'YES' ELSE 'NO' END",
+          "transformation_type": "conditional",
+          "transformation_logic": "Conditional check if First Attended Date and Episode Referral Rejection Date are null"
+        },
+        {
+          "target_column": "[Team Wait Weeks]",
+          "source_table": "SLAMBI.Vault.WaitingTimes",
+          "source_column": "floor(datediff(dd,wt.Episode_Referral_Received_Date,getDate()) / 7)",
+          "transformation_type": "calculation",
+          "transformation_logic": "Calculates full weeks between Episode Referral Received Date and current date"
+        },
+        {
+          "target_column": "[Trust Referral ID]",
+          "source_table": "SLAMBI.Vault.TrustAccessWaitingTimes",
+          "source_column": "ta.[ReferralId]",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from TrustAccessWaitingTimes"
+        },
+        {
+          "target_column": "[Episode ID]",
+          "source_table": "SLAMBI.Vault.WaitingTimes",
+          "source_column": "wt.Episode_Id",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from WaitingTimes"
+        },
+        {
+          "target_column": "Deceased",
+          "source_table": "SLAMBI.Vault.Patient",
+          "source_column": "case when vp.Date_of_Death is not null then 'Deceased' end",
+          "transformation_type": "conditional",
+          "transformation_logic": "Sets to 'Deceased' if patient has a date of death"
+        },
+        {
+          "target_column": "[Trust 52+ wks]",
+          "source_table": "SLAMBI.Vault.TrustAccessWaitingTimes",
+          "source_column": "case when ta.[Weeks Waited For First Contact] >= 52 then 1 else 0 end",
+          "transformation_type": "conditional",
+          "transformation_logic": "Flag if Trust Access Wait Weeks is 52 or more"
+        },
+        {
+          "target_column": "[Trust 26+ wks]",
+          "source_table": "SLAMBI.Vault.TrustAccessWaitingTimes",
+          "source_column": "case when ta.[Weeks Waited For First Contact] >= 26 then 1 else 0 end",
+          "transformation_type": "conditional",
+          "transformation_logic": "Flag if Trust Access Wait Weeks is 26 or more"
+        },
+        {
+          "target_column": "[Trust 10+ wks]",
+          "source_table": "SLAMBI.Vault.TrustAccessWaitingTimes",
+          "source_column": "case when ta.[Weeks Waited For First Contact] >= 10 then 1 else 0 end",
+          "transformation_type": "conditional",
+          "transformation_logic": "Flag if Trust Access Wait Weeks is 10 or more"
+        },
+        {
+          "target_column": "[Trust 4+ wks]",
+          "source_table": "SLAMBI.Vault.TrustAccessWaitingTimes",
+          "source_column": "case when ta.[Weeks Waited For First Contact] >= 4 then 1 else 0 end",
+          "transformation_type": "conditional",
+          "transformation_logic": "Flag if Trust Access Wait Weeks is 4 or more"
+        },
+        {
+          "target_column": "Referral_Status_Desc",
+          "source_table": "SLAMBI.Vault.ReferralStatusValues",
+          "source_column": "rsv.Referral_Status_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from ReferralStatusValues"
+        }
+      ],
+      "joins": [
+        {
+          "left_table": "SLAMBI.Vault.WaitingTimes",
+          "right_table": "SLAMBI.Vault.Patient",
+          "join_type": "LEFT",
+          "condition": "wt.Patient_Id = vp.Patient_ID"
+        },
+        {
+          "left_table": "SLAMBI.Vault.WaitingTimes",
+          "right_table": "SLAMBI.Vault.Episode",
+          "join_type": "LEFT",
+          "condition": "wt.Episode_Id = ep.Episode_ID"
+        },
+        {
+          "left_table": "SLAMBI.Vault.WaitingTimes",
+          "right_table": "SLAMBI.Vault.TrustAccessWaitingTimes",
+          "join_type": "LEFT",
+          "condition": "wt.Referral_ID = ta.[ReferralID] and ta.[Crisis RefID] is null"
+        },
+        {
+          "left_table": "SLAMBI.Vault.WaitingTimes",
+          "right_table": "SLAMBI.Vault.DimSD",
+          "join_type": "LEFT",
+          "condition": "wt.Location_Id = wtsd.Location_ID"
+        },
+        {
+          "left_table": "SLAMBI.Vault.Episode",
+          "right_table": "SLAMBI.Vault.DimSD",
+          "join_type": "LEFT",
+          "condition": "ep.Location_Id = epsd.Location_ID"
+        },
+        {
+          "left_table": "SLAMBI.Vault.Episode",
+          "right_table": "SLAMBI.Dim.Priority",
+          "join_type": "LEFT",
+          "condition": "ep.Episode_Priority_ID = pri.PriorityID"
+        },
+        {
+          "left_table": "SLAMBI.Vault.Episode",
+          "right_table": "SLAMBI.Vault.ReferralStatusValues",
+          "join_type": "LEFT",
+          "condition": "ep.Referral_Status_ID = rsv.Referral_Status_ID"
+        }
+      ],
+      "filters": [
+        "wt.Referral_Referral_Rejection_Date is null",
+        "vp.Date_Of_Death is null",
+        "wt.First_Attended_Date is null",
+        "Episode_Referral_Discharged_Date is null",
+        "Episode_Referral_Rejection_Date is null",
+        "wtsd.[Team Name] not in ('Test Team','testing team')",
+        "ep.Referral_Status_ID in (1,0)"
+      ],
+      "grouping": [],
+      "extraction_method": "gemini",
+      "source_file": "Vault.TrustAccessWaits.sql"
+    }
+  ],
+  "catalogue": {
+    "PRIORITY": {
+      "qualified_name": "DIM.Priority",
+      "database": "DIM",
+      "schema": "",
+      "columns": [
+        {
+          "name": "PRIORITYSK",
+          "type": "ASC",
+          "nullable": true,
+          "primary_key": false
+        }
+      ],
+      "source_file": "tables.sql"
+    },
+    "DIMSD": {
+      "qualified_name": "Vault.DimSD",
+      "database": "VAULT",
+      "schema": "",
+      "columns": [
+        {
+          "name": "TEAM",
+          "type": "NAME",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "TEAM",
+          "type": "STATUS",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "TEAM",
+          "type": "OR",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "TEAM",
+          "type": "POSTCODE",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "NATIONAL",
+          "type": "SITE",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "NATIONAL",
+          "type": "TEAM",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "NATIONAL",
+          "type": "WARD",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "WARD",
+          "type": "INTENDED",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "WARD",
+          "type": "GENDER",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "WARD",
+          "type": "CARE",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "WARD",
+          "type": "SECURITY",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "WARD",
+          "type": "LOCKED",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "NATIONAL",
+          "type": "BED",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "WARD",
+          "type": "TYPE",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "WARD",
+          "type": "CARE",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "WARD",
+          "type": "PATHWAY",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "SERVICE",
+          "type": "TYPE",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "CARE",
+          "type": "GROUP",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "CONTRACT",
+          "type": "SERVICE",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "LSLC",
+          "type": "CONTRACT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "CASE",
+          "type": "MANAGEMENT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "SERVICE",
+          "type": "LINE",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "SUB",
+          "type": "SERVICE",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "FINANCIAL",
+          "type": "SERVICE",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "FINANCIAL",
+          "type": "SERVICE",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "COST",
+          "type": "CENTRE",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "COST",
+          "type": "CENTRE",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "SITE",
+          "type": "LOCATION",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "TEAM",
+          "type": "CODE",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "MONITOR",
+          "type": "GROUP",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "MONITOR",
+          "type": "LOS",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "CQC",
+          "type": "CORE",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "SERVICE",
+          "type": "CATEGORY",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "CARE",
+          "type": "OPTION",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "MHSDS",
+          "type": "SERVICE",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "MHSDS",
+          "type": "TEAM",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "MHSDS",
+          "type": "WARD",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "MHSDS",
+          "type": "WARD",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "MHSDS",
+          "type": "WARD",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "MHSDS",
+          "type": "WARD",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "MHSDS",
+          "type": "WARD",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "MHSDS",
+          "type": "ADMITTED",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "MHSDS",
+          "type": "SITE",
+          "nullable": true,
+          "primary_key": false
+        }
+      ],
+      "source_file": "tables.sql"
+    },
+    "EPISODE": {
+      "qualified_name": "Vault.Episode",
+      "database": "VAULT",
+      "schema": "",
+      "columns": [],
+      "source_file": "tables.sql"
+    },
+    "PATIENT": {
+      "qualified_name": "Vault.Patient",
+      "database": "VAULT",
+      "schema": "",
+      "columns": [
+        {
+          "name": "PATIENT_ID",
+          "type": "ASC",
+          "nullable": true,
+          "primary_key": false
+        }
+      ],
+      "source_file": "tables.sql"
+    },
+    "REFERRALSTATUSVALUES": {
+      "qualified_name": "Vault.ReferralStatusValues",
+      "database": "VAULT",
+      "schema": "",
+      "columns": [],
+      "source_file": "tables.sql"
+    },
+    "TRUSTACCESSWAITINGTIMES": {
+      "qualified_name": "Vault.TrustAccessWaitingTimes",
+      "database": "VAULT",
+      "schema": "",
+      "columns": [
+        {
+          "name": "RTT",
+          "type": "STARTID",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "RTT",
+          "type": "START",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "RTT",
+          "type": "START",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "FIRST",
+          "type": "CONTACTID",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "FIRST",
+          "type": "CONTACT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "FIRST",
+          "type": "CONTACT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "FIRST",
+          "type": "CONTACT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "FIRST",
+          "type": "CONTACT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "RTT",
+          "type": "STOPID",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "RTT",
+          "type": "STOP",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "RTT",
+          "type": "STOP",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "RTT",
+          "type": "STOP",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "RTT",
+          "type": "STOP",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "REF",
+          "type": "TRIAGEID",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "REF",
+          "type": "TRIAGE",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "REF",
+          "type": "TRIAGE",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "REF",
+          "type": "TRIAGE",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "CRISIS",
+          "type": "REFID",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "CRISIS",
+          "type": "REF",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "CRISIS",
+          "type": "REF",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "CRISIS",
+          "type": "REF",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "CRISIS",
+          "type": "REF",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "CRISIS",
+          "type": "CONTACTID",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "CRISIS",
+          "type": "CONTACT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "CRISIS",
+          "type": "CONTACT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "CRISIS",
+          "type": "CONTACT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "REFERRAL",
+          "type": "SOURCEID",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "REFERRAL",
+          "type": "PRIORITY",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "REFERRAL",
+          "type": "TEAM",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "REFERRAL",
+          "type": "DIRECTORATE",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "REFERRAL",
+          "type": "DIVISION",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "REFERRAL",
+          "type": "SERVICE",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "REFERRAL",
+          "type": "SUB",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "REFERRAL",
+          "type": "RECEIVED",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "FIRST",
+          "type": "CONTACT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "FIRST",
+          "type": "CONTACT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "FIRST",
+          "type": "CONTACT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "FIRST",
+          "type": "CONTACT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "FIRST",
+          "type": "CONTACT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "EARLIEST",
+          "type": "ACCEPTED",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "EARLIEST",
+          "type": "ACCEPTED",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "EARLIEST",
+          "type": "ACCEPTED",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "EARLIEST",
+          "type": "ACCEPTED",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "EARLIEST",
+          "type": "ACCEPTED",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "EARLIEST",
+          "type": "ACCEPTED",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "EARLIEST",
+          "type": "ACCEPTED",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "LATEST",
+          "type": "ACTIVE",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "LATEST",
+          "type": "ACTIVE",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "LATEST",
+          "type": "ACTIVE",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "LATEST",
+          "type": "ACTIVE",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "LATEST",
+          "type": "ACTIVE",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "LATEST",
+          "type": "ACTIVE",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "TEAM",
+          "type": "TRIAGED",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "DAYS",
+          "type": "WITH",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "LATEST",
+          "type": "TEAM",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "LATEST",
+          "type": "TEAM",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "LATEST",
+          "type": "TEAM",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "CRISIS",
+          "type": "CONTACT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "CRISIS",
+          "type": "CONTACT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "CRISIS",
+          "type": "CONTACT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "CRISIS",
+          "type": "CONTACT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "CRISIS",
+          "type": "CONTACT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "PATIENT",
+          "type": "GENDERID",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "FIRST",
+          "type": "CONTACT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "DAYS",
+          "type": "WAITED",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "WEEKS",
+          "type": "WAITED",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "WEEKS",
+          "type": "WAITED",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "WEEKS",
+          "type": "WAITED",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "DAYS",
+          "type": "REF",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "DAYS",
+          "type": "TRIAGE",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "DAYS",
+          "type": "WAITED",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "WEEKS",
+          "type": "WAITED",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "WEEKS",
+          "type": "WAITED",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "WEEKS",
+          "type": "WAITED",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "WAITING",
+          "type": "FOR",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "FIRST",
+          "type": "CONTACT",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "CRISIS",
+          "type": "WAIT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "CRISIS",
+          "type": "WAIT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "CENSUS",
+          "type": "DATE",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "EXCLUSION",
+          "type": "FLAG",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "EXCLUSION",
+          "type": "REASON",
+          "nullable": true,
+          "primary_key": false
+        }
+      ],
+      "source_file": "tables.sql"
+    },
+    "WAITINGTIMES": {
+      "qualified_name": "Vault.WaitingTimes",
+      "database": "VAULT",
+      "schema": "",
+      "columns": [],
+      "source_file": "tables.sql"
+    },
+    "TRUSTACCESSWAITS": {
+      "qualified_name": "Vault.TrustAccessWaits",
+      "database": "VAULT",
+      "schema": "",
+      "columns": [
+        {
+          "name": "BACKUP",
+          "type": "DATE",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "TRUST",
+          "type": "REFERRAL",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "TRUST",
+          "type": "REFERRAL",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "TRUST",
+          "type": "ACCESS",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "TRUST",
+          "type": "ACCESS",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "TEAM",
+          "type": "NAME",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "SUB",
+          "type": "SERVICE",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "EPISODE",
+          "type": "PRIORITY",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "LATEST",
+          "type": "TEAM",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "EPISODE",
+          "type": "REFERRAL",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "TEAM",
+          "type": "WAIT",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "TEAM",
+          "type": "WAIT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "TRUST",
+          "type": "REFERRAL",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "EPISODE",
+          "type": "ID",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "TEAM",
+          "type": "52",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "TEAM",
+          "type": "26",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "TEAM",
+          "type": "10",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "TEAM",
+          "type": "4",
+          "nullable": false,
+          "primary_key": false
+        }
+      ],
+      "source_file": "tables.sql"
+    }
+  }
+}

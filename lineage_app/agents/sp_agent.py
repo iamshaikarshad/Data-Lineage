@@ -1,16 +1,78 @@
-"""SP Agent that implements the three-step extraction pipeline."""
+"""SP Agent that implements the three-step extraction pipeline with
+MasterAgent routing and per-SP override support."""
 
 import json
 import logging
 import os
+import re
 import time
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Union
+from typing import Dict, List, Any, Optional, Union, Literal
 
 from . import normalise_table
 from .sp_parser import extract_lineage
+from .master_agent import MasterAgent, ExtractionMethod
 
 logger = logging.getLogger(__name__)
+
+
+def _strip_llm_response_to_json(text: str) -> Optional[str]:
+    """Extract the first valid JSON object from an LLM response.
+
+    LLMs often wrap JSON in markdown fences or add prose around it.
+    This helper strips fences, finds the outermost ``{ … }`` block,
+    and returns it; returns None if no JSON object can be found.
+    """
+    if not text or not text.strip():
+        return None
+
+    raw = text.strip()
+
+    # Strip common markdown fence patterns
+    #   ```json\n{...}\n```   or   ```\n{...}\n```
+    fence_match = re.search(
+        r"```(?:json)?\s*\n?(.*?)\n?\s*```", raw, re.DOTALL
+    )
+    if fence_match:
+        raw = fence_match.group(1).strip()
+
+    # If it still doesn't start with '{', try to find the first '{'
+    # and match its closing '}' (handling nesting).
+    start = raw.find("{")
+    if start == -1:
+        return None
+
+    depth = 0
+    in_string = False
+    escape_next = False
+    for i in range(start, len(raw)):
+        ch = raw[i]
+        if escape_next:
+            escape_next = False
+            continue
+        if ch == "\\" and in_string:
+            escape_next = True
+            continue
+        if ch == '"' and not escape_next:
+            in_string = not in_string
+            continue
+        if in_string:
+            continue
+        if ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                candidate = raw[start : i + 1]
+                # Validate it parses
+                try:
+                    json.loads(candidate)
+                    return candidate
+                except json.JSONDecodeError:
+                    # Keep searching for a later block
+                    continue
+    # No balanced JSON object found
+    return raw[start:] if start != -1 else None
 
 try:
     import anthropic
@@ -19,12 +81,58 @@ except ImportError:
     logger.warning("anthropic package not installed; Claude step will be skipped")
 
 try:
+    from openai import OpenAI
+except ImportError:
+    OpenAI = None
+    logger.warning("openai package not installed; Gemini/NVIDIA step will be skipped")
+
+try:
     from google import genai
     _genai_available = True
 except ImportError:
     genai = None
     _genai_available = False
     logger.warning("google-genai package not installed; Gemini step will be skipped")
+
+
+def load_sp_overrides(path: Union[str, Path]) -> Dict[str, str]:
+    """
+    Load the per-SP extraction-method override file. Returns an empty dict
+    if the file does not exist or is invalid JSON (logs a WARNING in the
+    invalid-JSON case, stays silent if simply missing).
+    Validates that every value is one of "regex", "claude", "gemini","nvidia";
+    invalid values are dropped with a WARNING.
+    """
+    path = Path(path)
+    if not path.exists():
+        return {}
+
+    try:
+        with path.open("r", encoding="utf-8") as f:
+            data = json.load(f)
+    except json.JSONDecodeError as e:
+        logger.warning("Invalid JSON in override file %s: %s", path, e)
+        return {}
+    except Exception as e:
+        logger.warning("Failed to read override file %s: %s", path, e)
+        return {}
+
+    if not isinstance(data, dict):
+        logger.warning("Override file %s must contain a JSON object, got %s", path, type(data).__name__)
+        return {}
+
+    valid_methods = {"regex", "claude", "gemini","nvidia"}
+    overrides = {}
+    for key, value in data.items():
+        if isinstance(value, str) and value.lower() in valid_methods:
+            overrides[key] = value.lower()
+        else:
+            logger.warning(
+                "Override file: dropping invalid entry '%s': '%s' "
+                "(value must be one of %s)", key, value, valid_methods
+            )
+
+    return overrides
 
 
 class SPAgent:
@@ -40,10 +148,15 @@ class SPAgent:
         catalogue: Dict[str, Dict[str, Any]],
         anthropic_api_key: Optional[str] = None,
         gemini_api_key: Optional[str] = None,
+        nvidia_api_key: Optional[str] = None,
         model_claude: str = "claude-sonnet-4-6",
-        model_gemini: str = "gemini-1.5-flash",
+        model_gemini: str = "gemini-2.5-flash",
+        model_nvidia: str = "nvidia/nemotron-3-super-120b-a12b",
         delay_between_calls: float = 0.5,
         failure_log_path: Optional[Union[str, Path]] = None,
+        use_master_agent: bool = True,
+        prefer_llm: Literal["claude", "gemini", "nvidia"] = "gemini",
+        per_sp_overrides: Optional[Dict[str, ExtractionMethod]] = None,
     ):
         """
         Initialize the SPAgent.
@@ -53,38 +166,146 @@ class SPAgent:
             catalogue: The table catalogue from SchemaAgent.
             anthropic_api_key: API key for Claude. If None, step 2 is skipped.
             gemini_api_key: API key for Gemini. If None, step 3 is skipped.
+            nvidia_api_key: API key for NVIDIA NIM. If None, step 4 is skipped.
             model_claude: Claude model to use.
             model_gemini: Gemini model to use.
+            model_nvidia: NVIDIA NIM model to use.
             delay_between_calls: Delay between API calls to avoid rate limits.
-            failure_log_path: Path to the JSONL failure log. If None, defaults to logs/failed_extractions.jsonl.
+            failure_log_path: Path to the JSONL failure log.
+            use_master_agent: If True, use MasterAgent to decide starting method.
+            prefer_llm: Which LLM to prefer when MasterAgent routes to LLM.
+            per_sp_overrides: Dict mapping filename -> forced extraction method.
         """
         self.sp_dir = Path(sp_dir)
         self.catalogue = catalogue
         self.anthropic_api_key = anthropic_api_key or os.environ.get("ANTHROPIC_API_KEY")
         self.gemini_api_key = gemini_api_key or os.environ.get("GEMINI_API_KEY")
+        self.nvidia_api_key = nvidia_api_key or os.environ.get("NVIDIA_API_KEY")
         self.model_claude = model_claude
         self.model_gemini = model_gemini
+        self.model_nvidia = model_nvidia
         self.delay_between_calls = delay_between_calls
         self.failure_log_path = Path(failure_log_path) if failure_log_path else Path("logs/failed_extractions.jsonl")
         self.results: List[Dict[str, Any]] = []
         self.failure_log_path.parent.mkdir(parents=True, exist_ok=True)
 
+        self.use_master_agent = use_master_agent
+        self.master_agent = MasterAgent(prefer_llm=prefer_llm) if use_master_agent else None
+        self.per_sp_overrides = per_sp_overrides or {}
+
+        # Track which methods are actually available
+        available: Dict[str, bool] = {"regex": True}
+
         # Initialize API clients if keys are present
         if self.anthropic_api_key and anthropic:
             self.claude_client = anthropic.Anthropic(api_key=self.anthropic_api_key)
+            available["claude"] = True
         else:
             self.claude_client = None
+            available["claude"] = False
             if not self.anthropic_api_key:
                 logger.warning("ANTHROPIC_API_KEY not set; skipping Claude extraction step")
 
         if self.gemini_api_key and _genai_available:
             self.genai_client = genai.Client(api_key=self.gemini_api_key)
             self.gemini_model = self.model_gemini
+            available["gemini"] = True
         else:
             self.genai_client = None
             self.gemini_model = None
+            available["gemini"] = False
             if not self.gemini_api_key:
                 logger.warning("GEMINI_API_KEY not set; skipping Gemini extraction step")
+
+        if self.nvidia_api_key and OpenAI is not None:
+            self.nvidia_client = OpenAI(
+                base_url="https://integrate.api.nvidia.com/v1",
+                api_key=self.nvidia_api_key,
+            )
+            available["nvidia"] = True
+        else:
+            self.nvidia_client = None
+            available["nvidia"] = False
+            if not self.nvidia_api_key:
+                logger.warning("NVIDIA_API_KEY not set; skipping NVIDIA extraction step")
+
+        self._available_methods = available
+
+    def _build_step_sequence(self, start_method: str, is_override: bool = False) -> List[tuple]:
+        """
+        Returns the ordered list of (method_name, extractor_callable) pairs
+        to attempt.
+
+        When is_override is False (MasterAgent or default routing):
+          Start at start_method in the canonical regex -> claude -> gemini
+          order and include every step that follows it.
+
+        When is_override is True (user forced a specific method):
+          Put the override method first, then add all remaining available
+          methods as fallback in canonical order.  This way, forcing
+          "gemini" tries gemini first but falls back to claude/regex if
+          it fails, rather than producing no result at all.
+
+        If the requested start_method is entirely unavailable (client/key
+        missing), an override inserts a stub that raises a clear error so
+        the failure is explicitly logged; a non-override silently falls
+        back to the first available step.
+        """
+        all_steps = []
+        all_steps.append(("regex", lambda code: extract_lineage(code, self.catalogue)))
+        if self.claude_client is not None:
+            all_steps.append(("claude", self._extract_with_claude))
+        if self.gemini_model is not None:
+            all_steps.append(("gemini", self._extract_with_gemini))
+        if self.nvidia_client is not None:
+            all_steps.append(("nvidia", self._extract_with_nvidia))
+
+        method_order = [name for name, _ in all_steps]
+
+        if is_override:
+            # Build sequence: override method first, then everything else
+            # in canonical order as fallback.
+            sequence: List[tuple] = []
+
+            if start_method in method_order:
+                # Override method is available — put it first
+                idx = method_order.index(start_method)
+                sequence.append(all_steps[idx])
+                # Add all other available steps in canonical order
+                for i, step in enumerate(all_steps):
+                    if i != idx:
+                        sequence.append(step)
+            else:
+                # Override method unavailable (no client/key).
+                # Insert a stub that raises so the failure is explicit,
+                # then add all available steps as fallback.
+                logger.warning(
+                    "  -> user override requested '%s' but client/key is "
+                    "unavailable; will try to fall back to other methods",
+                    start_method,
+                )
+                def _unavailable_stub(code, _method=start_method):
+                    raise RuntimeError(
+                        "Extraction method '%s' was forced by override "
+                        "but the API client/key is not configured" % _method
+                    )
+                sequence.append((start_method, _unavailable_stub))
+                # Add all available steps as fallback
+                sequence.extend(all_steps)
+
+            return sequence
+
+        # Non-override path: start at the given method in canonical order
+        if start_method in method_order:
+            start_idx = method_order.index(start_method)
+        else:
+            logger.warning(
+                "  -> requested start method '%s' unavailable "
+                "(missing client/key); falling back to first available step",
+                start_method,
+            )
+            start_idx = 0
+        return all_steps[start_idx:]
 
     def run(self) -> List[Dict[str, Any]]:
         """
@@ -93,102 +314,92 @@ class SPAgent:
         """
         logger.info("Starting SPAgent")
         sp_files = list(self.sp_dir.rglob("*.sql"))
-        logger.info(f"Found {len(sp_files)} stored procedure file(s)")
+        logger.info("Found %d stored procedure file(s)", len(sp_files))
 
         self.results = []
         failed_count = 0
+        routing_counts: Dict[str, int] = {"regex": 0, "claude": 0, "gemini": 0, "nvidia": 0}
 
         for idx, sp_file in enumerate(sp_files, start=1):
-            logger.info(f"[{idx}/{len(sp_files)}] Processing {sp_file.name}")
+            logger.info("[%d/%d] Processing %s", idx, len(sp_files), sp_file.name)
             try:
                 sp_code = sp_file.read_text(encoding="utf-8", errors="ignore")
             except Exception as e:
-                logger.error(f"Failed to read {sp_file}: {e}")
+                logger.error("Failed to read %s: %s", sp_file, e)
                 continue
 
             if not sp_code.strip():
-                logger.debug(f"Skipping empty file: {sp_file.name}")
+                logger.debug("Skipping empty file: %s", sp_file.name)
                 continue
 
+            # Determine starting extraction method for this file
+            is_override = False
+            override = self.per_sp_overrides.get(sp_file.name)
+            if override:
+                start_method = override
+                is_override = True
+                logger.info("  -> user override: forcing method=%s for %s", override, sp_file.name)
+            elif self.master_agent is not None:
+                start_method, signals = self.master_agent.recommend(sp_code)
+                logger.info(
+                    "  -> MasterAgent: score=%s -> route=%s  reasons=%s",
+                    signals.score, start_method, signals.reasons,
+                )
+            else:
+                start_method = "regex"
+
+            routing_counts[start_method] = routing_counts.get(start_method, 0) + 1
+
+            # Execute extraction steps
+            step_errors: Dict[str, Optional[str]] = {
+                "regex": None, "claude": None, "gemini": None, "nvidia": None
+            }
+            steps_attempted: List[str] = []
             result = None
-            step1_error = None
-            step2_error = None
-            step3_error = None
 
-            # Step 1: Regex/sqlparse parser
-            try:
-                result = extract_lineage(sp_code, self.catalogue)
-                if result is not None:
-                    logger.info(f"  → step1=OK  method=regex")
-                    result["extraction_method"] = "regex"
-                    result["source_file"] = sp_file.name
-                    self.results.append(result)
-                    time.sleep(self.delay_between_calls)
-                    continue
-                else:
-                    step1_error = "No INSERT INTO or SELECT INTO found, or missing source tables/column mappings"
-            except Exception as e:
-                step1_error = f"Unexpected error: {e}"
-                logger.error(f"Step 1 raised exception: {e}")
-
-            # Step 2: Claude AI
-            if self.claude_client is not None:
+            for method_name, extractor in self._build_step_sequence(start_method, is_override=is_override):
+                steps_attempted.append(method_name)
                 try:
-                    result = self._extract_with_claude(sp_code)
+                    result = extractor(sp_code)
                     if result is not None:
-                        logger.info(f"  → step1=FAIL  step2=OK  method=claude")
-                        result["extraction_method"] = "claude"
+                        logger.info("  -> method=%s  steps_tried=%s", method_name, steps_attempted)
+                        result["extraction_method"] = method_name
                         result["source_file"] = sp_file.name
                         self.results.append(result)
-                        time.sleep(self.delay_between_calls)
-                        continue
+                        break
                     else:
-                        step2_error = "Returned None (likely JSON decode error)"
+                        step_errors[method_name] = "Returned None"
                 except Exception as e:
-                    step2_error = f"API error: {e}"
-                    logger.error(f"Step 2 raised exception: {e}")
-            else:
-                step2_error = "Anthropic API key not set or client not initialized"
-                logger.debug("Skipping Claude step: no API key")
+                    step_errors[method_name] = "Exception: %s" % e
+                    logger.error("  -> %s raised exception: %s", method_name, e)
 
-            # Step 3: Google Gemini
-            if self.gemini_model is not None:
-                try:
-                    result = self._extract_with_gemini(sp_code)
-                    if result is not None:
-                        logger.info(f"  → step1=FAIL  step2=FAIL  step3=OK  method=gemini")
-                        result["extraction_method"] = "gemini"
-                        result["source_file"] = sp_file.name
-                        self.results.append(result)
-                        time.sleep(self.delay_between_calls)
-                        continue
-                    else:
-                        step3_error = "Returned None (likely JSON decode error)"
-                except Exception as e:
-                    step3_error = f"API error: {e}"
-                    logger.error(f"Step 3 raised exception: {e}")
+            if result is None:
+                for skipped in {"regex", "claude", "gemini", "nvidia"} - set(steps_attempted):
+                    step_errors[skipped] = "Skipped (not attempted, started at later step)"
+                failed_count += 1
+                logger.warning(
+                    "  -> all attempted steps failed  steps_tried=%s  [REVIEW REQUIRED]",
+                    steps_attempted,
+                )
+                self._log_failure(
+                    sp_file.name, sp_code,
+                    step_errors["regex"], step_errors["claude"],
+                    step_errors["gemini"], step_errors["nvidia"],
+                )
             else:
-                step3_error = "Gemini API key not set or model not initialized"
-                logger.debug("Skipping Gemini step: no API key")
-
-            # All three steps failed
-            failed_count += 1
-            logger.warning(f"  → step1=FAIL  step2=FAIL  step3=FAIL  [REVIEW REQUIRED]")
-            self._log_failure(
-                sp_file.name,
-                sp_code,
-                step1_error,
-                step2_error,
-                step3_error,
-            )
-            logger.error(f"[REVIEW REQUIRED] {sp_file.name} — all extraction steps failed. See logs/failed_extractions.jsonl for details.")
+                time.sleep(self.delay_between_calls)
 
         logger.info(
-            f"SPAgent: {len(self.results)} succeeded "
-            f"({sum(1 for r in self.results if r.get('extraction_method') == 'regex')} regex, "
-            f"({sum(1 for r in self.results if r.get('extraction_method') == 'claude')} claude, "
-            f"({sum(1 for r in self.results if r.get('extraction_method') == 'gemini')} gemini), "
-            f"{failed_count} failed"
+            "SPAgent: %d succeeded "
+            "(%d regex, %d claude, %d gemini, %d nvidia), "
+            "%d failed, routing_counts=%s",
+            len(self.results),
+            sum(1 for r in self.results if r.get("extraction_method") == "regex"),
+            sum(1 for r in self.results if r.get("extraction_method") == "claude"),
+            sum(1 for r in self.results if r.get("extraction_method") == "gemini"),
+            sum(1 for r in self.results if r.get("extraction_method") == "nvidia"),
+            failed_count,
+            routing_counts,
         )
         return self.results
 
@@ -199,32 +410,27 @@ class SPAgent:
         """
         normalised = []
         for result in self.results:
-            # Create a deep copy
             res = json.loads(json.dumps(result))
 
-            # Normalise target_table
             target_table_qualified = res.get("target_table", "")
             res["target_table_qualified"] = target_table_qualified
             res["target_table"] = normalise_table(target_table_qualified)
 
-            # Normalise source_tables
             source_tables = res.get("source_tables", [])
-            source_tables_qualified = source_tables[:]  # copy
+            source_tables_qualified = source_tables[:]
             res["source_tables_qualified"] = source_tables_qualified
             res["source_tables"] = [normalise_table(t) for t in source_tables]
 
-            # Normalise column_mappings source_table
             for mapping in res.get("column_mappings", []):
                 source_table_qualified = mapping.get("source_table", "")
                 mapping["source_table_qualified"] = source_table_qualified
                 mapping["source_table"] = normalise_table(source_table_qualified)
 
-            # Normalise joins left_table and right_table
             for join in res.get("joins", []):
                 left_table_qualified = join.get("left_table", "")
                 right_table_qualified = join.get("right_table", "")
                 join["left_table_qualified"] = left_table_qualified
-                join["right_table_qualized"] = right_table_qualified
+                join["right_table_qualified"] = right_table_qualified
                 join["left_table"] = normalise_table(left_table_qualified)
                 join["right_table"] = normalise_table(right_table_qualified)
 
@@ -232,150 +438,126 @@ class SPAgent:
         return normalised
 
     def _extract_with_claude(self, sp_code: str) -> Optional[Dict[str, Any]]:
-        """
-        Extract lineage using Claude AI.
-        Returns the parsed JSON dict or None on failure.
-        """
+        """Extract lineage using Claude AI. Returns the parsed JSON dict or None."""
         if not self.claude_client:
             return None
 
-        # Build the catalogue summary (we'll include a brief version)
         catalogue_summary = ""
         for table_name, info in self.catalogue.items():
-            catalogue_summary += f"- {info.get('qualified_name', table_name)}: {len(info.get('columns', []))} columns\n"
+            catalogue_summary += "- %s: %d columns\n" % (
+                info.get("qualified_name", table_name),
+                len(info.get("columns", [])),
+            )
 
         system_prompt = (
             "You are an expert SQL data lineage analyst. "
             "Your job is to read a stored procedure and return ONLY valid JSON describing "
-            "the data lineage — no markdown, no explanation, just the JSON object."
+            "the data lineage -- no markdown, no explanation, just the JSON object."
         )
 
-        user_prompt = f"""
-	Analyse this stored procedure. Return ONLY a JSON object
-	(no markdown fences, no extra text) with EXACTLY this structure:
-
-	{{
-	  "procedure_name": "<name of the SP>",
-	  "target_table": "<the table written to — use the full qualified name as it appears>",
-	  "source_tables": ["<full qualified name as it appears>", ...],
-	  "column_mappings": [
-	    {{
-	      "target_column": "<column in target table>",
-	      "source_table":  "<full qualified name as it appears>",
-	      "source_column": "<original column name or full expression>",
-	      "transformation_type": "direct_copy | aggregation | calculation | conditional | constant",
-	      "transformation_logic": "<brief plain-English description>"
-	    }}
-	  ],
-	  "joins": [
-	    {{
-	      "left_table":  "<full qualified name as it appears>",
-	      "right_table": "<full qualified name as it appears>",
-	      "join_type":   "INNER | LEFT | RIGHT | FULL | CROSS",
-	      "condition":   "<the ON clause verbatim>"
-	    }}
-	  ],
-	  "filters":  ["<each WHERE condition as a string>"],
-	  "grouping": ["<each GROUP BY expression as a string>"]
-	}}
-
-	STORED PROCEDURE:
-	```sql
-	{sp_code}
-	```
-
-	KNOWN TABLE CATALOGUE (for reference only — use qualified names from SP, not these):
-	{catalogue_summary}
-	""".strip()
+        user_prompt = (
+            "Analyse this stored procedure. Return ONLY a JSON object "
+            "(no markdown fences, no extra text) with EXACTLY this structure:\n\n"
+            "{\n"
+            '  "procedure_name": "<name of the SP>",\n'
+            '  "target_table": "<the table written to -- use the full qualified name as it appears>",\n'
+            '  "source_tables": ["<full qualified name as it appears>", ...],\n'
+            '  "column_mappings": [\n'
+            "    {\n"
+            '      "target_column": "<column in target table>",\n'
+            '      "source_table":  "<full qualified name as it appears>",\n'
+            '      "source_column": "<original column name or full expression>",\n'
+            '      "transformation_type": "direct_copy | aggregation | calculation | conditional | constant",\n'
+            '      "transformation_logic": "<brief plain-English description>"\n'
+            "    }\n"
+            "  ],\n"
+            '  "joins": [\n'
+            "    {\n"
+            '      "left_table":  "<full qualified name as it appears>",\n'
+            '      "right_table": "<full qualified name as it appears>",\n'
+            '      "join_type":   "INNER | LEFT | RIGHT | FULL | CROSS",\n'
+            '      "condition":   "<the ON clause verbatim>"\n'
+            "    }\n"
+            "  ],\n"
+            '  "filters":  ["<each WHERE condition as a string>"],\n'
+            '  "grouping": ["<each GROUP BY expression as a string>"]\n'
+            "}\n\n"
+            "STORED PROCEDURE:\n"
+            "```sql\n%s\n```\n\n"
+            "KNOWN TABLE CATALOGUE (for reference only -- use qualified names from SP, not these):\n%s"
+        ) % (sp_code, catalogue_summary)
 
         try:
             response = self.claude_client.messages.create(
                 model=self.model_claude,
                 max_tokens=4096,
                 system=system_prompt,
-                messages=[
-                    {
-                        "role": "user",
-                        "content": user_prompt,
-                    }
-                ],
+                messages=[{"role": "user", "content": user_prompt}],
             )
-            # Extract the text content
             text = response.content[0].text if response.content else ""
         except Exception as e:
-            logger.error(f"Claude API error: {e}")
+            logger.error("Claude API error: %s", e)
             return None
 
-        # Strip markdown fences
-        if text.startswith("```json"):
-            text = text[7:]
-        if text.endswith("```"):
-            text = text[:-3]
-        text = text.strip()
+        cleaned = _strip_llm_response_to_json(text)
+        if cleaned is None:
+            logger.error("Failed to extract JSON from Claude response (empty or no JSON object found)")
+            logger.debug("Claude raw response: %s", text[:500])
+            return None
 
         try:
-            data = json.loads(text)
-            # Validate that we have the required keys? We'll assume the LLM follows the structure.
-            return data
+            return json.loads(cleaned)
         except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse Claude response as JSON: {e}")
-            logger.debug(f"Claude response text: {text}")
+            logger.error("Failed to parse Claude response as JSON: %s", e)
+            logger.debug("Claude response text: %s", text[:500])
             return None
 
     def _extract_with_gemini(self, sp_code: str) -> Optional[Dict[str, Any]]:
-        """
-        Extract lineage using Google Gemini.
-        Returns the parsed JSON dict or None on failure.
-        """
+        """Extract lineage using Google Gemini. Returns the parsed JSON dict or None."""
         if not self.genai_client:
             return None
 
-        # Build the catalogue summary
         catalogue_summary = ""
         for table_name, info in self.catalogue.items():
-            catalogue_summary += f"- {info.get('qualified_name', table_name)}: {len(info.get('columns', []))} columns\n"
+            catalogue_summary += "- %s: %d columns\n" % (
+                info.get("qualified_name", table_name),
+                len(info.get("columns", [])),
+            )
 
-        # The prompt is the same as for Claude, but we prefix with SYSTEM and USER as per instructions
         system_text = "You are an expert SQL data lineage analyst. Return ONLY valid JSON, no markdown."
-        user_text = f"""
-	Analyse this stored procedure. Return ONLY a JSON object
-	(no markdown fences, no extra text) with EXACTLY this structure:
+        user_text = (
+            "Analyse this stored procedure. Return ONLY a JSON object "
+            "(no markdown fences, no extra text) with EXACTLY this structure:\n\n"
+            "{\n"
+            '  "procedure_name": "<name of the SP>",\n'
+            '  "target_table": "<the table written to -- use the full qualified name as it appears>",\n'
+            '  "source_tables": ["<full qualified name as it appears>", ...],\n'
+            '  "column_mappings": [\n'
+            "    {\n"
+            '      "target_column": "<column in target table>",\n'
+            '      "source_table":  "<full qualified name as it appears>",\n'
+            '      "source_column": "<original column name or full expression>",\n'
+            '      "transformation_type": "direct_copy | aggregation | calculation | conditional | constant",\n'
+            '      "transformation_logic": "<brief plain-English description>"\n'
+            "    }\n"
+            "  ],\n"
+            '  "joins": [\n'
+            "    {\n"
+            '      "left_table":  "<full qualified name as it appears>",\n'
+            '      "right_table": "<full qualified name as it appears>",\n'
+            '      "join_type":   "INNER | LEFT | RIGHT | FULL | CROSS",\n'
+            '      "condition":   "<the ON clause verbatim>"\n'
+            "    }\n"
+            "  ],\n"
+            '  "filters":  ["<each WHERE condition as a string>"],\n'
+            '  "grouping": ["<each GROUP BY expression as a string>"]\n'
+            "}\n\n"
+            "STORED PROCEDURE:\n"
+            "```sql\n%s\n```\n\n"
+            "KNOWN TABLE CATALOGUE (for reference only -- use qualified names from SP, not these):\n%s"
+        ) % (sp_code, catalogue_summary)
 
-	{{
-	  "procedure_name": "<name of the SP>",
-	  "target_table": "<the table written to — use the full qualified name as it appears>",
-	  "source_tables": ["<full qualified name as it appears>", ...],
-	  "column_mappings": [
-	    {{
-	      "target_column": "<column in target table>",
-	      "source_table":  "<full qualified name as it appears>",
-	      "source_column": "<original column name or full expression>",
-	      "transformation_type": "direct_copy | aggregation | calculation | conditional | constant",
-	      "transformation_logic": "<brief plain-English description>"
-	    }}
-	  ],
-	  "joins": [
-	    {{
-	      "left_table":  "<full qualified name as it appears>",
-	      "right_table": "<full qualified name as it appears>",
-	      "join_type":   "INNER | LEFT | RIGHT | FULL | CROSS",
-	      "condition":   "<the ON clause verbatim>"
-	    }}
-	  ],
-	  "filters":  ["<each WHERE condition as a string>"],
-	  "grouping": ["<each GROUP BY expression as a string>"]
-	}}
-
-	STORED PROCEDURE:
-	```sql
-	{sp_code}
-	```
-
-	KNOWN TABLE CATALOGUE (for reference only — use qualified names from SP, not these):
-	{catalogue_summary}
-	""".strip()
-
-        prompt = f"SYSTEM: {system_text}\n\nUSER: {user_text}"
+        prompt = "SYSTEM: %s\n\nUSER: %s" % (system_text, user_text)
 
         try:
             response = self.genai_client.models.generate_content(
@@ -384,22 +566,101 @@ class SPAgent:
             )
             text = response.text
         except Exception as e:
-            logger.error(f"Gemini API error: {e}")
+            logger.error("Gemini API error: %s", e)
             return None
 
-        # Strip markdown fences
-        if text.startswith("```json"):
-            text = text[7:]
-        if text.endswith("```"):
-            text = text[:-3]
-        text = text.strip()
+        cleaned = _strip_llm_response_to_json(text)
+        if cleaned is None:
+            logger.error("Failed to extract JSON from Gemini response (empty or no JSON object found)")
+            logger.debug("Gemini raw response: %s", text[:500])
+            return None
 
         try:
-            data = json.loads(text)
-            return data
+            return json.loads(cleaned)
         except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse Gemini response as JSON: {e}")
-            logger.debug(f"Gemini response text: {text}")
+            logger.error("Failed to parse Gemini response as JSON: %s", e)
+            logger.debug("Gemini response text: %s", text[:500])
+            return None
+
+    def _extract_with_nvidia(self, sp_code: str) -> Optional[Dict[str, Any]]:
+        """Extract lineage using NVIDIA NIM (OpenAI-compatible API).
+        Returns the parsed JSON dict or None."""
+        if not self.nvidia_client:
+            return None
+
+        catalogue_summary = ""
+        for table_name, info in self.catalogue.items():
+            catalogue_summary += "- %s: %d columns\n" % (
+                info.get("qualified_name", table_name),
+                len(info.get("columns", [])),
+            )
+
+        system_prompt = (
+            "You are an expert SQL data lineage analyst. "
+            "Your job is to read a stored procedure and return ONLY valid JSON describing "
+            "the data lineage -- no markdown, no explanation, just the JSON object."
+        )
+
+        user_prompt = (
+            "Analyse this stored procedure. Return ONLY a JSON object "
+            "(no markdown fences, no extra text) with EXACTLY this structure:\n\n"
+            "{\n"
+            '  "procedure_name": "<name of the SP>",\n'
+            '  "target_table": "<the table written to -- use the full qualified name as it appears>",\n'
+            '  "source_tables": ["<full qualified name as it appears>", ...],\n'
+            '  "column_mappings": [\n'
+            "    {\n"
+            '      "target_column": "<column in target table>",\n'
+            '      "source_table":  "<full qualified name as it appears>",\n'
+            '      "source_column": "<original column name or full expression>",\n'
+            '      "transformation_type": "direct_copy | aggregation | calculation | conditional | constant",\n'
+            '      "transformation_logic": "<brief plain-English description>"\n'
+            "    }\n"
+            "  ],\n"
+            '  "joins": [\n'
+            "    {\n"
+            '      "left_table":  "<full qualified name as it appears>",\n'
+            '      "right_table": "<full qualified name as it appears>",\n'
+            '      "join_type":   "INNER | LEFT | RIGHT | FULL | CROSS",\n'
+            '      "condition":   "<the ON clause verbatim>"\n'
+            "    }\n"
+            "  ],\n"
+            '  "filters":  ["<each WHERE condition as a string>"],\n'
+            '  "grouping": ["<each GROUP BY expression as a string>"]\n'
+            "}\n\n"
+            "STORED PROCEDURE:\n"
+            "```sql\n%s\n```\n\n"
+            "KNOWN TABLE CATALOGUE (for reference only -- use qualified names from SP, not these):\n%s"
+        ) % (sp_code, catalogue_summary)
+
+        try:
+            response = self.nvidia_client.chat.completions.create(
+                model=self.model_nvidia,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+                max_tokens=4096,
+                temperature=0.2,
+            )
+            text = response.choices[0].message.content or ""
+            logger.info("NVIDIA raw response length: %d chars", len(text))
+            logger.debug("NVIDIA raw response (first 800 chars): %s", text[:800])
+        except Exception as e:
+            logger.error("NVIDIA NIM API error: %s", e)
+            return None
+
+        cleaned = _strip_llm_response_to_json(text)
+        if cleaned is None:
+            logger.error("Failed to extract JSON from NVIDIA response (empty or no JSON object found)")
+            logger.info("NVIDIA response preview (first 500 chars): %s", text[:500])
+            return None
+
+        try:
+            return json.loads(cleaned)
+        except json.JSONDecodeError as e:
+            logger.error("Failed to parse NVIDIA response as JSON: %s", e)
+            logger.info("NVIDIA cleaned text preview (first 500 chars): %s", cleaned[:500])
             return None
 
     def _log_failure(
@@ -409,45 +670,43 @@ class SPAgent:
         step1_error: Optional[str],
         step2_error: Optional[str],
         step3_error: Optional[str],
+        step4_error: Optional[str],
     ) -> None:
-        """
-        Append a structured failure record to the JSONL log.
-        """
+        """Append a structured failure record to the JSONL log."""
         record = {
             "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             "source_file": source_file,
-            "failure_reason": "All three extraction steps failed",
+            "failure_reason": "All attempted extraction steps failed",
             "step1_error": step1_error or "Unknown",
             "step2_error": step2_error or "Skipped or unknown",
             "step3_error": step3_error or "Skipped or unknown",
+            "step4_error": step4_error or "Skipped or unknown",
             "sp_snippet": sp_code[:300],
         }
         try:
             with self.failure_log_path.open("a", encoding="utf-8") as f:
                 f.write(json.dumps(record) + "\n")
         except Exception as e:
-            logger.error(f"Failed to write to failure log: {e}")
+            logger.error("Failed to write to failure log: %s", e)
 
 
 if __name__ == "__main__":
-    # For testing
     logging.basicConfig(level=logging.INFO)
-    # We need a catalogue; we'll create a mock one
     catalogue = {
         "CUSTOMERS": {
             "qualified_name": "[SalesDB].[dbo].[Customers]",
-            "database": "SALESDB",
-            "schema": "DBO",
+            "database": "SALESDB", "schema": "DBO",
             "columns": [{"name": "CUSTOMER_ID", "type": "INT", "nullable": False, "primary_key": True}],
             "source_file": "tables.sql"
         }
     }
-    # We don't have API keys in this test environment, so we'll only run step 1
     agent = SPAgent(
         sp_dir="data/sp",
         catalogue=catalogue,
         anthropic_api_key=None,
         gemini_api_key=None,
+        nvidia_api_key=None,
+        per_sp_overrides=load_sp_overrides(Path("data/sp_overrides.json")),
     )
     results = agent.run()
-    print(f"Results: {results}")
+    print("Results: %s" % results)

@@ -6,10 +6,19 @@ import os
 from pathlib import Path
 from typing import Dict, Any, Optional
 
+# Load .env file early
+try:
+    from dotenv import load_dotenv
+    _env_path = Path(__file__).parent.parent / '.env'
+    if _env_path.exists():
+        load_dotenv(_env_path)
+except ImportError:
+    pass  # dotenv is optional; env vars may be set externally
+
 from flask import Flask, render_template, request, jsonify
 
 from agents.schema_agent import SchemaAgent
-from agents.sp_agent import SPAgent
+from agents.sp_agent import SPAgent, load_sp_overrides
 from agents.lineage_agent import LineageAgent
 
 logger = logging.getLogger(__name__)
@@ -20,12 +29,26 @@ app = Flask(__name__)
 BASE_DIR = Path(__file__).parent
 SP_DIR = BASE_DIR / 'data' / 'sp'
 SCHEMA_DIR = BASE_DIR / 'data' / 'schemas'
+OVERRIDES_FILE = BASE_DIR / 'data' / 'sp_overrides.json'
 CACHE_FILE = BASE_DIR / 'lineage_cache.json'
 FAILURE_LOG = BASE_DIR / 'logs' / 'failed_extractions.jsonl'
 
 # Global variable to hold the lineage agent
 _lineage_agent: Optional[LineageAgent] = None
 _catalogue: Optional[Dict[str, Any]] = None
+
+# Extra overrides injected from the CLI (via --force-method). These take
+# precedence over values in sp_overrides.json.
+_cli_overrides: Dict[str, str] = {}
+
+
+def set_cli_overrides(overrides: Dict[str, str]) -> None:
+    """
+    Store command-line override values so that run_agents() can merge them
+    with the file-based overrides. Called once at startup from run.py.
+    """
+    global _cli_overrides
+    _cli_overrides = overrides
 
 
 def run_agents(force: bool = False) -> Optional[LineageAgent]:
@@ -66,6 +89,14 @@ def run_agents(force: bool = False) -> Optional[LineageAgent]:
     catalogue = schema_agent.run()
     _catalogue = catalogue
 
+    # Load per-SP overrides: file-based, then CLI overrides on top
+    overrides = load_sp_overrides(OVERRIDES_FILE)
+    if _cli_overrides:
+        overrides.update(_cli_overrides)
+        logger.info("Merged %d CLI override(s) into per-SP overrides", len(_cli_overrides))
+    if overrides:
+        logger.info("Loaded %d per-SP override(s) from %s + CLI", len(overrides), OVERRIDES_FILE)
+
     # Step 2: Run SPAgent
     logger.info("Running SPAgent")
     sp_agent = SPAgent(
@@ -73,6 +104,8 @@ def run_agents(force: bool = False) -> Optional[LineageAgent]:
         catalogue=catalogue,
         anthropic_api_key=os.environ.get("ANTHROPIC_API_KEY"),
         gemini_api_key=os.environ.get("GEMINI_API_KEY"),
+        nvidia_api_key=os.environ.get("NVIDIA_API_KEY"),
+        per_sp_overrides=overrides,
     )
     sp_results = sp_agent.run()
 
@@ -203,7 +236,7 @@ def lineage(table):
             subgraph = agent.get_lineage(table, depth)
 
         if subgraph.number_of_nodes() == 0:
-            return jsonify({"error": f"Table '{table}' not found"}), 404
+            return jsonify({"error": "Table '%s' not found" % table}), 404
 
         data = agent.to_serialisable(subgraph)
         return jsonify(data)
@@ -234,14 +267,13 @@ def stats():
     """Return statistics about the lineage graph."""
     agent = _get_agent()
     if agent is None:
-        # Return empty stats
         return jsonify({
             "total_tables": 0,
             "total_edges": 0,
             "source_tables": 0,
             "target_tables": 0,
             "procedures": 0,
-            "by_method": {"regex": 0, "claude": 0, "gemini": 0, "failed": 0}
+            "by_method": {"regex": 0, "claude": 0, "gemini": 0, "nvidia": 0, "failed": 0}
         })
     stats = agent.statistics()
     return jsonify(stats)
@@ -289,6 +321,4 @@ def internal_error(error):
 
 
 if __name__ == '__main__':
-    # This is used when running the app directly (for development)
-    # For production, use run.py instead
     app.run(debug=False, threaded=True, port=5000)
