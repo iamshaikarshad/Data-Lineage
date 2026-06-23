@@ -81,6 +81,7 @@ header { display:flex; align-items:center; padding:8px 16px; background:var(--su
 .pill-regex { background:rgba(34,197,94,.15); color:#22c55e; }
 .pill-claude { background:rgba(79,142,247,.15); color:#4f8ef7; }
 .pill-gemini { background:rgba(167,139,250,.15); color:#a78bfa; }
+.pill-nvidia { background:rgba(118,185,0,.15); color:#76b900; }
 .pill-direct_copy { background:rgba(34,197,94,.15); color:#22c55e; }
 .pill-aggregation { background:rgba(245,158,11,.15); color:#f59e0b; }
 .pill-calculation { background:rgba(167,139,250,.15); color:#a78bfa; }
@@ -133,15 +134,33 @@ svg { width:100%; height:100%; display:block; }
 .legend-dot { width:10px; height:10px; border-radius:3px; }
 
 /* Node styles */
-.node-rect { rx:6; ry:6; stroke-width:1; cursor:pointer; }
-.node-label { font-family:monospace; font-size:12px; fill:#fff; pointer-events:none; text-anchor:middle; dominant-baseline:central; }
-.node-schema { font-size:9px; fill:var(--muted); pointer-events:none; text-anchor:middle; }
-.node-badge { font-size:9px; fill:rgba(255,255,255,.6); pointer-events:none; text-anchor:end; }
-.node-expand { font-size:14px; fill:var(--muted); cursor:pointer; }
+.node-rect { rx:6; ry:6; stroke-width:2; cursor:pointer; transition:opacity .25s, stroke-width .25s; }
+.node-label { font-family:monospace; font-size:12px; fill:#fff; pointer-events:none; text-anchor:middle; dominant-baseline:central; transition:opacity .25s; }
+.node-schema { font-size:9px; fill:var(--muted); pointer-events:none; text-anchor:middle; transition:opacity .25s; }
+.node-badge { font-size:9px; fill:rgba(255,255,255,.6); pointer-events:none; text-anchor:end; transition:opacity .25s; }
+.node-expand { font-size:14px; fill:var(--muted); cursor:pointer; transition:opacity .25s; }
 .node-expand:hover { fill:var(--warn); }
-.edge-path { fill:none; stroke:var(--accent); stroke-width:1.5; opacity:.6; }
-.edge-path.highlighted { stroke:var(--warn); stroke-width:2.5; opacity:1; }
-.edge-path-bg { fill:none; stroke:transparent; stroke-width:12; }
+
+/* Edge styles */
+.edge-path { fill:none; stroke:var(--accent); stroke-width:1.5; opacity:.5; transition:opacity .25s, stroke .25s, stroke-width .25s; }
+.edge-path-bg { fill:none; stroke:transparent; stroke-width:14; cursor:pointer; }
+
+/* Dimming: when a node is selected, unrelated nodes/edges fade */
+.root.dimmed .node-rect { opacity:.15; stroke-width:1; }
+.root.dimmed .node-label { opacity:.15; }
+.root.dimmed .node-schema { opacity:.1; }
+.root.dimmed .node-badge { opacity:.1; }
+.root.dimmed .node-expand { opacity:.1; }
+.root.dimmed .edge-path { opacity:.08; stroke-width:1; }
+.root.dimmed .edge-path-bg { stroke-width:0; }
+/* Keep selected and connected items at full opacity */
+.root.dimmed .node-rect.focused { opacity:1; stroke-width:3; }
+.root.dimmed .node-label.focused { opacity:1; }
+.root.dimmed .node-schema.focused { opacity:1; }
+.root.dimmed .node-badge.focused { opacity:1; }
+.root.dimmed .node-expand.focused { opacity:1; }
+.root.dimmed .edge-path.focused { opacity:1; stroke:var(--warn); stroke-width:2.5; }
+.root.dimmed .edge-path-bg.focused { stroke-width:14; }
 
 /* Overlay */
 .overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(15,17,23,.85); display:flex; align-items:center; justify-content:center; z-index:30; }
@@ -240,6 +259,8 @@ svg { width:100%; height:100%; display:block; }
       <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div>Both</div>
       <div class="legend-item"><div class="legend-dot" style="background:var(--danger)"></div>Target</div>
       <div class="legend-item"><div class="legend-dot" style="background:var(--warn)"></div>Selected</div>
+      <div style="height:4px"></div>
+      <div class="legend-item" style="font-size:10px;color:var(--muted)">Hover/click a node to focus</div>
     </div>
   </div>
 </div>
@@ -512,31 +533,59 @@ function renderGraph(graphData, focusTable) {
   if (simulation) simulation.stop();
   const root = d3.select('#graphSvg g.root');
   root.selectAll('*').remove();
+  root.classed('dimmed', false);
 
   if (!graphData || !graphData.nodes || !graphData.nodes.length) return;
 
   const nodes = graphData.nodes.map(n => ({ ...n }));
   const edges = graphData.edges.map(e => ({ ...e, source: e.source, target: e.target }));
 
-  // Arrow marker
+  // Build a set of node IDs for quick lookup
+  const nodeIdSet = new Set(nodes.map(n => n.id));
+
+  // ── Arrow markers: default + highlighted ──
   const defs = root.append('defs');
-  defs.append('marker').attr('id', 'arrowhead').attr('viewBox', '0 -5 10 10').attr('refX', 28).attr('refY', 0).attr('markerWidth', 6).attr('markerHeight', 6).attr('orient', 'auto').append('path').attr('d', 'M0,-5L10,0L0,5').attr('fill', 'var(--accent)');
+  defs.append('marker')
+    .attr('id', 'arrowhead')
+    .attr('viewBox', '0 -5 10 10')
+    .attr('refX', 30).attr('refY', 0)
+    .attr('markerWidth', 7).attr('markerHeight', 7)
+    .attr('orient', 'auto')
+    .append('path').attr('d', 'M0,-4L10,0L0,4').attr('fill', 'var(--accent)').attr('opacity', '.6');
+  defs.append('marker')
+    .attr('id', 'arrowhead-hl')
+    .attr('viewBox', '0 -5 10 10')
+    .attr('refX', 30).attr('refY', 0)
+    .attr('markerWidth', 8).attr('markerHeight', 8)
+    .attr('orient', 'auto')
+    .append('path').attr('d', 'M0,-4L10,0L0,4').attr('fill', 'var(--warn)');
 
-  // Edges
+  // ── Edges ──
   const edgeGroup = root.append('g').attr('class', 'edges');
-  edgeGroup.selectAll('.edge-path-bg').data(edges).join('path').attr('class', 'edge-path-bg').attr('data-source', d => d.source).attr('data-target', d => d.target);
-  const edgePaths = edgeGroup.selectAll('.edge-path').data(edges).join('path').attr('class', d => {
-    const hl = (selectedTable && (d.source === selectedTable || d.target === selectedTable)) ? ' highlighted' : '';
-    return 'edge-path' + hl;
-  }).attr('data-source', d => d.source).attr('data-target', d => d.target).attr('marker-end', 'url(#arrowhead)');
+  edgeGroup.selectAll('.edge-path-bg')
+    .data(edges).join('path')
+    .attr('class', 'edge-path-bg')
+    .attr('data-source', d => d.source)
+    .attr('data-target', d => d.target);
 
-  // Nodes
+  const edgePaths = edgeGroup.selectAll('.edge-path')
+    .data(edges).join('path')
+    .attr('class', 'edge-path')
+    .attr('data-source', d => d.source)
+    .attr('data-target', d => d.target)
+    .attr('marker-end', 'url(#arrowhead)');
+
+  // ── Nodes ──
   const nodeGroup = root.append('g').attr('class', 'nodes');
-  const nodeGs = nodeGroup.selectAll('g').data(nodes).join('g').attr('class', 'node').call(d3.drag()
-    .on('start', (event, d) => { if (!event.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
-    .on('drag', (event, d) => { d.fx = event.x; d.fy = event.y; })
-    .on('end', (event, d) => { if (!event.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; })
-  );
+  const nodeGs = nodeGroup.selectAll('g')
+    .data(nodes).join('g')
+    .attr('class', 'node')
+    .attr('data-id', d => d.id)
+    .call(d3.drag()
+      .on('start', (event, d) => { if (!event.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+      .on('drag', (event, d) => { d.fx = event.x; d.fy = event.y; })
+      .on('end', (event, d) => { if (!event.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; })
+    );
 
   nodeGs.each(function(d) {
     const labelLen = d.id.length;
@@ -545,10 +594,17 @@ function renderGraph(graphData, focusTable) {
     d._w = w; d._h = h;
 
     const g = d3.select(this);
-    g.append('rect').attr('class', 'node-rect').attr('width', w).attr('height', h).attr('x', -w / 2).attr('y', -h / 2).attr('fill', 'var(--surface2)').attr('stroke', nodeColor(d.id)).attr('stroke-width', 2);
+    g.append('rect').attr('class', 'node-rect')
+      .attr('width', w).attr('height', h)
+      .attr('x', -w / 2).attr('y', -h / 2)
+      .attr('fill', 'var(--surface2)')
+      .attr('stroke', nodeColor(d.id));
 
     // Left color strip
-    g.append('rect').attr('width', 4).attr('height', h).attr('x', -w / 2).attr('y', -h / 2).attr('fill', nodeColor(d.id)).attr('rx', 2);
+    g.append('rect')
+      .attr('width', 4).attr('height', h)
+      .attr('x', -w / 2).attr('y', -h / 2)
+      .attr('fill', nodeColor(d.id)).attr('rx', 2);
 
     // Label
     g.append('text').attr('class', 'node-label').attr('y', -2).text(d.id);
@@ -558,17 +614,20 @@ function renderGraph(graphData, focusTable) {
 
     // Column count badge
     const cols = d.columns ? d.columns.length : 0;
-    if (cols > 0) g.append('text').attr('class', 'node-badge').attr('x', w / 2 - 6).attr('y', -h / 2 + 12).text(cols + ' cols');
+    if (cols > 0) g.append('text').attr('class', 'node-badge')
+      .attr('x', w / 2 - 6).attr('y', -h / 2 + 12).text(cols + ' cols');
 
     // Expand icon
-    g.append('text').attr('class', 'node-expand').attr('x', w / 2 - 16).attr('y', h / 2 - 8).text('⊞');
+    g.append('text').attr('class', 'node-expand')
+      .attr('x', w / 2 - 16).attr('y', h / 2 - 8).text('⊞');
   });
 
-  // Click handler
+  // ── Click handler ──
   nodeGs.on('click', (event, d) => {
     event.stopPropagation();
     if (expandedTable === d.id && columnPanelOpen) {
       closeColumnPanel();
+      clearDimming();
     } else {
       selectedTable = d.id;
       highlightNode(d.id);
@@ -577,27 +636,29 @@ function renderGraph(graphData, focusTable) {
     }
   });
 
-  // Simulation
+  // ── Hover handler (preview dimming) ──
+  nodeGs.on('mouseenter', (event, d) => {
+    if (selectedTable) return; // don't override click-based dimming
+    applyDimming(d.id);
+  }).on('mouseleave', (event, d) => {
+    if (selectedTable) return;
+    clearDimming();
+  });
+
+  // ── Force simulation ──
   simulation = d3.forceSimulation(nodes)
-    .force('link', d3.forceLink(edges).id(d => d.id || d.source).distance(180).strength(0.6))
-    .force('charge', d3.forceManyBody().strength(-500))
+    .force('link', d3.forceLink(edges).id(d => d.id || d.source)
+      .distance(250).strength(0.4))
+    .force('charge', d3.forceManyBody().strength(-800))
     .force('center', d3.forceCenter())
-    .force('x', d3.forceX().strength(0.04))
-    .force('y', d3.forceY().strength(0.04))
-    .force('collide', d3.forceCollide().radius(90))
+    .force('x', d3.forceX().strength(0.05))
+    .force('y', d3.forceY().strength(0.05))
+    .force('collide', d3.forceCollide().radius(110))
     .on('tick', () => {
-      edgePaths.attr('d', d => {
-        const dx = d.target.x - d.source.x;
-        const dy = d.target.y - d.source.y;
-        const dr = Math.sqrt(dx * dx + dy * dy) * 0.5;
-        return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
-      });
-      edgeGroup.selectAll('.edge-path-bg').attr('d', d => {
-        const dx = d.target.x - d.source.x;
-        const dy = d.target.y - d.source.y;
-        const dr = Math.sqrt(dx * dx + dy * dy) * 0.5;
-        return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
-      });
+      // Straight-line edge paths: M source L target
+      const line = d => `M${d.source.x},${d.source.y}L${d.target.x},${d.target.y}`;
+      edgePaths.attr('d', line);
+      edgeGroup.selectAll('.edge-path-bg').attr('d', line);
       nodeGs.attr('transform', d => `translate(${d.x},${d.y})`);
     });
 
@@ -606,11 +667,62 @@ function renderGraph(graphData, focusTable) {
 }
 
 function highlightNode(tableId) {
-  d3.selectAll('.node-rect').attr('stroke', d => nodeColor(d.id)).attr('stroke-width', 2);
-  d3.selectAll('.edge-path').attr('class', d => {
-    const hl = (selectedTable && (d.source.id === selectedTable || d.target.id === selectedTable || d.source === selectedTable || d.target === selectedTable)) ? ' highlighted' : '';
-    return 'edge-path' + hl;
+  if (!tableId) {
+    clearDimming();
+    return;
+  }
+  applyDimming(tableId);
+}
+
+function applyDimming(tableId) {
+  if (!currentGraph || !currentGraph.nodes) return;
+  const root = d3.select('#graphSvg g.root');
+
+  // Find all nodes connected to this one
+  const connectedIds = new Set([tableId]);
+  currentGraph.edges.forEach(e => {
+    const src = e.source.id || e.source;
+    const tgt = e.target.id || e.target;
+    if (src === tableId) connectedIds.add(tgt);
+    if (tgt === tableId) connectedIds.add(src);
   });
+
+  // Activate dimming on the root group
+  root.classed('dimmed', true);
+
+  // Mark focused nodes
+  d3.selectAll('.node').each(function(d) {
+    const isFocused = connectedIds.has(d.id);
+    d3.select(this).selectAll('.node-rect').classed('focused', isFocused);
+    d3.select(this).selectAll('.node-label').classed('focused', isFocused);
+    d3.select(this).selectAll('.node-schema').classed('focused', isFocused);
+    d3.select(this).selectAll('.node-badge').classed('focused', isFocused);
+    d3.select(this).selectAll('.node-expand').classed('focused', isFocused);
+  });
+
+  // Mark focused edges + swap arrowhead
+  d3.selectAll('.edge-path').each(function(d) {
+    const src = d.source.id || d.source;
+    const tgt = d.target.id || d.target;
+    const isFocused = (src === tableId || tgt === tableId);
+    d3.select(this).classed('focused', isFocused)
+      .attr('marker-end', isFocused ? 'url(#arrowhead-hl)' : 'url(#arrowhead)');
+  });
+  d3.selectAll('.edge-path-bg').classed('focused', d => {
+    const src = d.source.id || d.source;
+    const tgt = d.target.id || d.target;
+    return (src === tableId || tgt === tableId);
+  });
+}
+
+function clearDimming() {
+  const root = d3.select('#graphSvg g.root');
+  root.classed('dimmed', false);
+  d3.selectAll('.node-rect, .node-label, .node-schema, .node-badge, .node-expand')
+    .classed('focused', false);
+  d3.selectAll('.edge-path').classed('focused', false)
+    .attr('marker-end', 'url(#arrowhead)');
+  d3.selectAll('.edge-path-bg').classed('focused', false);
 }
 
 // ── Column panel ──
@@ -699,7 +811,7 @@ function openFailuresModal() {
   const list = document.getElementById('failuresList');
   let html = '';
   failuresList.forEach(f => {
-    html += `<div class="failure-card"><div class="failure-file">${f.source_file}</div><div class="failure-reason">${f.failure_reason}</div><details class="failure-steps"><summary>Step details</summary><div style="margin-top:6px">Step 1: ${f.step1_error}<br>Step 2: ${f.step2_error}<br>Step 3: ${f.step3_error}</div></details>`;
+    html += `<div class="failure-card"><div class="failure-file">${f.source_file}</div><div class="failure-reason">${f.failure_reason}</div><details class="failure-steps"><summary>Step details</summary><div style="margin-top:6px">Step 1 (regex): ${f.step1_error}<br>Step 2 (claude): ${f.step2_error}<br>Step 3 (gemini): ${f.step3_error}<br>Step 4 (nvidia): ${f.step4_error || 'Skipped or unknown'}</div></details>`;
     if (f.sp_snippet) html += `<div class="failure-snippet">${f.sp_snippet}</div>`;
     html += '</div>';
   });
@@ -765,6 +877,7 @@ function clearSearch() {
   selectedTable = null;
   expandedTable = null;
   closeColumnPanel();
+  clearDimming();
   if (currentGraph) renderGraph(currentGraph, null);
 }
 
@@ -798,7 +911,7 @@ function bindEvents() {
   d3.select('#graphSvg').on('click', () => {
     selectedTable = null;
     closeColumnPanel();
-    if (currentGraph) highlightNode(null);
+    clearDimming();
   });
 }
 
