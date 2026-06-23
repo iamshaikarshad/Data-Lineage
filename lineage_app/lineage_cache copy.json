@@ -2,7 +2,7 @@
   "sp_results": [
     {
       "procedure_name": "Vault.LoadPatient",
-      "target_table": "vault.Patient",
+      "target_table": "Vault.Patient",
       "source_tables": [
         "raw.tblPatient",
         "raw.tblCNDocument",
@@ -412,14 +412,14 @@
         {
           "target_column": "Stated_Gender_Identity_ID",
           "source_table": "raw.tblPatient",
-          "source_column": "[Stated_Gender_Identity_ID",
+          "source_column": "Stated_Gender_Identity_ID",
           "transformation_type": "direct_copy",
           "transformation_logic": "Direct copy from raw.tblPatient"
         },
         {
           "target_column": "Gender_Identity_Same_At_Birth_ID",
           "source_table": "raw.tblPatient",
-          "source_column": "[Gender_Identity_Same_At_Birth_ID",
+          "source_column": "Gender_Identity_Same_At_Birth_ID",
           "transformation_type": "direct_copy",
           "transformation_logic": "Direct copy from raw.tblPatient"
         },
@@ -841,7 +841,7 @@
       ],
       "column_mappings": [
         {
-          "target_column": "[Backup Date",
+          "target_column": "Backup Date",
           "source_table": null,
           "source_column": "Getdate()",
           "transformation_type": "calculation",
@@ -869,112 +869,112 @@
           "transformation_logic": "Direct copy from Patient"
         },
         {
-          "target_column": "[Trust Referral Received Date",
+          "target_column": "Trust Referral Received Date",
           "source_table": "Vault.TrustAccessWaitingTimes",
           "source_column": "ta.RTT Start Date",
           "transformation_type": "direct_copy",
           "transformation_logic": "Direct copy from TrustAccessWaitingTimes"
         },
         {
-          "target_column": "[Trust Referral Priority",
+          "target_column": "Trust Referral Priority",
           "source_table": "Vault.TrustAccessWaitingTimes",
           "source_column": "ta.Referral Priority",
           "transformation_type": "direct_copy",
           "transformation_logic": "Direct copy from TrustAccessWaitingTimes"
         },
         {
-          "target_column": "[Trust Access Wait flag",
+          "target_column": "Trust Access Wait flag",
           "source_table": "Vault.TrustAccessWaitingTimes",
           "source_column": "ta.Waiting For First Contact",
           "transformation_type": "direct_copy",
           "transformation_logic": "Direct copy from TrustAccessWaitingTimes"
         },
         {
-          "target_column": "[Trust Access Wait Weeks",
+          "target_column": "Trust Access Wait Weeks",
           "source_table": "Vault.TrustAccessWaitingTimes",
           "source_column": "ta.Weeks Waited For First Contact",
           "transformation_type": "direct_copy",
           "transformation_logic": "Direct copy from TrustAccessWaitingTimes"
         },
         {
-          "target_column": "[Team",
+          "target_column": "Team",
           "source_table": "Vault.DimSD",
           "source_column": "wtsd.Team Name",
           "transformation_type": "direct_copy",
           "transformation_logic": "Direct copy from DimSD (aliased as wtsd)"
         },
         {
-          "target_column": "[Team Name",
+          "target_column": "Team Name",
           "source_table": "Vault.DimSD",
           "source_column": "epsd.Team Name",
           "transformation_type": "direct_copy",
           "transformation_logic": "Direct copy from DimSD (aliased as epsd)"
         },
         {
-          "target_column": "[Directorate",
+          "target_column": "Directorate",
           "source_table": "Vault.DimSD",
           "source_column": "wtsd.Directorate",
           "transformation_type": "direct_copy",
           "transformation_logic": "Direct copy from DimSD (aliased as wtsd)"
         },
         {
-          "target_column": "[Division",
+          "target_column": "Division",
           "source_table": "Vault.DimSD",
           "source_column": "wtsd.Division",
           "transformation_type": "direct_copy",
           "transformation_logic": "Direct copy from DimSD (aliased as wtsd)"
         },
         {
-          "target_column": "[Sub Service Line",
+          "target_column": "Sub Service Line",
           "source_table": "Vault.DimSD",
           "source_column": "wtsd.Sub Service Line",
           "transformation_type": "direct_copy",
           "transformation_logic": "Direct copy from DimSD (aliased as wtsd)"
         },
         {
-          "target_column": "[Episode Priority",
+          "target_column": "Episode Priority",
           "source_table": "Dim.Priority",
           "source_column": "pri.PriorityDescription",
           "transformation_type": "direct_copy",
           "transformation_logic": "Direct copy from Dim.Priority"
         },
         {
-          "target_column": "[Latest Team Flag",
+          "target_column": "Latest Team Flag",
           "source_table": "Vault.TrustAccessWaitingTimes, Vault.DimSD",
           "source_column": "case when ta.Latest Active Episode Team = wtsd.Team Name then 'YES' else 'NO' end",
           "transformation_type": "conditional",
           "transformation_logic": "Conditional check if latest active episode team matches team name from wtsd"
         },
         {
-          "target_column": "[Episode Referral Received Date",
+          "target_column": "Episode Referral Received Date",
           "source_table": "Vault.WaitingTimes",
           "source_column": "wt.Episode_Referral_Received_Date",
           "transformation_type": "direct_copy",
           "transformation_logic": "Direct copy from WaitingTimes"
         },
         {
-          "target_column": "[Team Wait Flag",
+          "target_column": "Team Wait Flag",
           "source_table": "Vault.WaitingTimes",
           "source_column": "case when wt.First_Attended_Date is null and Episode_Referral_Rejection_Date is null then 'YES' ELSE 'NO' END",
           "transformation_type": "conditional",
           "transformation_logic": "Conditional check if First Attended Date and Episode Referral Rejection Date are null"
         },
         {
-          "target_column": "[Team Wait Weeks",
+          "target_column": "Team Wait Weeks",
           "source_table": "Vault.WaitingTimes",
           "source_column": "floor(datediff(dd,wt.Episode_Referral_Received_Date,getDate()) / 7)",
           "transformation_type": "calculation",
           "transformation_logic": "Calculates full weeks between Episode Referral Received Date and current date"
         },
         {
-          "target_column": "[Trust Referral ID",
+          "target_column": "Trust Referral ID",
           "source_table": "Vault.TrustAccessWaitingTimes",
           "source_column": "ta.ReferralId",
           "transformation_type": "direct_copy",
           "transformation_logic": "Direct copy from TrustAccessWaitingTimes"
         },
         {
-          "target_column": "[Episode ID",
+          "target_column": "Episode ID",
           "source_table": "Vault.WaitingTimes",
           "source_column": "wt.Episode_Id",
           "transformation_type": "direct_copy",
@@ -988,28 +988,28 @@
           "transformation_logic": "Sets to 'Deceased' if patient has a date of death"
         },
         {
-          "target_column": "[Trust 52+ wks",
+          "target_column": "Trust 52+ wks",
           "source_table": "Vault.TrustAccessWaitingTimes",
           "source_column": "case when ta.Weeks Waited For First Contact >= 52 then 1 else 0 end",
           "transformation_type": "conditional",
           "transformation_logic": "Flag if Trust Access Wait Weeks is 52 or more"
         },
         {
-          "target_column": "[Trust 26+ wks",
+          "target_column": "Trust 26+ wks",
           "source_table": "Vault.TrustAccessWaitingTimes",
           "source_column": "case when ta.Weeks Waited For First Contact >= 26 then 1 else 0 end",
           "transformation_type": "conditional",
           "transformation_logic": "Flag if Trust Access Wait Weeks is 26 or more"
         },
         {
-          "target_column": "[Trust 10+ wks",
+          "target_column": "Trust 10+ wks",
           "source_table": "Vault.TrustAccessWaitingTimes",
           "source_column": "case when ta.Weeks Waited For First Contact >= 10 then 1 else 0 end",
           "transformation_type": "conditional",
           "transformation_logic": "Flag if Trust Access Wait Weeks is 10 or more"
         },
         {
-          "target_column": "[Trust 4+ wks",
+          "target_column": "Trust 4+ wks",
           "source_table": "Vault.TrustAccessWaitingTimes",
           "source_column": "case when ta.Weeks Waited For First Contact >= 4 then 1 else 0 end",
           "transformation_type": "conditional",

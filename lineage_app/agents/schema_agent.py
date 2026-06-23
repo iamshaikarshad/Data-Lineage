@@ -3,7 +3,7 @@
 import logging
 import re
 from pathlib import Path
-from typing import Dict, List, Any, Union
+from typing import Dict, List, Any, Union, Tuple, Set, Optional
 
 from . import normalise_table
 
@@ -58,12 +58,10 @@ class SchemaAgent:
 
         # Split by CREATE TABLE boundary (lookahead to keep the delimiter)
         statements = re.split(r'(?=CREATE\s+TABLE\b)', content, flags=re.IGNORECASE)
-        # The first element might be empty or text before the first CREATE TABLE
         for stmt in statements:
             if not stmt.strip():
                 continue
             if not re.match(r'CREATE\s+TABLE\b', stmt, flags=re.IGNORECASE):
-                # Skip any non-CREATE TABLE chunks
                 continue
             self._parse_create_table(stmt, file_path.name)
 
@@ -75,136 +73,74 @@ class SchemaAgent:
             stmt: The CREATE TABLE statement string.
             source_file: The name of the file the statement came from.
         """
-        # Regex to capture database, schema, and table name
-        # Handles optional database and schema parts, each optionally surrounded by [] or ""
-        pattern = re.compile(
-            r'''CREATE\s+TABLE\s+
-            (?:\[?\"?(\w+)\"?\]?\.)?      # optional database (group 1)
-            (?:\[?\"?(\w+)\"?\]?\.)?      # optional schema (group 2)
-            \[?\"?(\w+)\"?\]?             # table name (group 3)
-            ''',
-            re.IGNORECASE | re.VERBOSE
+        # -- 1. Extract the table header (everything between CREATE TABLE and first '(') --
+        header_pattern = re.compile(
+            r'CREATE\s+TABLE\s+(.+?)\s*\(',
+            re.IGNORECASE | re.DOTALL
         )
-        match = pattern.search(stmt)
-        if not match:
-            logger.warning(f"Could not parse table name from statement: {stmt[:100]}...")
+        header_match = header_pattern.search(stmt)
+        if not header_match:
+            logger.warning(f"Could not parse table header from: {stmt[:100]}...")
             return
 
-        db_part, schema_part, table_part = match.groups()
+        header = header_match.group(1).strip()
+        # Handle optional IF NOT EXISTS / IF EXISTS
+        header = re.sub(r'^IF\s+(NOT\s+)?EXISTS\s+', '', header, flags=re.IGNORECASE)
+
+        # Parse dot-separated identifiers (handles brackets, quotes, spaces, special chars)
+        identifiers = self._parse_identifiers(header)
+        if not identifiers:
+            logger.warning(f"Could not parse identifiers from header: {header}")
+            return
+
+        # Assign database / schema / table based on number of parts
+        # 1 part  → table only
+        # 2 parts → schema.table
+        # 3+ parts → database.schema.table (take last 3)
+        if len(identifiers) == 1:
+            db_part, schema_part, table_part = None, None, identifiers[0]
+        elif len(identifiers) == 2:
+            db_part, schema_part, table_part = None, identifiers[0], identifiers[1]
+        else:
+            db_part, schema_part, table_part = identifiers[-3], identifiers[-2], identifiers[-1]
+
         table_name = normalise_table(table_part) if table_part else ""
         if not table_name:
             logger.warning(f"Empty table name after normalisation in: {stmt[:100]}...")
             return
 
-        # Build qualified name as it appears (original)
+        # Build qualified name preserving original case
         qualified_parts = [p for p in [db_part, schema_part, table_part] if p is not None]
         qualified_name = ".".join(qualified_parts)
 
-        # Normalise database and schema parts (if present) to uppercase, else empty string
+        # Normalise database and schema (uppercase) for catalogue fields
         database = normalise_table(db_part) if db_part else ""
         schema = normalise_table(schema_part) if schema_part else ""
 
-        # Find the column body by matching parentheses
-        # We look for the first '(' after CREATE TABLE and then find the matching ')'
-        # We assume the statement ends with a semicolon or the end of string.
-        # We'll find the start of the column list.
-        # We look for the first '(' that is after the table name.
-        # Since we have the match, we know the table name ends at match.end(3)
-        start_idx = stmt.find('(', match.end(3))
-        if start_idx == -1:
-            logger.warning(f"No opening parenthesis for columns in: {stmt[:100]}...")
+        # -- 2. Extract the column body (between first '(' and its matching ')') --
+        body_start = header_match.end()  # position right after the '('
+        body_end = self._find_matching_paren(stmt, body_start)
+        if body_end == -1:
+            logger.warning(f"Could not find matching ')' for column body in: {stmt[:100]}...")
             return
 
-        # Now find the matching closing parenthesis
-        depth = 0
-        in_string = False
-        string_char = None
-        escape = False
-        for i, ch in enumerate(stmt[start_idx:], start=start_idx):
-            if escape:
-                escape = False
-                continue
-            if ch == '\\':
-                escape = True
-                continue
-            if ch in ('\"', "'"):
-                if not in_string:
-                    in_string = True
-                    string_char = ch
-                elif string_char == ch:
-                    in_string = False
-                    string_char = None
-                continue
-            if in_string:
-                continue
-            if ch == '(':
-                depth += 1
-            elif ch == ')':
-                depth -= 1
-                if depth == 0:
-                    end_idx = i
-                    break
-        else:
-            logger.warning(f"Could not find matching closing parenthesis for columns in: {stmt[:100]}...")
-            return
+        column_body = stmt[body_start:body_end]
 
-        column_body = stmt[start_idx + 1:end_idx]
+        # -- 3. Parse columns and constraints --
+        columns, pk_columns = self._parse_columns_and_constraints(column_body)
 
-        # Now parse each line in the column body
-        lines = column_body.split('\n')
-        columns: List[Dict[str, Any]] = []
+        # -- 4. Mark PRIMARY KEY columns from constraint definitions --
+        # Use case-insensitive lookup since SQL identifiers are case-insensitive
+        col_lookup: Dict[str, Dict[str, Any]] = {}
+        for col in columns:
+            col_lookup[col["name"].lower()] = col
+        for pk_col_name in pk_columns:
+            col = col_lookup.get(pk_col_name.lower())
+            if col:
+                col["primary_key"] = True
+                col["nullable"] = False
 
-        for line in lines:
-            line = line.strip()
-            if not line:
-                continue
-            # Skip constraint lines
-            upper_line = line.upper()
-            if any(upper_line.startswith(keyword) for keyword in
-                   ('PRIMARY KEY', 'UNIQUE', 'FOREIGN KEY', 'INDEX', 'CONSTRAINT', 'CHECK')):
-                continue
-            # Skip comments
-            if upper_line.startswith('--'):
-                continue
-
-            # Parse column definition: [name] [type] [nullable?] [primary key?]
-            # We'll use a regex to capture the column name and data type
-            col_pattern = re.compile(
-                r'''\[?\"?(\w+)\"?\]?\s+   # column name
-                (\w+(?:\s*\(\s*[\d,\s]+\s*\))?)  # data type with optional parameters
-                ''',
-                re.VERBOSE
-            )
-            col_match = col_pattern.match(line)
-            if not col_match:
-                # If we can't parse, skip the line
-                logger.debug(f"Skipping unrecognised column line: {line}")
-                continue
-
-            col_name, data_type = col_match.groups()
-            col_name = normalise_table(col_name) if col_name else ""
-            data_type = data_type.upper().strip()
-
-            # Determine nullable and primary key
-            nullable = True
-            primary_key = False
-
-            # Check for NOT NULL
-            if re.search(r'\bNOT\s+NULL\b', line, re.IGNORECASE):
-                nullable = False
-            # Check for inline PRIMARY KEY
-            if re.search(r'\bPRIMARY\s+KEY\b', line, re.IGNORECASE):
-                primary_key = True
-                nullable = False  # Primary key implies NOT NULL
-
-            columns.append({
-                "name": col_name,
-                "type": data_type,
-                "nullable": nullable,
-                "primary_key": primary_key
-            })
-
-        # Store in catalogue
+        # -- 5. Store in catalogue --
         self.catalogue[table_name] = {
             "qualified_name": qualified_name,
             "database": database,
@@ -214,6 +150,338 @@ class SchemaAgent:
         }
 
         logger.debug(f"Parsed table: {table_name} from {source_file}")
+
+    # ------------------------------------------------------------------ #
+    #  Identifier parsing helpers                                         #
+    # ------------------------------------------------------------------ #
+
+    def _parse_identifiers(self, header: str) -> List[str]:
+        """
+        Parse a dot-separated identifier string like '[DB].[Schema].[Table Name]'
+        into a list of clean identifier strings, respecting bracket and quote
+        delimiters so that dots inside brackets are not treated as separators.
+
+        Args:
+            header: The raw header string (e.g. '[Vault].[DimSD]').
+
+        Returns:
+            A list of identifier strings with brackets/quotes removed.
+        """
+        identifiers: List[str] = []
+        current = ""
+        in_bracket = False
+        in_quote = False
+        quote_char: Optional[str] = None
+
+        for ch in header:
+            if in_bracket:
+                current += ch
+                if ch == ']':
+                    in_bracket = False
+            elif in_quote:
+                current += ch
+                if ch == quote_char:
+                    in_quote = False
+            else:
+                if ch == '[':
+                    in_bracket = True
+                    current += ch
+                elif ch in ('"', '`'):
+                    in_quote = True
+                    quote_char = ch
+                    current += ch
+                elif ch == '.':
+                    identifiers.append(self._clean_identifier(current))
+                    current = ""
+                else:
+                    current += ch
+
+        if current.strip():
+            identifiers.append(self._clean_identifier(current))
+
+        return identifiers
+
+    @staticmethod
+    def _clean_identifier(s: str) -> str:
+        """Remove surrounding brackets, double-quotes, or backticks from an identifier."""
+        s = s.strip()
+        if len(s) >= 2:
+            if s[0] == '[' and s[-1] == ']':
+                return s[1:-1]
+            if s[0] == '"' and s[-1] == '"':
+                return s[1:-1]
+            if s[0] == '`' and s[-1] == '`':
+                return s[1:-1]
+        return s
+
+    # ------------------------------------------------------------------ #
+    #  Parenthesis / depth tracking helpers                               #
+    # ------------------------------------------------------------------ #
+
+    @staticmethod
+    def _find_matching_paren(text: str, start: int) -> int:
+        """
+        Given that position ``start`` is just past an opening '(', find the
+        index of the matching closing ')' in ``text``.  String literals
+        (single and double quotes) are respected so that parentheses inside
+        strings are ignored.
+
+        Returns:
+            The index of the matching ')', or -1 if not found.
+        """
+        depth = 1
+        in_string = False
+        string_char: Optional[str] = None
+
+        for i in range(start, len(text)):
+            ch = text[i]
+            if in_string:
+                if ch == string_char:
+                    in_string = False
+                    string_char = None
+                continue
+            if ch in ("'", '"'):
+                in_string = True
+                string_char = ch
+                continue
+            if ch == '(':
+                depth += 1
+            elif ch == ')':
+                depth -= 1
+                if depth == 0:
+                    return i
+        return -1
+
+    @staticmethod
+    def _count_paren_depth_change(s: str) -> int:
+        """
+        Compute the net change in parenthesis depth for a single line,
+        ignoring parentheses inside string literals.
+
+        Returns:
+            Net depth change (positive = more opens, negative = more closes).
+        """
+        depth = 0
+        in_string = False
+        string_char: Optional[str] = None
+
+        for ch in s:
+            if in_string:
+                if ch == string_char:
+                    in_string = False
+                    string_char = None
+                continue
+            if ch in ("'", '"'):
+                in_string = True
+                string_char = ch
+                continue
+            if ch == '(':
+                depth += 1
+            elif ch == ')':
+                depth -= 1
+        return depth
+
+    # ------------------------------------------------------------------ #
+    #  Column / constraint parsing                                        #
+    # ------------------------------------------------------------------ #
+
+    def _parse_columns_and_constraints(
+        self, column_body: str
+    ) -> Tuple[List[Dict[str, Any]], Set[str]]:
+        """
+        Separate the column body into column-definition lines and
+        constraint lines, then parse each.
+
+        Uses a depth tracker so that lines inside a constraint's
+        parentheses (e.g. ``[PrioritySK] ASC`` inside a PRIMARY KEY block)
+        are NOT mistaken for column definitions.
+
+        Returns:
+            A tuple of (list of column dicts, set of PK column names).
+        """
+        lines = column_body.split('\n')
+
+        column_lines: List[str] = []
+        constraint_lines: List[str] = []
+        depth = 0
+        in_constraint = False
+
+        constraint_keywords = (
+            'CONSTRAINT', 'PRIMARY KEY', 'UNIQUE', 'FOREIGN KEY',
+            'CHECK', 'INDEX', 'KEY',
+        )
+
+        for line in lines:
+            stripped = line.strip()
+            if not stripped:
+                continue
+            # Skip comment lines
+            if stripped.startswith('--'):
+                continue
+
+            depth_change = self._count_paren_depth_change(stripped)
+            upper = stripped.upper()
+
+            # Detect start of a constraint block (only at depth 0)
+            is_constraint_start = any(
+                upper.startswith(kw) for kw in constraint_keywords
+            )
+            if is_constraint_start and depth == 0:
+                in_constraint = True
+
+            if in_constraint:
+                constraint_lines.append(stripped)
+            elif depth == 0:
+                # Skip stray WITH / ON / closing-paren lines
+                if (not upper.startswith('WITH')
+                        and not upper.startswith('ON')
+                        and not stripped.startswith(')')):
+                    column_lines.append(stripped)
+
+            depth += depth_change
+            if depth <= 0:
+                depth = 0
+                in_constraint = False
+
+        # Parse individual column definitions
+        columns: List[Dict[str, Any]] = []
+        for line in column_lines:
+            col = self._parse_column_line(line)
+            if col:
+                columns.append(col)
+
+        # Extract PRIMARY KEY column names from constraint text
+        pk_columns = self._extract_pk_columns(constraint_lines)
+
+        return columns, pk_columns
+
+    def _parse_column_line(self, line: str) -> Optional[Dict[str, Any]]:
+        """
+        Parse a single column-definition line such as::
+
+            [Team Name] [varchar](255) NOT NULL,
+            [PrioritySK] [smallint] IDENTITY(-1,1) NOT NULL,
+            [TrustID] [nvarchar](max) NULL,
+            [Age] [numeric](18, 0) NULL,
+
+        Returns:
+            A dict with keys name, type, nullable, primary_key — or None
+            if the line cannot be parsed as a column definition.
+        """
+        # Remove trailing comma
+        line = line.rstrip(',').strip()
+        if not line:
+            return None
+
+        # Column name: bracketed [..], quoted "..", or bare word
+        # Type name:   optional brackets, bare word
+        # Type params: optional (..)  — digits, commas, 'max', spaces
+        col_pattern = re.compile(
+            r'''
+            ^\s*
+            (?:\[([^\]]+)\]|"([^"]+)"|(\w+))   # column name  (groups 1/2/3)
+            \s+
+            \[?(\w+)\]?                         # type name    (group 4)
+            (?:\s*\(\s*([^)]*?)\s*\))?          # type params  (group 5)
+            ''',
+            re.VERBOSE
+        )
+
+        col_match = col_pattern.match(line)
+        if not col_match:
+            logger.debug(f"Skipping unrecognised column line: {line}")
+            return None
+
+        # Extract column name from whichever alternative matched
+        col_name = (col_match.group(1)
+                    or col_match.group(2)
+                    or col_match.group(3)
+                    or "")
+        type_base = col_match.group(4) or ""
+        type_params = col_match.group(5)  # may be None
+
+        # Skip computed columns (AS …)
+        if type_base.upper() == 'AS':
+            logger.debug(f"Skipping computed column: {line}")
+            return None
+
+        # Build the data-type string, preserving original case
+        if type_params is not None:
+            data_type = f"{type_base}({type_params})"
+        else:
+            data_type = type_base
+
+        # Determine nullability and inline PRIMARY KEY
+        nullable = True
+        primary_key = False
+
+        if re.search(r'\bNOT\s+NULL\b', line, re.IGNORECASE):
+            nullable = False
+        if re.search(r'\bPRIMARY\s+KEY\b', line, re.IGNORECASE):
+            primary_key = True
+            nullable = False
+
+        return {
+            "name": col_name,
+            "type": data_type,
+            "nullable": nullable,
+            "primary_key": primary_key,
+        }
+
+    @staticmethod
+    def _extract_pk_columns(constraint_lines: List[str]) -> Set[str]:
+        """
+        Given the list of constraint lines collected from the column body,
+        find every PRIMARY KEY constraint and extract the column names
+        referenced in it.
+
+        Handles both single-line and multi-line constraint definitions::
+
+            CONSTRAINT [PK] PRIMARY KEY CLUSTERED
+            (
+                [Col1] ASC,
+                [Col2] ASC
+            )WITH (...) ON [PRIMARY]
+
+        Returns:
+            A set of column names (original case, brackets removed).
+        """
+        if not constraint_lines:
+            return set()
+
+        constraint_text = ' '.join(constraint_lines)
+        pk_columns: Set[str] = set()
+
+        # Match  PRIMARY KEY [CLUSTERED|NONCLUSTERED] ( col-list )
+        # Non-greedy .*? ensures we stop at the first ')' (the column-list
+        # closing paren), not the WITH(...) paren.
+        pk_matches = re.finditer(
+            r'PRIMARY\s+KEY\s+(?:CLUSTERED\s+|NONCLUSTERED\s+)?\(\s*(.*?)\s*\)',
+            constraint_text,
+            re.IGNORECASE | re.DOTALL,
+        )
+
+        for m in pk_matches:
+            col_list = m.group(1)
+            # Each entry may be: [ColName] ASC,  "ColName" DESC,  ColName, etc.
+            for col_ref in col_list.split(','):
+                col_ref = col_ref.strip()
+                # Strip trailing ASC / DESC
+                col_ref = re.sub(
+                    r'\s+(ASC|DESC)\s*$', '', col_ref, flags=re.IGNORECASE
+                ).strip()
+                # Strip brackets / quotes
+                if len(col_ref) >= 2:
+                    if col_ref[0] == '[' and col_ref[-1] == ']':
+                        col_ref = col_ref[1:-1]
+                    elif col_ref[0] == '"' and col_ref[-1] == '"':
+                        col_ref = col_ref[1:-1]
+                    elif col_ref[0] == '`' and col_ref[-1] == '`':
+                        col_ref = col_ref[1:-1]
+                if col_ref:
+                    pk_columns.add(col_ref)
+
+        return pk_columns
 
 
 if __name__ == "__main__":

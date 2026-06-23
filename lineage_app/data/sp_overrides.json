@@ -1,4 +1,4 @@
 {
-  "Vault.TrustAccessWaits.sql": "nvidia",
-  "Vault.Loadpatient.sql": "nvidia"
+  "Vault.TrustAccessWaits.sql": "gemini",
+  "Vault.Loadpatient.sql": "gemini"
 }
