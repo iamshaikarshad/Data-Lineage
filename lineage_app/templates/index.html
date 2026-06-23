@@ -607,7 +607,7 @@ function renderGraph(graphData, focusTable) {
       .attr('fill', nodeColor(d.id)).attr('rx', 2);
 
     // Label
-    g.append('text').attr('class', 'node-label').attr('y', -2).text(d.id);
+    g.append('text').attr('class', 'node-label').attr('y', -2).text(d.label || d.id);
 
     // Schema below
     if (d.schema) g.append('text').attr('class', 'node-schema').attr('y', 14).text(d.schema);
@@ -730,7 +730,8 @@ async function openColumnPanel(tableId) {
   expandedTable = tableId;
   columnPanelOpen = true;
   document.getElementById('columnPanel').classList.add('open');
-  document.getElementById('panelTitle').textContent = tableId;
+  const node = catalogue[tableId] || {};
+  document.getElementById('panelTitle').textContent = node.label || node.display_name || tableId;
   await renderColumnPanel(tableId);
 }
 

@@ -29,41 +29,56 @@ class LineageAgent:
     def _build_graph(self, results: List[Dict[str, Any]]) -> None:
         """
         Build the directed graph from the normalised SP results.
+
+        All node names are normalised so that lookups via normalise_table()
+        always match. The original (pre-normalisation) name is preserved as
+        the node's ``display_name`` attribute for use in labels / UI.
         """
         logger.info("Building lineage graph from %d SP results", len(results))
 
         for result in results:
-            target = result.get("target_table")
-            if not target:
+            raw_target = result.get("target_table")
+            if not raw_target:
                 continue
+            target = normalise_table(raw_target)
 
             # Ensure target node exists
-            self._ensure_node(target, result)
+            self._ensure_node(target, raw_target, result)
 
             # Process source tables and create edges
-            source_tables = result.get("source_tables", [])
-            for source in source_tables:
-                if not source:
+            raw_source_tables = result.get("source_tables", [])
+            for raw_source in raw_source_tables:
+                if not raw_source:
                     continue
+                source = normalise_table(raw_source)
 
                 # Ensure source node exists
-                self._ensure_node(source, result)
+                self._ensure_node(source, raw_source, result)
 
                 # Add or update edge from source to target
                 self._add_or_update_edge(source, target, result)
 
-    def _ensure_node(self, table_name: str, result: Dict[str, Any]) -> None:
+    def _ensure_node(self, table_name: str, raw_name: str, result: Dict[str, Any]) -> None:
         """
         Ensure a node exists in the graph, creating it if necessary.
+
+        Args:
+            table_name: Normalised table name (used as the graph node ID).
+            raw_name:   Original name before normalisation (stored for display).
+            result:     The SP result dict (unused for now, kept for API compat).
         """
         if self.graph.has_node(table_name):
-            # Node already exists, we might want to update some attributes
-            # For now, we'll keep the existing node as is
+            # Node already exists — keep the existing node but update display_name
+            # if the new raw_name is more informative (longer / has qualifiers).
+            existing_display = self.graph.nodes[table_name].get("display_name", "")
+            if len(raw_name) > len(existing_display):
+                self.graph.nodes[table_name]["display_name"] = raw_name
             return
 
         # Create new node with default attributes
         self.graph.add_node(
             table_name,
+            display_name=raw_name,  # original name for UI labels
             schema="dbo",  # default
             database="",   # default
             qualified_name="",
@@ -303,6 +318,15 @@ class LineageAgent:
     def column_lineage(self, table: str) -> Dict[str, List[Dict[str, Any]]]:
         """
         Return column-level lineage for the given table.
+
+        Each incoming entry is a 1:1 copy of one column_mappings record:
+        source_table, source_column, target_column, transformation_type, and
+        transformation_logic all come from the same mapping object — never mixed
+        across mappings or replaced by a loop variable.
+
+        Because the same mapping can appear on multiple predecessor or successor
+        edges (the graph-builder copies an SP's full mapping list to every edge
+        it creates), we deduplicate by (source_table, source_column, target_column).
         """
         table = normalise_table(table)
         if not self.graph.has_node(table):
@@ -310,31 +334,64 @@ class LineageAgent:
 
         incoming = []
         outgoing = []
+        seen_incoming: set = set()
+        seen_outgoing: set = set()
 
         # Get incoming edges (predecessors)
         for predecessor in self.graph.predecessors(table):
             edge_data = self.graph[predecessor][table]
             for mapping in edge_data.get("column_mappings", []):
+                # Use the mapping's own source_table, not the graph predecessor
+                source_table = mapping.get("source_table", "") or predecessor
+                source_table_qualified = mapping.get("source_table_qualified", "")
+                source_column = mapping.get("source_column", "")
+                target_column = mapping.get("target_column", "")
+                transformation_type = mapping.get("transformation_type", "")
+                transformation_logic = mapping.get("transformation_logic", "")
+
+                # Dedup key: same mapping may appear on multiple edges
+                key = f"{source_table}|{source_column}|{target_column}"
+                if key in seen_incoming:
+                    continue
+                seen_incoming.add(key)
+
                 incoming.append({
-                    "source_table": predecessor,
-                    "source_table_qualified": mapping.get("source_table_qualified", ""),
-                    "source_column": mapping.get("source_column", ""),
-                    "target_column": mapping.get("target_column", ""),
-                    "transformation_type": mapping.get("transformation_type", ""),
-                    "transformation_logic": mapping.get("transformation_logic", ""),
+                    "source_table": source_table,
+                    "source_table_qualified": source_table_qualified,
+                    "source_column": source_column,
+                    "target_column": target_column,
+                    "transformation_type": transformation_type,
+                    "transformation_logic": transformation_logic,
                 })
 
         # Get outgoing edges (successors)
         for successor in self.graph.successors(table):
             edge_data = self.graph[table][successor]
             for mapping in edge_data.get("column_mappings", []):
+                target_table = mapping.get("target_table", "") or successor
+                target_table_qualified = mapping.get("target_table_qualified", "")
+                source_table = mapping.get("source_table", "")
+                source_table_qualified = mapping.get("source_table_qualified", "")
+                source_column = mapping.get("source_column", "")
+                target_column = mapping.get("target_column", "")
+                transformation_type = mapping.get("transformation_type", "")
+                transformation_logic = mapping.get("transformation_logic", "")
+
+                # Dedup key
+                key = f"{target_table}|{source_column}|{target_column}"
+                if key in seen_outgoing:
+                    continue
+                seen_outgoing.add(key)
+
                 outgoing.append({
-                    "target_table": successor,
-                    "target_table_qualified": mapping.get("target_table_qualified", ""),
-                    "source_column": mapping.get("source_column", ""),
-                    "target_column": mapping.get("target_column", ""),
-                    "transformation_type": mapping.get("transformation_type", ""),
-                    "transformation_logic": mapping.get("transformation_logic", ""),
+                    "target_table": target_table,
+                    "target_table_qualified": target_table_qualified,
+                    "source_table": source_table,
+                    "source_table_qualified": source_table_qualified,
+                    "source_column": source_column,
+                    "target_column": target_column,
+                    "transformation_type": transformation_type,
+                    "transformation_logic": transformation_logic,
                 })
 
         return {
@@ -352,9 +409,15 @@ class LineageAgent:
         nodes = []
         for node_id in subgraph.nodes:
             node_data = subgraph.nodes[node_id]
+            # Prefer qualified_name for label (set by catalogue enrichment),
+            # then display_name (original name before normalisation), then node_id.
+            display = (node_data.get("qualified_name")
+                       or node_data.get("display_name")
+                       or node_id)
             nodes.append({
                 "id": node_id,
-                "label": node_id,
+                "label": display,
+                "display_name": node_data.get("display_name", node_id),
                 "qualified_name": node_data.get("qualified_name", ""),
                 "database": node_data.get("database", ""),
                 "schema": node_data.get("schema", ""),
