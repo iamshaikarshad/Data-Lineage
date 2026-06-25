@@ -3,9 +3,12 @@
 import logging
 import re
 from pathlib import Path
-from typing import Dict, List, Any, Union, Tuple, Set, Optional
+from typing import Dict, List, Any, Union, Tuple, Set, Optional, TYPE_CHECKING
 
 from . import normalise_table
+
+if TYPE_CHECKING:
+    from .tracker import ProcessingTracker
 
 logger = logging.getLogger(__name__)
 
@@ -16,29 +19,62 @@ class SchemaAgent:
     CREATE TABLE statement it finds, and returns a catalogue dictionary.
     """
 
-    def __init__(self, schema_dir: Union[str, Path]):
+    def __init__(self, schema_dir: Union[str, Path], tracker: Optional["ProcessingTracker"] = None):
         """
         Initialize the SchemaAgent.
 
         Args:
             schema_dir: Path to the directory containing schema SQL files.
+            tracker: Optional ProcessingTracker to skip already-processed files.
         """
         self.schema_dir = Path(schema_dir)
         self.catalogue: Dict[str, Dict[str, Any]] = {}
+        self.tracker = tracker
 
     def run(self) -> Dict[str, Dict[str, Any]]:
         """
         Parse all schema files and return the catalogue.
 
+        If a ProcessingTracker is attached, already-processed schema files
+        are skipped entirely.
+
         Returns:
             A dictionary mapping normalised table names to their metadata.
         """
         logger.info("Starting SchemaAgent")
-        schema_files = list(self.schema_dir.rglob("*.sql"))
-        logger.info(f"Found {len(schema_files)} schema file(s)")
+        all_schema_files = list(self.schema_dir.rglob("*.sql"))
+        logger.info(f"Found {len(all_schema_files)} schema file(s)")
 
+        # Filter out already-processed files when tracker is available
+        if self.tracker:
+            unprocessed = [f for f in all_schema_files if not self.tracker.is_schema_processed(f.name)]
+            skipped = len(all_schema_files) - len(unprocessed)
+            if skipped:
+                logger.info(
+                    f"Tracker: skipping {skipped} already-processed schema(s), "
+                    f"processing {len(unprocessed)} new"
+                )
+                for f in all_schema_files:
+                    if self.tracker.is_schema_processed(f.name):
+                        logger.info(f"  Skipping already-processed schema: {f.name}")
+            schema_files = unprocessed
+        else:
+            schema_files = all_schema_files
+
+        tables_before = len(self.catalogue)
         for schema_file in schema_files:
             self._parse_file(schema_file)
+            # Count tables added from this file
+            tables_after_file = len(self.catalogue)
+            tables_from_file = tables_after_file - tables_before
+            tables_before = tables_after_file
+
+            if self.tracker:
+                self.tracker.mark_schema(schema_file.name, "success", tables_found=tables_from_file)
+
+        # Persist tracker state
+        if self.tracker:
+            self.tracker.save()
 
         logger.info(f"SchemaAgent: found {len(self.catalogue)} tables")
         return self.catalogue

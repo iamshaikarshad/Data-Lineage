@@ -197,8 +197,10 @@ svg { width:100%; height:100%; display:block; }
 <header>
   <span class="logo">&#x2B21; Data Lineage Explorer</span>
   <span class="badge badge-stats" id="statsBadge">0 tables &middot; 0 procedures</span>
+  <span class="badge" id="trackerBadge" style="background:var(--surface2);color:var(--muted);cursor:default">&#x2713; 0/0 SPs &middot; 0/0 Schemas</span>
   <span class="badge badge-failures" id="failuresBadge" onclick="openFailuresModal()">&#x26A0; <span id="failCount">0</span> failed</span>
   <span style="flex:1"></span>
+  <button class="btn btn-outline" id="resetTrackerBtn" onclick="resetTracker()" title="Reset tracker so all files will be re-processed on next run">&#x1F504; Reset Tracker</button>
   <button class="btn btn-primary" id="runBtn" onclick="runAgents(true)">&#x26A1; Run Agents</button>
   <button class="btn btn-outline" id="fullGraphBtn" onclick="fetchAndRenderFull()" disabled>Full Graph</button>
 </header>
@@ -318,12 +320,38 @@ async function runAgents(force = false) {
     await loadStats();
     await loadTables();
     await loadFailures();
+    await loadTrackerBadge();
     if (allTables.length > 0) {
       hideOverlay();
       await fetchAndRenderFull();
     }
   } catch (e) { showToast('Error: ' + e.message); }
   finally { btn.disabled = false; btn.innerHTML = '&#x26A1; Run Agents'; }
+}
+
+async function loadTrackerBadge() {
+  try {
+    const t = await api('/api/tracker');
+    const badge = document.getElementById('trackerBadge');
+    const spProcessed = t.sp_processed || 0;
+    const spTotal = t.sp_total || 0;
+    const schemaProcessed = t.schemas_processed || 0;
+    const schemaTotal = t.schemas_total || 0;
+    const allDone = spProcessed === spTotal && schemaProcessed === schemaTotal && spTotal > 0;
+    badge.innerHTML = `${allDone ? '&#x2713;' : '&#x25CB;'} ${spProcessed}/${spTotal} SPs &middot; ${schemaProcessed}/${schemaTotal} Schemas`;
+    badge.style.color = allDone ? 'var(--success, #4caf50)' : 'var(--muted)';
+  } catch (e) { /* non-critical */ }
+}
+
+async function resetTracker() {
+  const btn = document.getElementById('resetTrackerBtn');
+  btn.disabled = true;
+  try {
+    await api('/api/tracker/reset', { method: 'POST' });
+    showToast('Tracker reset — next Run Agents will process all files');
+    await loadTrackerBadge();
+  } catch (e) { showToast('Error resetting tracker: ' + e.message); }
+  finally { btn.disabled = false; }
 }
 
 async function loadStats() {
@@ -922,6 +950,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadStats();
   await loadTables();
   await loadFailures();
+  await loadTrackerBadge();
   bindEvents();
   if (allTables.length > 0) {
     hideOverlay();

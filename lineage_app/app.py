@@ -4,7 +4,7 @@ import json
 import logging
 import os
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Dict, List, Any, Optional
 
 # Load .env file early
 try:
@@ -20,6 +20,7 @@ from flask import Flask, render_template, request, jsonify
 from agents.schema_agent import SchemaAgent
 from agents.sp_agent import SPAgent, load_sp_overrides
 from agents.lineage_agent import LineageAgent
+from agents.tracker import ProcessingTracker
 
 logger = logging.getLogger(__name__)
 
@@ -32,10 +33,12 @@ SCHEMA_DIR = BASE_DIR / 'data' / 'schemas'
 OVERRIDES_FILE = BASE_DIR / 'data' / 'sp_overrides.json'
 CACHE_FILE = BASE_DIR / 'lineage_cache.json'
 FAILURE_LOG = BASE_DIR / 'logs' / 'failed_extractions.jsonl'
+TRACKER_FILE = BASE_DIR / 'data' / 'processing_tracker.json'
 
 # Global variable to hold the lineage agent
 _lineage_agent: Optional[LineageAgent] = None
 _catalogue: Optional[Dict[str, Any]] = None
+_tracker: Optional[ProcessingTracker] = None
 
 # Extra overrides injected from the CLI (via --force-method). These take
 # precedence over values in sp_overrides.json.
@@ -51,12 +54,25 @@ def set_cli_overrides(overrides: Dict[str, str]) -> None:
     _cli_overrides = overrides
 
 
+def _get_tracker() -> ProcessingTracker:
+    """Return (and lazily create) the global ProcessingTracker."""
+    global _tracker
+    if _tracker is None:
+        _tracker = ProcessingTracker(TRACKER_FILE)
+    return _tracker
+
+
 def run_agents(force: bool = False) -> Optional[LineageAgent]:
     """
     Run the full extraction pipeline (or load from cache).
 
+    When a tracker is active, already-processed files are skipped and only
+    new / unprocessed files are run through the extraction pipeline.
+
     Args:
-        force: If True, bypass cache and re-run agents.
+        force: If True, bypass cache and re-run agents (but still
+               respect the tracker — to re-process everything, reset
+               the tracker first).
 
     Returns:
         LineageAgent instance or None if failed.
@@ -83,9 +99,12 @@ def run_agents(force: bool = False) -> Optional[LineageAgent]:
     SCHEMA_DIR.mkdir(parents=True, exist_ok=True)
     FAILURE_LOG.parent.mkdir(parents=True, exist_ok=True)
 
+    # Create tracker for incremental processing
+    tracker = _get_tracker()
+
     # Step 1: Run SchemaAgent
     logger.info("Running SchemaAgent")
-    schema_agent = SchemaAgent(SCHEMA_DIR)
+    schema_agent = SchemaAgent(SCHEMA_DIR, tracker=tracker)
     catalogue = schema_agent.run()
     _catalogue = catalogue
 
@@ -106,12 +125,26 @@ def run_agents(force: bool = False) -> Optional[LineageAgent]:
         gemini_api_key=os.environ.get("GEMINI_API_KEY"),
         nvidia_api_key=os.environ.get("NVIDIA_API_KEY"),
         per_sp_overrides=overrides,
+        tracker=tracker,
     )
     sp_results = sp_agent.run()
 
+    # When the tracker skipped already-processed files, merge with cached
+    # SP results so the LineageAgent gets the full picture.
+    cached_sp_results = _load_cached_sp_results()
+    if cached_sp_results is not None:
+        # Build index by source_file to avoid duplicates
+        existing_by_file = {r.get("source_file", ""): r for r in sp_results if r.get("source_file")}
+        for cached_r in cached_sp_results:
+            f = cached_r.get("source_file", "")
+            if f and f not in existing_by_file:
+                sp_results.append(cached_r)
+                existing_by_file[f] = cached_r
+        logger.info("Merged with %d cached SP results (total: %d)", len(cached_sp_results), len(sp_results))
+
     # Step 3: Normalise and run LineageAgent
     logger.info("Running LineageAgent")
-    normalised_results = sp_agent.normalised_results()
+    normalised_results = _normalise_sp_results(sp_results)
     lineage_agent = LineageAgent(normalised_results)
 
     # Enrich nodes with catalogue data
@@ -186,6 +219,65 @@ def _get_agent() -> Optional[LineageAgent]:
     return _lineage_agent
 
 
+def _load_cached_sp_results() -> Optional[List[dict]]:
+    """
+    Read the SP results from the cache file (if it exists) so that
+    previously-processed files can be merged with newly-extracted ones.
+    """
+    if not CACHE_FILE.exists():
+        return None
+    try:
+        with CACHE_FILE.open("r", encoding="utf-8") as f:
+            cache_data = json.load(f)
+        sp_results = cache_data.get("sp_results")
+        if isinstance(sp_results, list):
+            return sp_results
+    except Exception:
+        pass
+    return None
+
+
+def _normalise_sp_results(sp_results: List[dict]) -> List[dict]:
+    """
+    Normalise a list of SP results (table names, join tables, mapping
+    source_tables) using the same logic as SPAgent.normalised_results().
+
+    This is used instead of sp_agent.normalised_results() when we have
+    a merged list of fresh + cached results.
+    """
+    from agents import normalise_table as _nt
+    import copy
+
+    normalised = []
+    for result in sp_results:
+        res = copy.deepcopy(result)
+
+        target_table_qualified = res.get("target_table", "")
+        res["target_table_qualified"] = target_table_qualified
+        res["target_table"] = _nt(target_table_qualified)
+
+        source_tables = res.get("source_tables", [])
+        source_tables_qualified = source_tables[:]
+        res["source_tables_qualified"] = source_tables_qualified
+        res["source_tables"] = [_nt(t) for t in source_tables]
+
+        for mapping in res.get("column_mappings", []):
+            source_table_qualified = mapping.get("source_table", "")
+            mapping["source_table_qualified"] = source_table_qualified
+            mapping["source_table"] = _nt(source_table_qualified)
+
+        for join in res.get("joins", []):
+            left_table_qualified = join.get("left_table", "")
+            right_table_qualified = join.get("right_table", "")
+            join["left_table_qualified"] = left_table_qualified
+            join["right_table_qualified"] = right_table_qualified
+            join["left_table"] = _nt(left_table_qualified)
+            join["right_table"] = _nt(right_table_qualified)
+
+        normalised.append(res)
+    return normalised
+
+
 @app.route('/')
 def index():
     """Render the main page."""
@@ -202,7 +294,12 @@ def analyse():
         if agent is None:
             return jsonify({"status": "error", "message": "Failed to run agents"}), 500
         stats = agent.statistics()
-        return jsonify({"status": "ok", "statistics": stats})
+        tracker_counts = _get_tracker().processed_counts()
+        return jsonify({
+            "status": "ok",
+            "statistics": stats,
+            "tracker": tracker_counts,
+        })
     except Exception as e:
         logger.exception("Error in /api/analyse")
         return jsonify({"status": "error", "message": str(e)}), 500
@@ -275,8 +372,8 @@ def stats():
             "procedures": 0,
             "by_method": {"regex": 0, "claude": 0, "gemini": 0, "nvidia": 0, "failed": 0}
         })
-    stats = agent.statistics()
-    return jsonify(stats)
+    s = agent.statistics()
+    return jsonify(s)
 
 
 @app.route('/api/full')
@@ -306,6 +403,27 @@ def failures():
     except Exception as e:
         logger.error("Failed to read failure log: %s", e)
         return jsonify({"failures": []})
+
+
+@app.route('/api/tracker')
+def tracker_status():
+    """Return the current processing tracker state."""
+    tracker = _get_tracker()
+    counts = tracker.processed_counts()
+    # Add total file counts from disk
+    sp_files = list(SP_DIR.rglob("*.sql")) if SP_DIR.exists() else []
+    schema_files = list(SCHEMA_DIR.rglob("*.sql")) if SCHEMA_DIR.exists() else []
+    counts["sp_total"] = len(sp_files)
+    counts["schemas_total"] = len(schema_files)
+    return jsonify(counts)
+
+
+@app.route('/api/tracker/reset', methods=['POST'])
+def tracker_reset():
+    """Clear the processing tracker so the next run re-processes everything."""
+    tracker = _get_tracker()
+    tracker.reset()
+    return jsonify({"status": "ok", "message": "Tracker reset — all files will be re-processed on next run"})
 
 
 # Error handlers

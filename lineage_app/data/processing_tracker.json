@@ -1,0 +1,23 @@
+{
+  "sp": {
+    "Vault.Loadpatient.sql": {
+      "status": "success",
+      "processed_at": "2026-06-25T10:45:15Z",
+      "method": "gemini",
+      "target_table": "vault.Patient"
+    },
+    "Vault.TrustAccessWaits.sql": {
+      "status": "success",
+      "processed_at": "2026-06-25T10:45:55Z",
+      "method": "gemini",
+      "target_table": "[SLAMBI].[Vault].[TrustAccessWaits]"
+    }
+  },
+  "schemas": {
+    "tables.sql": {
+      "status": "success",
+      "tables_found": 0,
+      "processed_at": "2026-06-25T10:43:47Z"
+    }
+  }
+}

@@ -157,6 +157,7 @@ class SPAgent:
         use_master_agent: bool = True,
         prefer_llm: Literal["claude", "gemini", "nvidia"] = "gemini",
         per_sp_overrides: Optional[Dict[str, ExtractionMethod]] = None,
+        tracker: Any = None,
     ):
         """
         Initialize the SPAgent.
@@ -175,6 +176,7 @@ class SPAgent:
             use_master_agent: If True, use MasterAgent to decide starting method.
             prefer_llm: Which LLM to prefer when MasterAgent routes to LLM.
             per_sp_overrides: Dict mapping filename -> forced extraction method.
+            tracker: Optional ProcessingTracker to skip already-processed files.
         """
         self.sp_dir = Path(sp_dir)
         self.catalogue = catalogue
@@ -192,6 +194,7 @@ class SPAgent:
         self.use_master_agent = use_master_agent
         self.master_agent = MasterAgent(prefer_llm=prefer_llm) if use_master_agent else None
         self.per_sp_overrides = per_sp_overrides or {}
+        self.tracker = tracker
 
         # Track which methods are actually available
         available: Dict[str, bool] = {"regex": True}
@@ -309,12 +312,31 @@ class SPAgent:
 
     def run(self) -> List[Dict[str, Any]]:
         """
-        Iterates over all SP files, applies the three-step pipeline,
+        Iterates over all SP files, applies the extraction pipeline,
         logs failures, returns list of successful results (raw, un-normalised).
+
+        If a ProcessingTracker is attached, already-processed files are
+        skipped entirely.
         """
         logger.info("Starting SPAgent")
-        sp_files = list(self.sp_dir.rglob("*.sql"))
-        logger.info("Found %d stored procedure file(s)", len(sp_files))
+        all_sp_files = list(self.sp_dir.rglob("*.sql"))
+        logger.info("Found %d stored procedure file(s)", len(all_sp_files))
+
+        # Filter out already-processed files when tracker is available
+        if self.tracker:
+            unprocessed = [f for f in all_sp_files if not self.tracker.is_sp_processed(f.name)]
+            skipped = len(all_sp_files) - len(unprocessed)
+            if skipped:
+                logger.info(
+                    "Tracker: skipping %d already-processed SP(s), processing %d new",
+                    skipped, len(unprocessed),
+                )
+                for f in all_sp_files:
+                    if self.tracker.is_sp_processed(f.name):
+                        logger.info("  Skipping already-processed: %s", f.name)
+            sp_files = unprocessed
+        else:
+            sp_files = all_sp_files
 
         self.results = []
         failed_count = 0
@@ -386,8 +408,22 @@ class SPAgent:
                     step_errors["regex"], step_errors["claude"],
                     step_errors["gemini"], step_errors["nvidia"],
                 )
+                # Mark failure in tracker
+                if self.tracker:
+                    self.tracker.mark_sp(sp_file.name, "failed")
             else:
+                # Mark success in tracker
+                if self.tracker:
+                    self.tracker.mark_sp(
+                        sp_file.name, "success",
+                        method=result.get("extraction_method", ""),
+                        target_table=result.get("target_table", ""),
+                    )
                 time.sleep(self.delay_between_calls)
+
+        # Persist tracker state
+        if self.tracker:
+            self.tracker.save()
 
         logger.info(
             "SPAgent: %d succeeded "
