@@ -92,11 +92,21 @@ header { display:flex; align-items:center; padding:8px 16px; background:var(--su
 .col-name { font-family:monospace; font-size:13px; font-weight:600; }
 .col-type { color:var(--muted); font-size:11px; margin-left:8px; }
 .col-pk { color:var(--warn); font-size:10px; margin-left:4px; }
-.mapping-card { background:var(--surface2); border-radius:6px; padding:8px 10px; margin-bottom:8px; }
+.mapping-card { background:var(--surface2); border-radius:6px; padding:8px 10px; margin-bottom:8px; transition:background .15s; }
+.mapping-card:hover { background:var(--border); }
 .mapping-src { font-family:monospace; font-size:12px; color:var(--accent2); }
 .mapping-arrow { color:var(--muted); margin:0 4px; }
 .mapping-tgt { font-family:monospace; font-size:12px; color:var(--text); }
 .mapping-logic { font-size:11px; color:var(--muted); margin-top:4px; }
+.chain-row { margin-bottom:6px; display:flex; align-items:center; flex-wrap:wrap; gap:4px; font-size:12px; line-height:1.7; }
+.chain-arrow { color:var(--muted); font-weight:700; margin:0 2px; }
+.chain-table { font-family:monospace; font-weight:600; }
+.chain-col { color:var(--accent2); font-family:monospace; }
+.leaf-marker { font-size:11px; color:var(--muted); font-style:italic; }
+.full-lineage-back { display:inline-flex; align-items:center; gap:4px; color:var(--accent); cursor:pointer; font-size:13px; font-weight:600; margin-bottom:12px; padding:6px 0; }
+.full-lineage-back:hover { text-decoration:underline; }
+.trace-section { margin-bottom:16px; }
+.trace-chains { margin-top:6px; }
 .empty-state { text-align:center; padding:32px 16px; color:var(--muted); }
 
 /* Graph area */
@@ -485,7 +495,7 @@ function switchTab(name) {
     if (!node || !node.column_details || !node.column_details.length) { tc.innerHTML = '<div class="empty-state">No schema information available</div>'; return; }
     let html = '';
     node.column_details.forEach(c => {
-      html += `<div class="column-row"><span class="col-name">${c.name}</span><span class="col-type">${c.type}</span>${c.primary_key ? '<span class="col-pk">[PK]</span>' : ''}</div>`;
+      html += `<div class="column-row" style="cursor:pointer" onclick="showFullLineage('${selectedTable}','${c.name}')"><span class="col-name">${c.name}</span><span class="col-type">${c.type}</span>${c.primary_key ? '<span class="col-pk">[PK]</span>' : ''}</div>`;
     });
     tc.innerHTML = html;
   } else if (name === 'mappings') {
@@ -493,12 +503,12 @@ function switchTab(name) {
     api(`/api/column/${encodeURIComponent(selectedTable)}`).then(colData => {
       let html = '<div class="detail-title">Incoming</div>';
       (colData.incoming || []).forEach(m => {
-        html += `<div class="mapping-card"><span class="mapping-src">${m.source_table}.${m.source_column}</span><span class="mapping-arrow">&rarr;</span><span class="mapping-tgt">${m.target_column}</span> <span class="pill pill-${m.transformation_type}" style="margin-left:6px">${m.transformation_type}</span><div class="mapping-logic">${m.transformation_logic}</div></div>`;
+        html += `<div class="mapping-card" style="cursor:pointer" onclick="showFullLineage('${selectedTable}','${m.target_column}')"><span class="mapping-src">${m.source_table}.${m.source_column}</span><span class="mapping-arrow">&rarr;</span><span class="mapping-tgt">${m.target_column}</span> <span class="pill pill-${m.transformation_type}" style="margin-left:6px">${m.transformation_type}</span><div class="mapping-logic">${m.transformation_logic}</div></div>`;
       });
       if (!(colData.incoming || []).length) html += '<div style="color:var(--muted);font-size:12px">None</div>';
       html += '<div class="detail-title" style="margin-top:12px">Outgoing</div>';
       (colData.outgoing || []).forEach(m => {
-        html += `<div class="mapping-card"><span class="mapping-tgt">${m.source_column}</span><span class="mapping-arrow">&rarr;</span><span class="mapping-src" style="color:var(--danger)">${m.target_table}.${m.target_column}</span> <span class="pill pill-${m.transformation_type}" style="margin-left:6px">${m.transformation_type}</span><div class="mapping-logic">${m.transformation_logic}</div></div>`;
+        html += `<div class="mapping-card" style="cursor:pointer" onclick="showFullLineage('${m.target_table}','${m.target_column}')"><span class="mapping-tgt">${m.source_column}</span><span class="mapping-arrow">&rarr;</span><span class="mapping-src" style="color:var(--danger)">${m.target_table}.${m.target_column}</span> <span class="pill pill-${m.transformation_type}" style="margin-left:6px">${m.transformation_type}</span><div class="mapping-logic">${m.transformation_logic}</div></div>`;
       });
       if (!(colData.outgoing || []).length) html += '<div style="color:var(--muted);font-size:12px">None</div>';
       tc.innerHTML = html;
@@ -791,7 +801,7 @@ async function renderColumnPanel(tableId) {
     } else {
       columns.forEach(col => {
         const maps = byTarget[col.name] || [];
-        html += `<div class="target-col-row"><span class="target-col-name">${col.name}</span><span class="target-col-type">${col.type}</span>${col.primary_key ? '<span class="target-col-pk">[PK]</span>' : ''}`;
+        html += `<div class="target-col-row" style="cursor:pointer" onclick="showFullLineage('${tableId}','${col.name}')"><span class="target-col-name">${col.name}</span><span class="target-col-type">${col.type}</span>${col.primary_key ? '<span class="target-col-pk">[PK]</span>' : ''}`;
         if (maps.length) {
           maps.forEach(m => {
             html += `<div class="mapping-source"><span style="color:var(--accent2)">${m.source_table}</span>.${m.source_column} <span class="pill pill-${m.transformation_type}">${m.transformation_type}</span><div class="mapping-logic" style="margin-left:12px">${m.transformation_logic}</div></div>`;
@@ -941,6 +951,140 @@ function bindEvents() {
     selectedTable = null;
     closeColumnPanel();
     clearDimming();
+  });
+}
+
+// ── Full Lineage Trace ──
+let _preFullLineageTab = null;  // remembers which tab was active before trace
+
+async function showFullLineage(table, column) {
+  const tc = document.getElementById('tabContent');
+  // Remember current tab so we can restore it
+  const activeTab = document.querySelector('.tab-btn.active');
+  _preFullLineageTab = activeTab ? activeTab.textContent.toLowerCase() : 'overview';
+
+  tc.innerHTML = '<div class="empty-state">Loading full lineage&hellip;</div>';
+
+  try {
+    const data = await api(`/api/column-trace/${encodeURIComponent(table)}/${encodeURIComponent(column)}`);
+    renderFullLineageView(table, column, data);
+    // Highlight chain tables on the graph
+    if (data.tables_in_chain && data.tables_in_chain.length) {
+      applyChainDimming(data.tables_in_chain);
+    }
+  } catch (e) {
+    tc.innerHTML = `<div class="empty-state" style="color:var(--danger)">Error loading trace: ${e.message}</div>`;
+  }
+}
+
+function renderFullLineageView(table, column, data) {
+  const tc = document.getElementById('tabContent');
+
+  // Deactivate all tab buttons while in full-lineage view
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+  let html = `<div class="full-lineage-back" onclick="closeFullLineage()">&larr; Back to mappings</div>`;
+  html += `<div style="font-family:monospace;font-size:15px;font-weight:700;margin-bottom:12px">${table}.${column}</div>`;
+
+  // Inbound chains
+  html += '<div class="trace-section"><div class="detail-title">Inbound (to origin)</div>';
+  const inbound = data.inbound || [];
+  if (inbound.length === 0) {
+    html += '<div style="color:var(--muted);font-size:12px">No inbound lineage</div>';
+  } else {
+    html += '<div class="trace-chains">';
+    inbound.forEach(chain => {
+      html += '<div class="chain-row">';
+      // Chain is ordered from origin to clicked column (or vice versa — both are fine).
+      // We reverse so it reads origin → ... → clicked (if needed). But as built,
+      // inbound chains go [clicked_step, ..., origin_step]. Let's render origin-first.
+      const reversed = [...chain].reverse();
+      reversed.forEach((step, i) => {
+        if (i > 0) html += '<span class="chain-arrow">&rarr;</span>';
+        const cls = step.type === 'cycle_detected' ? 'pill-constant' : (pillClass(step.type));
+        html += `<span class="chain-table">${step.table}</span><span style="color:var(--muted)">.</span><span class="chain-col">${step.column}</span>`;
+        if (step.type) html += ` <span class="pill pill-${cls}" style="margin-left:2px">${step.type}</span>`;
+        if (step.leaf && step.note) html += ` <span class="leaf-marker">(${step.note})</span>`;
+      });
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+
+  // Outbound chains
+  html += '<div class="trace-section"><div class="detail-title">Outbound (to consumers)</div>';
+  const outbound = data.outbound || [];
+  if (outbound.length === 0) {
+    html += '<div style="color:var(--muted);font-size:12px">No outbound lineage</div>';
+  } else {
+    html += '<div class="trace-chains">';
+    outbound.forEach(chain => {
+      html += '<div class="chain-row">';
+      chain.forEach((step, i) => {
+        if (i > 0) html += '<span class="chain-arrow">&rarr;</span>';
+        const cls = step.type === 'cycle_detected' ? 'pill-constant' : pillClass(step.type);
+        html += `<span class="chain-table">${step.table}</span><span style="color:var(--muted)">.</span><span class="chain-col">${step.column}</span>`;
+        if (step.type) html += ` <span class="pill pill-${cls}" style="margin-left:2px">${step.type}</span>`;
+        if (step.leaf && step.note) html += ` <span class="leaf-marker">(${step.note})</span>`;
+      });
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+
+  tc.innerHTML = html;
+}
+
+function pillClass(type) {
+  // Map transformation_type to an existing pill CSS class
+  const known = ['regex','claude','gemini','nvidia','direct_copy','aggregation','calculation','conditional','constant'];
+  if (known.includes(type)) return type;
+  return 'constant';  // fallback
+}
+
+function closeFullLineage() {
+  clearDimming();
+  // Restore the previous tab
+  if (_preFullLineageTab) {
+    switchTab(_preFullLineageTab);
+  } else {
+    switchTab('mappings');
+  }
+  _preFullLineageTab = null;
+}
+
+function applyChainDimming(tableIds) {
+  if (!currentGraph || !currentGraph.nodes) return;
+  const root = d3.select('#graphSvg g.root');
+  const idSet = new Set(tableIds);
+
+  // Activate dimming on root
+  root.classed('dimmed', true);
+
+  // Mark focused nodes
+  d3.selectAll('.node').each(function(d) {
+    const isFocused = idSet.has(d.id);
+    d3.select(this).selectAll('.node-rect').classed('focused', isFocused);
+    d3.select(this).selectAll('.node-label').classed('focused', isFocused);
+    d3.select(this).selectAll('.node-schema').classed('focused', isFocused);
+    d3.select(this).selectAll('.node-badge').classed('focused', isFocused);
+    d3.select(this).selectAll('.node-expand').classed('focused', isFocused);
+  });
+
+  // Mark focused edges — only edges that connect two nodes in the chain set
+  d3.selectAll('.edge-path').each(function(d) {
+    const src = d.source.id || d.source;
+    const tgt = d.target.id || d.target;
+    const isFocused = idSet.has(src) && idSet.has(tgt);
+    d3.select(this).classed('focused', isFocused)
+      .attr('marker-end', isFocused ? 'url(#arrowhead-hl)' : 'url(#arrowhead)');
+  });
+  d3.selectAll('.edge-path-bg').classed('focused', d => {
+    const src = d.source.id || d.source;
+    const tgt = d.target.id || d.target;
+    return idSet.has(src) && idSet.has(tgt);
   });
 }
 

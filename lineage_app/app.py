@@ -405,6 +405,20 @@ def failures():
         return jsonify({"failures": []})
 
 
+@app.route('/api/column-trace/<table>/<path:column>')
+def column_trace(table, column):
+    """Return full multi-hop column lineage trace for a table.column pair."""
+    try:
+        agent = _get_agent()
+        if agent is None:
+            return jsonify({"error": "No lineage data available"}), 404
+        data = agent.trace_column_lineage(table, column)
+        return jsonify(data)
+    except Exception as e:
+        logger.exception("Error in /api/column-trace")
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/api/tracker')
 def tracker_status():
     """Return the current processing tracker state."""

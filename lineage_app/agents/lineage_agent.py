@@ -485,6 +485,197 @@ class LineageAgent:
         }
 
 
+    def _build_reverse_mapping_index(self) -> Dict[str, List[Dict]]:
+        """
+        Build source_table.source_column -> list of (target_table, mapping) pairs.
+        """
+        if hasattr(self, '_reverse_index'):
+            return self._reverse_index
+
+        index = {}
+        for src, tgt, data in self.graph.edges(data=True):
+            for m in data.get("column_mappings", []):
+                st = normalise_table(m.get("source_table", "")) or src
+                sc = m.get("source_column", "")
+                key = f"{st}|{sc}"
+                index.setdefault(key, []).append({
+                    "source_table": st,
+                    "source_column": sc,
+                    "target_table": tgt,
+                    "target_column": m.get("target_column", ""),
+                    "transformation_type": m.get("transformation_type", ""),
+                    "transformation_logic": m.get("transformation_logic", ""),
+                })
+        self._reverse_index = index
+        return index
+
+    def _is_raw_table(self, table_name: str) -> bool:
+        """
+        Returns True if the table is a "raw" source — meaning it has in_degree=0 (no predecessors),
+        or its node's qualified_name/display_name contains "raw"/"Raw".
+        """
+        if self.graph.in_degree(table_name) == 0:
+            return True
+        node = self.graph.nodes[table_name]
+        display_name = node.get("display_name", "")
+        qualified_name = node.get("qualified_name", "")
+        if "raw" in display_name.lower() or "raw" in qualified_name.lower():
+            return True
+        return False
+
+    def trace_column_lineage(self, table: str, column: str) -> Dict[str, Any]:
+        """
+        Trace column lineage inbound (to raw/source) and outbound (to consumers).
+        Returns a dict with keys:
+          - inbound: list of chains (each chain is a list of steps from origin to the given column)
+          - outbound: list of chains (each chain is a list of steps from the given column to leaf consumers)
+          - tables_in_chain: set of table names involved in any chain (for highlighting)
+        """
+        table = normalise_table(table)
+        if not self.graph.has_node(table):
+            return {"inbound": [], "outbound": [], "tables_in_chain": []}
+
+        MAX_DEPTH = 20
+
+        def _trace_inbound(current_table: str, current_column: str, visited: set, depth: int) -> List[List[Dict]]:
+            if depth > MAX_DEPTH:
+                return [[{
+                    "table": current_table,
+                    "column": current_column,
+                    "type": "cycle_detected",
+                    "leaf": False,
+                    "note": "⚠ cycle detected (max depth exceeded)"
+                }]]
+            key = f"{current_table}|{current_column}"
+            if key in visited:
+                return [[{
+                    "table": current_table,
+                    "column": current_column,
+                    "type": "cycle_detected",
+                    "leaf": False,
+                    "note": "⚠ cycle detected"
+                }]]
+            visited = visited | {key}  # create a new set for this path
+
+            chains = []
+            for pred in self.graph.predecessors(current_table):
+                edge_data = self.graph[pred][current_table]
+                for mapping in edge_data.get("column_mappings", []):
+                    if mapping.get("target_column") == current_column:
+                        source_table = normalise_table(mapping.get("source_table", "")) or pred
+                        source_column = mapping.get("source_column", "")
+                        trans_type = mapping.get("transformation_type", "")
+
+                        if not source_table or trans_type == "constant":
+                            chains.append([{
+                                "table": current_table,
+                                "column": current_column,
+                                "type": trans_type if trans_type else "direct_copy",
+                                "leaf": False
+                            }, {
+                                "table": source_table or "(constant)",
+                                "column": source_column or "(constant)",
+                                "type": trans_type if trans_type else "direct_copy",
+                                "leaf": True,
+                                "note": "constant" if not source_table else f"constant: {trans_type}"
+                            }])
+                        elif self._is_raw_table(source_table):
+                            chains.append([{
+                                "table": current_table,
+                                "column": current_column,
+                                "type": trans_type if trans_type else "direct_copy",
+                                "leaf": False
+                            }, {
+                                "table": source_table,
+                                "column": source_column,
+                                "type": trans_type if trans_type else "direct_copy",
+                                "leaf": True,
+                                "note": "raw origin"
+                            }])
+                        else:
+                            subchains = _trace_inbound(source_table, source_column, visited, depth + 1)
+                            for subchain in subchains:
+                                chains.append([{
+                                    "table": current_table,
+                                    "column": current_column,
+                                    "type": trans_type if trans_type else "direct_copy",
+                                    "leaf": False
+                                }] + subchain)
+            if not chains:
+                chains = [[{
+                    "table": current_table,
+                    "column": current_column,
+                    "type": "unknown",
+                    "leaf": True,
+                    "note": "no incoming mappings"
+                }]]
+            return chains
+
+        def _trace_outbound(current_table: str, current_column: str, visited: set, depth: int) -> List[List[Dict]]:
+            if depth > MAX_DEPTH:
+                return [[{
+                    "table": current_table,
+                    "column": current_column,
+                    "type": "cycle_detected",
+                    "leaf": False,
+                    "note": "⚠ cycle detected (max depth exceeded)"
+                }]]
+            key = f"{current_table}|{current_column}"
+            if key in visited:
+                return [[{
+                    "table": current_table,
+                    "column": current_column,
+                    "type": "cycle_detected",
+                    "leaf": False,
+                    "note": "⚠ cycle detected"
+                }]]
+            visited = visited | {key}
+
+            rev_index = self._build_reverse_mapping_index()
+            key = f"{normalise_table(current_table)}|{current_column}"
+            mappings = rev_index.get(key, [])
+
+            chains = []
+            if not mappings:
+                chains = [[{
+                    "table": current_table,
+                    "column": current_column,
+                    "type": "leaf",
+                    "leaf": True,
+                    "note": "Not consumed by any other table"
+                }]]
+            else:
+                for mapping in mappings:
+                    target_table = mapping["target_table"]
+                    target_column = mapping["target_column"]
+                    trans_type = mapping["transformation_type"]
+                    subchains = _trace_outbound(target_table, target_column, visited, depth + 1)
+                    for subchain in subchains:
+                        chains.append([{
+                            "table": current_table,
+                            "column": current_column,
+                            "type": trans_type if trans_type else "direct_copy",
+                            "leaf": False
+                        }] + subchain)
+            return chains
+
+        inbound = _trace_inbound(table, column, set(), 0)
+        outbound = _trace_outbound(table, column, set(), 0)
+
+        tables_in_chain = set()
+        for chain in inbound + outbound:
+            for step in chain:
+                tbl = step["table"]
+                if tbl not in ["(constant)", "(unknown)"]:
+                    tables_in_chain.add(tbl)
+
+        return {
+            "inbound": inbound,
+            "outbound": outbound,
+            "tables_in_chain": list(tables_in_chain)
+        }
+
+
 if __name__ == "__main__":
     # For testing
     logging.basicConfig(level=logging.INFO)

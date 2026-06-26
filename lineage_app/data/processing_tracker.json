@@ -18,6 +18,11 @@
       "status": "success",
       "tables_found": 0,
       "processed_at": "2026-06-25T10:43:47Z"
+    },
+    "TrustAccessWaitTables.sql": {
+      "status": "success",
+      "tables_found": 8,
+      "processed_at": "2026-06-26T11:07:27Z"
     }
   }
 }
