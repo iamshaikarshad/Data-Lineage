@@ -25,7 +25,7 @@
         "raw.tblHasATwinValues",
         "raw.tblSpell",
         "raw.tblSexualityValues",
-        "Vault.HubPatient",
+        "vault.HubPatient",
         "raw.tblExternalCodeMapping",
         "raw.tblExternalCodeMappingDataSource",
         "raw.tblExternalCodeMappingContextValues",
@@ -40,437 +40,437 @@
       "column_mappings": [
         {
           "target_column": "HubPatientPK",
-          "source_table": "Vault.HubPatient",
+          "source_table": "vault.HubPatient",
           "source_column": "HubPatientPK",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from Vault.HubPatient"
+          "transformation_logic": "Direct copy of HubPatientPK from HubPatient table."
         },
         {
           "target_column": "RecordSource",
-          "source_table": "N/A",
+          "source_table": null,
           "source_column": "'PJS'",
           "transformation_type": "constant",
-          "transformation_logic": "Hardcoded string 'PJS'"
+          "transformation_logic": "Hardcoded constant string 'PJS'."
         },
         {
           "target_column": "NHS_Number",
           "source_table": "raw.tblPatient",
           "source_column": "NHS_Number",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblPatient"
+          "transformation_logic": "Direct copy of NHS_Number from tblPatient."
         },
         {
           "target_column": "Shared_Id",
           "source_table": "raw.tblPatient",
-          "source_column": "SUBSTRING(sys.fn_sqlvarbasetostr(HASHBYTES('SHA1', pat.NHS_Number + '031tai303')), 3, 60)",
+          "source_column": "nhs_number",
           "transformation_type": "calculation",
-          "transformation_logic": "SHA1 hash of NHS_Number concatenated with '031tai303', converted to string, then substring from 3rd character for 60 length."
+          "transformation_logic": "Calculated by taking SHA1 hash of NHS_Number (from tblPatient) concatenated with a constant string, converted to a string, and then a substring is extracted."
         },
         {
           "target_column": "Title_ID",
           "source_table": "raw.tblTitleValues",
           "source_column": "Title_Desc",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblTitleValues"
+          "transformation_logic": "Direct copy of Title_Desc from tblTitleValues."
         },
         {
           "target_column": "Forename",
           "source_table": "raw.tblPatient",
           "source_column": "Forename",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblPatient"
+          "transformation_logic": "Direct copy of Forename from tblPatient."
         },
         {
           "target_column": "Middle_Name",
           "source_table": "raw.tblPatient",
           "source_column": "Middle_Name",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblPatient"
+          "transformation_logic": "Direct copy of Middle_Name from tblPatient."
         },
         {
           "target_column": "Surname",
           "source_table": "raw.tblPatient",
           "source_column": "Surname",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblPatient"
+          "transformation_logic": "Direct copy of Surname from tblPatient."
         },
         {
           "target_column": "Date_Of_Birth",
           "source_table": "raw.tblPatient",
           "source_column": "Date_Of_Birth",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblPatient"
+          "transformation_logic": "Direct copy of Date_Of_Birth from tblPatient."
         },
         {
           "target_column": "cleaneddateofbirth",
           "source_table": "raw.tblPatient",
-          "source_column": "dateadd(mm, datediff(mm, 0, pat.Date_Of_Birth), 0)",
+          "source_column": "Date_Of_Birth",
           "transformation_type": "calculation",
-          "transformation_logic": "Calculates the first day of the month for the patient's Date_Of_Birth."
+          "transformation_logic": "Calculated as the first day of the month of the Date_Of_Birth from tblPatient."
         },
         {
           "target_column": "Date_Of_Death",
           "source_table": "raw.tblPatient",
           "source_column": "Date_Of_Death",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblPatient"
+          "transformation_logic": "Direct copy of Date_Of_Death from tblPatient."
         },
         {
           "target_column": "First_Year_Of_Care_Date",
           "source_table": "raw.tblPatient",
           "source_column": "First_Year_Of_Care_Date",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblPatient"
+          "transformation_logic": "Direct copy of First_Year_Of_Care_Date from tblPatient."
         },
         {
           "target_column": "First_Year_Of_Care_Text",
           "source_table": "raw.tblPatient",
           "source_column": "First_Year_Of_Care_Text",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblPatient"
+          "transformation_logic": "Direct copy of First_Year_Of_Care_Text from tblPatient."
         },
         {
           "target_column": "First_Language_ID",
           "source_table": "raw.tblLanguageValues",
           "source_column": "Language_Desc",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblLanguageValues"
+          "transformation_logic": "Direct copy of Language_Desc from tblLanguageValues."
         },
         {
           "target_column": "Gender_ID",
           "source_table": "raw.tblGenderValues",
           "source_column": "Gender_Desc",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblGenderValues"
-        },
-        {
-          "target_column": "Gender",
-          "source_table": "raw.tblGenderValues",
-          "source_column": "Gender_ID",
-          "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from Gender_ID column of raw.tblGenderValues via GV subquery."
+          "transformation_logic": "Direct copy of Gender_Desc from tblGenderValues."
         },
         {
           "target_column": "Religion_ID",
           "source_table": "raw.tblReligionValues",
           "source_column": "Religion_Desc",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblReligionValues"
+          "transformation_logic": "Direct copy of Religion_Desc from tblReligionValues."
         },
         {
           "target_column": "Marital_Status_ID",
           "source_table": "raw.tblMaritalStatusValues",
           "source_column": "Marital_Status_Desc",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblMaritalStatusValues"
+          "transformation_logic": "Direct copy of Marital_Status_Desc from tblMaritalStatusValues."
         },
         {
           "target_column": "Lives_With_ID",
           "source_table": "raw.tblLivesWithValues",
           "source_column": "Lives_With_Desc",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblLivesWithValues"
+          "transformation_logic": "Direct copy of Lives_With_Desc from tblLivesWithValues."
         },
         {
           "target_column": "Ethnicitycleaned",
           "source_table": "raw.tblEthnicityValues",
-          "source_column": "CASE WHEN pateth.Ethnicity_Desc = 'British (A)' THEN 'White - British' WHEN pateth.Ethnicity_Desc = 'White - British' THEN 'White - British' WHEN pateth.Ethnicity_Desc = 'English (CA)' THEN 'White - British' WHEN pateth.Ethnicity_Desc = 'Northern Irish (C2)' THEN 'White - British' WHEN pateth.Ethnicity_Desc = 'Northen Irish (C2)' THEN 'White - British' WHEN pateth.Ethnicity_Desc = 'Scottish (CB)' THEN 'White - British' WHEN pateth.Ethnicity_Desc = 'Welsh (CC)' THEN 'White - British' WHEN pateth.Ethnicity_Desc = 'Irish (B)' THEN 'White - Irish' WHEN pateth.Ethnicity_Desc = 'White - Irish' THEN 'White - Irish' WHEN pateth.Ethnicity_Desc = 'Gypsy/Romany (CN)' THEN 'White \u2013 Gypsy or Irish Traveller' WHEN pateth.Ethnicity_Desc = 'Irish Traveller (CL)' THEN 'White \u2013 Gypsy or Irish Traveller' WHEN pateth.Ethnicity_Desc = 'Traveller (CM)' THEN 'White \u2013 Gypsy or Irish Traveller' WHEN pateth.Ethnicity_Desc = 'White \u2013 Gypsy or Irish Traveller' THEN 'White \u2013 Gypsy or Irish Traveller' WHEN pateth.Ethnicity_Desc = 'Albanian (CS)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'All former USSR Republics (CQ)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Bosnian (CT)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Croatian (CU)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Cypriot (part not stated) (CE)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Greek (CF)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Greek Cypriot (CG)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Italian (CK)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Kosovan (CR)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Other former Yugoslavia (CW)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Other White Unspecified (C3)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Other White/Mixed European (CY)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Polish (CP)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Portuguese (C4)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Serbian (CV)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Turkish (CH)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'White \u2013 Other' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Turkish Cypriot (CJ)' THEN 'White \u2013 Other' WHEN pateth.Ethnicity_Desc = 'White and Black Caribbean (D)' THEN 'Mixed Race - White and Black Caribbean' WHEN pateth.Ethnicity_Desc = 'Mixed Race - White and Black Caribbean' THEN 'Mixed Race - White and Black Caribbean' WHEN pateth.Ethnicity_Desc = 'Mixed Race - White and Black African' THEN 'Mixed Race - White and Black African' WHEN pateth.Ethnicity_Desc = 'White and Black African (E)' THEN 'Mixed Race - White and Black African' WHEN pateth.Ethnicity_Desc = 'Mixed Race - White and Asian' THEN 'Mixed Race - White and Asian' WHEN pateth.Ethnicity_Desc = 'White and Asian (F)' THEN 'Mixed Race - White and Asian' WHEN pateth.Ethnicity_Desc = 'Mixed Race - Other' THEN 'Mixed/Multiple ethnic groups - Other' WHEN pateth.Ethnicity_Desc = 'Asian and Chinese (GE)' THEN 'Mixed/Multiple ethnic groups - Other' WHEN pateth.Ethnicity_Desc = 'Black and Asian (GA)' THEN 'Mixed/Multiple ethnic groups - Other' WHEN pateth.Ethnicity_Desc = 'Black and Chinese (GB)' THEN 'Mixed/Multiple ethnic groups - Other' WHEN pateth.Ethnicity_Desc = 'Black and White (GC)' THEN 'Mixed/Multiple ethnic groups - Other' WHEN pateth.Ethnicity_Desc = 'Chinese and White (GD)' THEN 'Mixed/Multiple ethnic groups - Other' WHEN pateth.Ethnicity_Desc = 'Mixed/Multiple ethnic groups - Other' THEN 'Mixed/Multiple ethnic groups - Other' WHEN pateth.Ethnicity_Desc = 'Other mixed or mixed unspecified (GF)' THEN 'Mixed/Multiple ethnic groups - Other' WHEN pateth.Ethnicity_Desc = 'Indian/British Indian (H)' THEN 'Asian/Asian British - Indian' WHEN pateth.Ethnicity_Desc = 'Asian/Asian British - Indian' THEN 'Asian/Asian British - Indian' WHEN pateth.Ethnicity_Desc = 'Pakistani/British Pakistani (J)' THEN 'Asian/Asian British - Pakistani' WHEN pateth.Ethnicity_Desc = 'Asian/Asian British - Pakistani' THEN 'Asian/Asian British - Pakistani' WHEN pateth.Ethnicity_Desc = 'Bangladeshi/British Bangladeshi (K)' THEN 'Asian/Asian British - Bangladeshi' WHEN pateth.Ethnicity_Desc = 'Asian/Asian British - Bangladeshi' THEN 'Asian/Asian British - Bangladeshi' WHEN pateth.Ethnicity_Desc = 'Caribbean (M)' THEN 'Black/Black British - Caribbean' WHEN pateth.Ethnicity_Desc = 'Black/Black British - Caribbean' THEN 'Black/Black British - Caribbean' WHEN pateth.Ethnicity_Desc = 'Algerian (PP)' THEN 'Black/Black British - African' WHEN pateth.Ethnicity_Desc = 'African' THEN 'Black/Black British - African' WHEN pateth.Ethnicity_Desc = 'Black/Black British - African' THEN 'Black/Black British - African' WHEN pateth.Ethnicity_Desc = 'Angolan (PJ)' THEN 'Black/Black British - African' WHEN pateth.Ethnicity_Desc = 'Ethiopian (PL)' THEN 'Black/Black British - African' WHEN pateth.Ethnicity_Desc = 'Ghanaian (PM)' THEN 'Black/Black British - African' WHEN pateth.Ethnicity_Desc = 'Nigerian (PC)' THEN 'Black/Black British - African' WHEN pateth.Ethnicity_Desc = 'Other African (N)' THEN 'Black/Black British - African' WHEN pateth.Ethnicity_Desc = 'Somali (PA)' THEN 'Black/Black British - African' WHEN pateth.Ethnicity_Desc = 'Sudanese (PH)' THEN 'Black/Black British - African' WHEN pateth.Ethnicity_Desc = 'Ugandan (PQ)' THEN 'Black/Black British - African' WHEN pateth.Ethnicity_Desc = 'Eritrean (PK)' THEN 'Black/Black British - African' WHEN pateth.Ethnicity_Desc = 'Ethnicity is unknown' THEN 'Not known' WHEN pateth.Ethnicity_Desc = 'Not known' THEN 'Not known' WHEN pateth.Ethnicity_Desc = 'Black British (PD)' THEN 'Black/Black British - Other' WHEN pateth.Ethnicity_Desc = 'Black/Black British - Other' THEN 'Black/Black British - Other' WHEN pateth.Ethnicity_Desc = 'Mixed Black (PB)' THEN 'Black/Black British - Other' WHEN pateth.Ethnicity_Desc = 'Other Black British (PD)' THEN 'Black/Black British - Other' WHEN pateth.Ethnicity_Desc = 'Other Black Unspecified (PE)' THEN 'Black/Black British - Other' WHEN pateth.Ethnicity_Desc = 'Chinese (R)' THEN 'Asian/Asian British - Chinese' WHEN pateth.Ethnicity_Desc = 'Chinese' THEN 'Asian/Asian British - Chinese' WHEN pateth.Ethnicity_Desc = 'Kurdish (C5)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Iraqi (SJ)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Middle Eastern (SF)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'British Asian (LH)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Asian/Asian British - Chinese' THEN 'Asian/Asian British - Chinese' WHEN pateth.Ethnicity_Desc = 'Asian/Asian British \u2013 Other' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Caribbean Asian (LJ)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'East African Asian (LD)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Kashmiri (LC)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Mixed Asian (LA)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Other Asian Unspecified (LK)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Punjabi (LB)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Sinhalese (LG)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Sri Lankan (LE)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Tamil (LF)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Filipino (SC)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Japanese (SB)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Malaysian (SD)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Vietnamese (SA)' THEN 'Asian/Asian British \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Arab (SG)' THEN 'Other ethnic group - Arab' WHEN pateth.Ethnicity_Desc = 'Other ethnic group - Arab' THEN 'Other ethnic group - Arab' WHEN pateth.Ethnicity_Desc = 'Any Other Group (SE)' THEN 'Other ethnic group \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Other ethnic group \u2013 Other' THEN 'Other ethnic group \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Colombian (SK)' THEN 'Other ethnic group \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Columbian (SK)' THEN 'Other ethnic group \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Ecuadorian (SL)' THEN 'Other ethnic group \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Iranian (SH)' THEN 'Other ethnic group \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Other Latin American (SM)' THEN 'Other ethnic group \u2013 Other' WHEN pateth.Ethnicity_Desc = 'Not Stated (Z)' THEN 'Not Stated' WHEN pateth.Ethnicity_Desc = 'Not Known (99)' THEN 'Not Stated' WHEN pateth.Ethnicity_Desc = 'Not Stated' THEN 'Not Stated' END",
+          "source_column": "Ethnicity_Desc",
           "transformation_type": "conditional",
-          "transformation_logic": "Maps various Ethnicity_Desc values from raw.tblEthnicityValues to a standardized 'cleaned' ethnicity string."
+          "transformation_logic": "Maps pateth.Ethnicity_Desc (from tblEthnicityValues) to a standardized ethnicity string using a complex CASE statement."
         },
         {
           "target_column": "Country_Of_Origin_ID",
           "source_table": "raw.tblCountryValues",
           "source_column": "Country_Desc",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblCountryValues"
+          "transformation_logic": "Direct copy of Country_Desc from tblCountryValues."
         },
         {
           "target_column": "Employment_ID",
           "source_table": "raw.tblEmploymentValues",
           "source_column": "Employment_Desc",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblEmploymentValues"
+          "transformation_logic": "Direct copy of Employment_Desc from tblEmploymentValues."
         },
         {
           "target_column": "Welfare_Benefits_Client_ID",
           "source_table": "raw.tblYesNoValues",
           "source_column": "Yes_No_Desc",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblYesNoValues"
+          "transformation_logic": "Direct copy of Yes_No_Desc from tblYesNoValues (aliased as patben)."
         },
         {
           "target_column": "Mobility_Problem_ID",
           "source_table": "raw.tblPatientMobilityProblemValues",
           "source_column": "Patient_Mobility_Problem_Desc",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblPatientMobilityProblemValues"
+          "transformation_logic": "Direct copy of Patient_Mobility_Problem_Desc from tblPatientMobilityProblemValues."
         },
         {
           "target_column": "Hearing_Impairment_ID",
           "source_table": "raw.tblPatientHearingImpairmentValues",
           "source_column": "Patient_Hearing_Impairment_Desc",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblPatientHearingImpairmentValues"
+          "transformation_logic": "Direct copy of Patient_Hearing_Impairment_Desc from tblPatientHearingImpairmentValues."
         },
         {
           "target_column": "Visual_Impairment_ID",
           "source_table": "raw.tblPatientVisualImpairmentValues",
           "source_column": "Patient_Visual_Impairment_Desc",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblPatientVisualImpairmentValues"
+          "transformation_logic": "Direct copy of Patient_Visual_Impairment_Desc from tblPatientVisualImpairmentValues."
         },
         {
           "target_column": "DAT_Of_Residence_ID",
           "source_table": "raw.tblDATValues",
           "source_column": "DAT_Desc",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblDATValues"
+          "transformation_logic": "Direct copy of DAT_Desc from tblDATValues."
         },
         {
           "target_column": "Housing_Status",
           "source_table": "raw.tblPatient",
           "source_column": "Housing_Status",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblPatient"
+          "transformation_logic": "Direct copy of Housing_Status from tblPatient."
         },
         {
           "target_column": "Is_Interpreter_Needed_ID",
           "source_table": "raw.tblYesNoValues",
           "source_column": "Yes_No_Desc",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblYesNoValues"
+          "transformation_logic": "Direct copy of Yes_No_Desc from tblYesNoValues (aliased as patint)."
         },
         {
           "target_column": "Occupation_ID",
           "source_table": "raw.tblOccupationValues",
           "source_column": "Occupation_Desc",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblOccupationValues"
+          "transformation_logic": "Direct copy of Occupation_Desc from tblOccupationValues."
         },
         {
           "target_column": "Overseas_Visitor_ID",
           "source_table": "raw.tblYesNoValues",
           "source_column": "Yes_No_Desc",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblYesNoValues"
+          "transformation_logic": "Direct copy of Yes_No_Desc from tblYesNoValues (aliased as patover)."
         },
         {
           "target_column": "Asylum_Seeker_ID",
           "source_table": "raw.tblAsylumSeekerValues",
           "source_column": "Asylum_Seeker_Desc",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblAsylumSeekerValues"
+          "transformation_logic": "Direct copy of Asylum_Seeker_Desc from tblAsylumSeekerValues."
         },
         {
           "target_column": "Has_A_Twin_ID",
           "source_table": "raw.tblHasATwinValues",
           "source_column": "Has_A_Twin_Desc",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblHasATwinValues"
+          "transformation_logic": "Direct copy of Has_A_Twin_Desc from tblHasATwinValues."
         },
         {
           "target_column": "Create_Dttm",
           "source_table": "raw.tblPatient",
           "source_column": "Create_Dttm",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblPatient"
+          "transformation_logic": "Direct copy of Create_Dttm from tblPatient."
         },
         {
           "target_column": "Updated_Dttm",
           "source_table": "raw.tblPatient",
           "source_column": "Updated_Dttm",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblPatient"
+          "transformation_logic": "Direct copy of Updated_Dttm from tblPatient."
         },
         {
           "target_column": "ViewDate",
           "source_table": "raw.tblCNDocument",
           "source_column": "ViewDate",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblCNDocument"
+          "transformation_logic": "Direct copy of ViewDate from tblCNDocument."
         },
         {
           "target_column": "Is_Active",
           "source_table": "raw.tblYesNoValues",
           "source_column": "Yes_No_Desc",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblYesNoValues"
+          "transformation_logic": "Direct copy of Yes_No_Desc from tblYesNoValues (aliased as patisact)."
         },
         {
           "target_column": "Spell_Number",
           "source_table": "raw.tblSpell",
           "source_column": "Spell_Number",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblSpell"
+          "transformation_logic": "Direct copy of Spell_Number from tblSpell."
         },
         {
           "target_column": "ViewText",
           "source_table": "raw.tblCNDocument",
           "source_column": "ViewText",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblCNDocument"
+          "transformation_logic": "Direct copy of ViewText from tblCNDocument."
         },
         {
           "target_column": "Patient_ID",
           "source_table": "raw.tblPatient",
           "source_column": "Patient_ID",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblPatient"
+          "transformation_logic": "Direct copy of Patient_ID from tblPatient."
         },
         {
           "target_column": "Other_ID1",
           "source_table": "raw.tblPatient",
           "source_column": "Other_ID1",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblPatient"
+          "transformation_logic": "Direct copy of Other_ID1 from tblPatient."
         },
         {
           "target_column": "TrustID",
           "source_table": "raw.tblPatient",
-          "source_column": "REPLACE(pat.Other_ID1, '-', '')",
+          "source_column": "Other_ID1",
           "transformation_type": "calculation",
-          "transformation_logic": "Removes hyphens from the Other_ID1 column of raw.tblPatient"
+          "transformation_logic": "Calculated by removing hyphens from Other_ID1 from tblPatient."
         },
         {
           "target_column": "CN_Doc_ID",
           "source_table": "raw.tblCNDocument",
           "source_column": "CN_Doc_ID",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblCNDocument"
+          "transformation_logic": "Direct copy of CN_Doc_ID from tblCNDocument."
         },
         {
           "target_column": "QualityInd",
           "source_table": "raw.tblPatient",
-          "source_column": "CASE WHEN pat.surname like 'XYX%' THEN 'N' WHEN pat.surname like 'XXX%' THEN 'N' WHEN pat.surname like 'tkest%' THEN 'N' WHEN pat.Surname like '%deletion%' THEN 'N' ELSE 'Y' END",
+          "source_column": "surname",
           "transformation_type": "conditional",
-          "transformation_logic": "Indicates data quality ('N' for specific surname patterns, 'Y' otherwise)."
+          "transformation_logic": "Indicates data quality based on patterns in the surname from tblPatient."
         },
         {
           "target_column": "Ethnicity_Desc",
           "source_table": "raw.tblEthnicityValues",
           "source_column": "Ethnicity_Desc",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblEthnicityValues"
+          "transformation_logic": "Direct copy of Ethnicity_Desc from tblEthnicityValues."
         },
         {
           "target_column": "Ethnicity_ID",
           "source_table": "raw.tblPatient",
           "source_column": "Ethnicity_ID",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblPatient"
-        },
-        {
-          "target_column": "GenderCode",
-          "source_table": "raw.tblExternalCodeMapping",
-          "source_column": "External_Code",
-          "transformation_type": "direct_copy",
-          "transformation_logic": "Looks up External_Code based on Gender_Desc from raw.tblGenderValues through a mapping table."
-        },
-        {
-          "target_column": "MaritalCode",
-          "source_table": "raw.tblExternalCodeMapping",
-          "source_column": "External_Code",
-          "transformation_type": "direct_copy",
-          "transformation_logic": "Looks up External_Code based on Marital_Status_Desc from raw.tblMaritalStatusValues through a mapping table."
-        },
-        {
-          "target_column": "EthnicityCode",
-          "source_table": "raw.tblExternalCodeMapping",
-          "source_column": "External_Code",
-          "transformation_type": "direct_copy",
-          "transformation_logic": "Looks up External_Code based on Ethnicity_Desc from raw.tblEthnicityValues through a mapping table."
-        },
-        {
-          "target_column": "LanguageCode",
-          "source_table": "raw.tblExternalCodeMapping",
-          "source_column": "External_code",
-          "transformation_type": "direct_copy",
-          "transformation_logic": "Looks up External_code based on Language_Desc from raw.tblLanguageValues through a mapping table."
-        },
-        {
-          "target_column": "LatestPostCode",
-          "source_table": "raw.tblAddress",
-          "source_column": "Post_Code",
-          "transformation_type": "conditional",
-          "transformation_logic": "Retrieves the Post_Code from the most recent permanent address (raw.tblAddress) for the patient."
-        },
-        {
-          "target_column": "LatestPractiseCode",
-          "source_table": "raw.tblPractice",
-          "source_column": "Practice_Code",
-          "transformation_type": "conditional",
-          "transformation_logic": "Retrieves the Practice_Code from the most recent GP detail (raw.tblGPDetail, raw.tblPractice) for the patient."
+          "transformation_logic": "Direct copy of Ethnicity_ID from tblPatient."
         },
         {
           "target_column": "Sexual_Orientation_ID",
           "source_table": "raw.tblSexualityValues",
           "source_column": "Sexuality_Desc",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblSexualityValues"
+          "transformation_logic": "Direct copy of Sexuality_Desc from tblSexualityValues."
         },
         {
           "target_column": "Stated_Gender_Identity_ID",
           "source_table": "raw.tblPatient",
           "source_column": "Stated_Gender_Identity_ID",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblPatient"
+          "transformation_logic": "Direct copy of Stated_Gender_Identity_ID from tblPatient."
         },
         {
           "target_column": "Gender_Identity_Same_At_Birth_ID",
           "source_table": "raw.tblPatient",
           "source_column": "Gender_Identity_Same_At_Birth_ID",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblPatient"
-        },
-        {
-          "target_column": "GenderIdentitySameAtBirthCode",
-          "source_table": "raw.tblExternalCodeMapping",
-          "source_column": "External_code",
-          "transformation_type": "direct_copy",
-          "transformation_logic": "Looks up External_code based on Gender_Identity_Same_At_Birth_ID from raw.tblGenderIdentitySameAtBirthValues through a mapping table."
-        },
-        {
-          "target_column": "PersonStatedGenderID",
-          "source_table": "raw.tblExternalCodeMapping",
-          "source_column": "External_code",
-          "transformation_type": "direct_copy",
-          "transformation_logic": "Looks up External_code based on Person_Stated_Gender_Identity_ID from raw.tblPersonStatedGenderIdentityValues through a mapping table."
+          "transformation_logic": "Direct copy of Gender_Identity_Same_At_Birth_ID from tblPatient."
         },
         {
           "target_column": "Ex_British_Armed_Forces_ID",
           "source_table": "raw.tblPatient",
           "source_column": "Ex_British_Armed_Forces_ID",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from raw.tblPatient"
+          "transformation_logic": "Direct copy of Ex_British_Armed_Forces_ID from tblPatient."
         },
         {
-          "target_column": "VaultLoaddate",
-          "source_table": "N/A",
-          "source_column": "GETDATE()",
-          "transformation_type": "constant",
-          "transformation_logic": "System current date and time at load."
+          "target_column": "GenderCode",
+          "source_table": "raw.tblExternalCodeMapping",
+          "source_column": "External_Code",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of External_Code from tblExternalCodeMapping, mapped via tblGenderValues and context filters."
         },
         {
-          "target_column": "VaultUpdateDate",
-          "source_table": "N/A",
-          "source_column": "GETDATE()",
-          "transformation_type": "constant",
-          "transformation_logic": "System current date and time at update/load."
+          "target_column": "MaritalCode",
+          "source_table": "raw.tblExternalCodeMapping",
+          "source_column": "External_Code",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of External_Code from tblExternalCodeMapping, mapped via tblMaritalStatusValues and context filters."
+        },
+        {
+          "target_column": "EthnicityCode",
+          "source_table": "raw.tblExternalCodeMapping",
+          "source_column": "External_Code",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of External_Code from tblExternalCodeMapping, mapped via tblEthnicityValues and context filters."
+        },
+        {
+          "target_column": "LanguageCode",
+          "source_table": "raw.tblExternalCodeMapping",
+          "source_column": "External_code",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of External_code from tblExternalCodeMapping, mapped via tblLanguageValues and context filters."
+        },
+        {
+          "target_column": "LatestPostCode",
+          "source_table": "raw.tblAddress",
+          "source_column": "Post_Code",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of Post_Code from tblAddress, representing the latest permanent address for the patient."
+        },
+        {
+          "target_column": "LatestPractiseCode",
+          "source_table": "raw.tblPractice",
+          "source_column": "Practice_Code",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of Practice_Code from tblPractice, representing the latest GP practice for the patient."
+        },
+        {
+          "target_column": "GenderIdentitySameAtBirthCode",
+          "source_table": "raw.tblExternalCodeMapping",
+          "source_column": "External_Code",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of External_Code from tblExternalCodeMapping, mapped via tblGenderIdentitySameAtBirthValues and context filters."
+        },
+        {
+          "target_column": "PersonStatedGenderID",
+          "source_table": "raw.tblExternalCodeMapping",
+          "source_column": "External_Code",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of External_Code from tblExternalCodeMapping, mapped via tblPersonStatedGenderIdentityValues and context filters."
         },
         {
           "target_column": "IsDeleted",
           "source_table": "raw.tblPatient",
-          "source_column": "case when PAT.surname like 'XYX%' then 'Y' when PAT.surname like 'XXX%' then 'Y' else 'N' end",
+          "source_column": "surname",
           "transformation_type": "conditional",
-          "transformation_logic": "Flag 'Y' if patient surname starts with 'XYX%' or 'XXX%', otherwise 'N'."
+          "transformation_logic": "Determines if the record should be marked as deleted based on specific patterns in the surname from tblPatient."
         },
         {
           "target_column": "TestRecord",
           "source_table": "raw.tblPatient",
-          "source_column": "case when PAT.surname like 'tkest%' then 'Y' when PAT.surname like 'XXtest%' then 'Y' when PAT.surname like 'XXXtest%' then 'Y' else 'N' end",
+          "source_column": "surname",
           "transformation_type": "conditional",
-          "transformation_logic": "Flag 'Y' if patient surname starts with 'tkest%', 'XXtest%', or 'XXXtest%', otherwise 'N'."
+          "transformation_logic": "Determines if the record is a test record based on specific patterns in the surname from tblPatient."
+        },
+        {
+          "target_column": "Gender",
+          "source_table": "raw.tblGenderValues",
+          "source_column": "GV.Gender",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of Gender_ID (aliased as Gender) from tblGenderValues, filtered by external code mapping context."
+        },
+        {
+          "target_column": "VaultLoaddate",
+          "source_table": null,
+          "source_column": "GETDATE()",
+          "transformation_type": "constant",
+          "transformation_logic": "Current system datetime, only set on insert."
+        },
+        {
+          "target_column": "VaultUpdateDate",
+          "source_table": null,
+          "source_column": "GETDATE()",
+          "transformation_type": "constant",
+          "transformation_logic": "Current system datetime, set on update and insert."
         }
       ],
       "joins": [
@@ -489,49 +489,49 @@
         {
           "left_table": "raw.tblPatient",
           "right_table": "raw.tblGenderValues",
-          "join_type": "LEFT",
+          "join_type": "LEFT OUTER",
           "condition": "pat.Gender_ID = patgen.Gender_ID"
         },
         {
           "left_table": "raw.tblPatient",
           "right_table": "raw.tblTitleValues",
-          "join_type": "LEFT",
+          "join_type": "LEFT OUTER",
           "condition": "pat.Title_ID = pattitle.Title_ID"
         },
         {
           "left_table": "raw.tblPatient",
           "right_table": "raw.tblReligionValues",
-          "join_type": "LEFT",
+          "join_type": "LEFT OUTER",
           "condition": "pat.Religion_ID = patrel.Religion_ID"
         },
         {
           "left_table": "raw.tblPatient",
           "right_table": "raw.tblMaritalStatusValues",
-          "join_type": "LEFT",
+          "join_type": "LEFT OUTER",
           "condition": "pat.Marital_Status_ID = patmar.Marital_Status_ID"
         },
         {
           "left_table": "raw.tblPatient",
           "right_table": "raw.tblLivesWithValues",
-          "join_type": "LEFT",
+          "join_type": "LEFT OUTER",
           "condition": "pat.Lives_With_ID = patlives.Lives_With_ID"
         },
         {
           "left_table": "raw.tblPatient",
           "right_table": "raw.tblEthnicityValues",
-          "join_type": "LEFT",
+          "join_type": "LEFT OUTER",
           "condition": "pat.Ethnicity_ID = pateth.Ethnicity_ID"
         },
         {
           "left_table": "raw.tblPatient",
           "right_table": "raw.tblCountryValues",
-          "join_type": "LEFT",
+          "join_type": "LEFT OUTER",
           "condition": "pat.Country_Of_Origin_ID = patorig.Country_ID"
         },
         {
           "left_table": "raw.tblPatient",
           "right_table": "raw.tblEmploymentValues",
-          "join_type": "LEFT",
+          "join_type": "LEFT OUTER",
           "condition": "pat.Employment_ID = patemp.Employment_ID"
         },
         {
@@ -567,7 +567,7 @@
         {
           "left_table": "raw.tblPatient",
           "right_table": "raw.tblDATValues",
-          "join_type": "LEFT",
+          "join_type": "LEFT OUTER",
           "condition": "pat.DAT_Of_Residence_ID = patdat.DAT_ID"
         },
         {
@@ -585,13 +585,13 @@
         {
           "left_table": "raw.tblPatient",
           "right_table": "raw.tblAsylumSeekerValues",
-          "join_type": "LEFT",
+          "join_type": "LEFT OUTER",
           "condition": "pat.Asylum_Seeker_ID = patasy.Asylum_Seeker_ID"
         },
         {
           "left_table": "raw.tblPatient",
           "right_table": "raw.tblHasATwinValues",
-          "join_type": "LEFT",
+          "join_type": "LEFT OUTER",
           "condition": "pat.Has_A_Twin_ID = pattwin.Has_A_Twin_ID"
         },
         {
@@ -603,23 +603,23 @@
         {
           "left_table": "raw.tblCNDocument",
           "right_table": "raw.tblSpell",
-          "join_type": "LEFT",
+          "join_type": "LEFT OUTER",
           "condition": "patcndoc.Referral_ID = patspell.Referral_ID"
         },
         {
           "left_table": "raw.tblPatient",
           "right_table": "raw.tblSexualityValues",
-          "join_type": "LEFT",
+          "join_type": "LEFT OUTER",
           "condition": "pat.Sexuality_ID = patsex.Sexuality_ID"
         },
         {
           "left_table": "raw.tblPatient",
-          "right_table": "Vault.HubPatient",
+          "right_table": "vault.HubPatient",
           "join_type": "INNER",
           "condition": "HP.PatientID = PAT.Patient_ID"
         },
         {
-          "left_table": "Patient",
+          "left_table": "Patient (CTE)",
           "right_table": "raw.tblGenderValues",
           "join_type": "LEFT",
           "condition": "GV.Gender_Desc = pat.Gender_ID"
@@ -634,16 +634,16 @@
           "left_table": "raw.tblExternalCodeMapping",
           "right_table": "raw.tblExternalCodeMappingDataSource",
           "join_type": "LEFT",
-          "condition": "esmd.External_Code_Mapping_Data_Source_ID = esm.External_Code_Mapping_Data_Source_ID AND esmd.External_Code_Mapping_Data_Source_Key = 'Gender'"
+          "condition": "esmd.External_Code_Mapping_Data_Source_ID = esm.External_Code_Mapping_Data_Source_ID"
         },
         {
           "left_table": "raw.tblExternalCodeMappingDataSource",
           "right_table": "raw.tblExternalCodeMappingContextValues",
           "join_type": "INNER",
-          "condition": "esmc.External_Code_Mapping_Context_ID = esmd.External_Code_Mapping_Context_ID AND esmc.External_Code_Mapping_Context_Key = 'MHMDS'"
+          "condition": "esmc.External_Code_Mapping_Context_ID = esmd.External_Code_Mapping_Context_ID"
         },
         {
-          "left_table": "Patient",
+          "left_table": "Patient (CTE)",
           "right_table": "raw.tblMaritalStatusValues",
           "join_type": "LEFT",
           "condition": "MS.Marital_Status_Desc = pat.Marital_Status_ID"
@@ -658,16 +658,16 @@
           "left_table": "raw.tblExternalCodeMapping",
           "right_table": "raw.tblExternalCodeMappingDataSource",
           "join_type": "LEFT",
-          "condition": "esmd.External_Code_Mapping_Data_Source_ID = esm.External_Code_Mapping_Data_Source_ID AND esmd.External_Code_Mapping_Data_Source_Key = 'Marital_Status'"
+          "condition": "esmd.External_Code_Mapping_Data_Source_ID = esm.External_Code_Mapping_Data_Source_ID"
         },
         {
           "left_table": "raw.tblExternalCodeMappingDataSource",
           "right_table": "raw.tblExternalCodeMappingContextValues",
           "join_type": "INNER",
-          "condition": "esmc.External_Code_Mapping_Context_ID = esmd.External_Code_Mapping_Context_ID AND esmc.External_Code_Mapping_Context_Key = 'MHMDS'"
+          "condition": "esmc.External_Code_Mapping_Context_ID = esmd.External_Code_Mapping_Context_ID"
         },
         {
-          "left_table": "Patient",
+          "left_table": "Patient (CTE)",
           "right_table": "raw.tblEthnicityValues",
           "join_type": "LEFT",
           "condition": "EV.Ethnicity_DESC = pat.Ethnicity_Desc"
@@ -682,16 +682,16 @@
           "left_table": "raw.tblExternalCodeMapping",
           "right_table": "raw.tblExternalCodeMappingDataSource",
           "join_type": "LEFT",
-          "condition": "esmd.External_Code_Mapping_Data_Source_ID = esm.External_Code_Mapping_Data_Source_ID AND esmd.External_Code_Mapping_Data_Source_Key = 'Ethnicity'"
+          "condition": "esmd.External_Code_Mapping_Data_Source_ID = esm.External_Code_Mapping_Data_Source_ID"
         },
         {
           "left_table": "raw.tblExternalCodeMappingDataSource",
           "right_table": "raw.tblExternalCodeMappingContextValues",
           "join_type": "INNER",
-          "condition": "esmc.External_Code_Mapping_Context_ID = esmd.External_Code_Mapping_Context_ID AND esmc.External_Code_Mapping_Context_Key = 'MHMDS'"
+          "condition": "esmc.External_Code_Mapping_Context_ID = esmd.External_Code_Mapping_Context_ID"
         },
         {
-          "left_table": "Patient",
+          "left_table": "Patient (CTE)",
           "right_table": "raw.tblLanguageValues",
           "join_type": "LEFT",
           "condition": "LC.Language_Desc = pat.First_Language_ID"
@@ -706,16 +706,16 @@
           "left_table": "raw.tblExternalCodeMapping",
           "right_table": "raw.tblExternalCodeMappingDataSource",
           "join_type": "LEFT",
-          "condition": "esmd.External_Code_Mapping_Data_Source_ID = esm.External_Code_Mapping_Data_Source_ID AND esmd.External_Code_Mapping_Data_Source_Key = 'Language'"
+          "condition": "esmd.External_Code_Mapping_Data_Source_ID = esm.External_Code_Mapping_Data_Source_ID"
         },
         {
           "left_table": "raw.tblExternalCodeMappingDataSource",
           "right_table": "raw.tblExternalCodeMappingContextValues",
           "join_type": "INNER",
-          "condition": "esmc.External_Code_Mapping_Context_ID = esmd.External_Code_Mapping_Context_ID AND esmc.External_Code_Mapping_Context_Key = 'MHMDS'"
+          "condition": "esmc.External_Code_Mapping_Context_ID = esmd.External_Code_Mapping_Context_ID"
         },
         {
-          "left_table": "Patient",
+          "left_table": "Patient (CTE)",
           "right_table": "raw.tblGenderIdentitySameAtBirthValues",
           "join_type": "LEFT",
           "condition": "GI.Gender_Identity_Same_At_Birth_ID = pat.Gender_Identity_Same_At_Birth_ID"
@@ -730,16 +730,16 @@
           "left_table": "raw.tblExternalCodeMapping",
           "right_table": "raw.tblExternalCodeMappingDataSource",
           "join_type": "LEFT",
-          "condition": "esmd.External_Code_Mapping_Data_Source_ID = esm.External_Code_Mapping_Data_Source_ID AND esmd.External_Code_Mapping_Data_Source_Key = 'Gender_Identity_Same_At_Birth'"
+          "condition": "esmd.External_Code_Mapping_Data_Source_ID = esm.External_Code_Mapping_Data_Source_ID"
         },
         {
           "left_table": "raw.tblExternalCodeMappingDataSource",
           "right_table": "raw.tblExternalCodeMappingContextValues",
           "join_type": "INNER",
-          "condition": "esmc.External_Code_Mapping_Context_ID = esmd.External_Code_Mapping_Context_ID AND esmc.External_Code_Mapping_Context_Key = 'MHMDS'"
+          "condition": "esmc.External_Code_Mapping_Context_ID = esmd.External_Code_Mapping_Context_ID"
         },
         {
-          "left_table": "Patient",
+          "left_table": "Patient (CTE)",
           "right_table": "raw.tblPersonStatedGenderIdentityValues",
           "join_type": "LEFT",
           "condition": "PG.Person_Stated_Gender_Identity_ID = pat.Stated_Gender_Identity_ID"
@@ -754,16 +754,16 @@
           "left_table": "raw.tblExternalCodeMapping",
           "right_table": "raw.tblExternalCodeMappingDataSource",
           "join_type": "LEFT",
-          "condition": "esmd.External_Code_Mapping_Data_Source_ID = esm.External_Code_Mapping_Data_Source_ID AND esmd.External_Code_Mapping_Data_Source_Key = 'Person_Stated_Gender_Identity'"
+          "condition": "esmd.External_Code_Mapping_Data_Source_ID = esm.External_Code_Mapping_Data_Source_ID"
         },
         {
           "left_table": "raw.tblExternalCodeMappingDataSource",
           "right_table": "raw.tblExternalCodeMappingContextValues",
           "join_type": "INNER",
-          "condition": "esmc.External_Code_Mapping_Context_ID = esmd.External_Code_Mapping_Context_ID AND esmc.External_Code_Mapping_Context_Key = 'MHMDS'"
+          "condition": "esmc.External_Code_Mapping_Context_ID = esmd.External_Code_Mapping_Context_ID"
         },
         {
-          "left_table": "Patient",
+          "left_table": "Patient (CTE)",
           "right_table": "raw.tblAddress",
           "join_type": "LEFT",
           "condition": "PC.patient_id = pat.patient_id"
@@ -775,7 +775,7 @@
           "condition": "PCT.PCT_ID = ADDR.Residence_PCT_ID"
         },
         {
-          "left_table": "Patient",
+          "left_table": "Patient (CTE)",
           "right_table": "raw.tblGPDetail",
           "join_type": "LEFT",
           "condition": "GPD.patient_id = pat.patient_id"
@@ -801,15 +801,12 @@
         {
           "left_table": "vault.Patient",
           "right_table": "VaultInterim.Patient_Interim",
-          "join_type": "ON",
+          "join_type": "MERGE",
           "condition": "SRC.Patient_ID = TGT.Patient_ID"
         }
       ],
       "filters": [
-        "(patcndoc.Object_Type_ID = 253)",
-        "ADDR.Address_Type_ID = '0'",
-        "Address_ID = (select top 1 Address_ID from raw.tblAddress ADDR2 where ADDR2.Address_Type_ID = '0' and ADDR2.patient_id = ADDR.patient_id order by ADDR2.Start_Date desc)",
-        "GP_Detail_ID = (select top 1 GP_Detail_ID from raw.tblGPDetail (nolock) GPDetail2 where GPDetail2.patient_id = GPDetail.patient_id order by GPDetail2.Start_Date desc)",
+        "patcndoc.Object_Type_ID = 253",
         "esmd.External_Code_Mapping_Data_Source_Key = 'Gender'",
         "esmc.External_Code_Mapping_Context_Key = 'MHMDS'",
         "esmd.External_Code_Mapping_Data_Source_Key = 'Marital_Status'",
@@ -821,248 +818,251 @@
         "esmd.External_Code_Mapping_Data_Source_Key = 'Gender_Identity_Same_At_Birth'",
         "esmc.External_Code_Mapping_Context_Key = 'MHMDS'",
         "esmd.External_Code_Mapping_Data_Source_Key = 'Person_Stated_Gender_Identity'",
-        "esmc.External_Code_Mapping_Context_Key = 'MHMDS'"
+        "esmc.External_Code_Mapping_Context_Key = 'MHMDS'",
+        "ADDR.Address_Type_ID = '0'",
+        "Address_ID = (select top 1 Address_ID from raw.tblAddress ADDR2 where ADDR2.Address_Type_ID = '0' and ADDR2.patient_id = ADDR.patient_id order by ADDR2.Start_Date desc)",
+        "GP_Detail_ID = (select top 1 GP_Detail_ID from raw.tblGPDetail (nolock) GPDetail2 where GPDetail2.patient_id = GPDetail.patient_id order by GPDetail2.Start_Date desc)"
       ],
       "grouping": [],
       "extraction_method": "gemini",
       "source_file": "Vault.Loadpatient.sql"
     },
     {
-      "procedure_name": "Vault.LoadTrustAccessWaits",
-      "target_table": "Vault.TrustAccessWaits",
+      "procedure_name": "vault.LoadTrustAccessWaits",
+      "target_table": "vault.TrustAccessWaits",
       "source_tables": [
-        "Vault.WaitingTimes",
-        "Vault.Patient",
-        "Vault.Episode",
-        "Vault.TrustAccessWaitingTimes",
-        "Vault.DimSD",
-        "Dim.Priority",
-        "Vault.ReferralStatusValues"
+        "SLAMBI.Vault.WaitingTimes",
+        "SLAMBI.Vault.Patient",
+        "SLAMBI.Vault.Episode",
+        "SLAMBI.Vault.TrustAccessWaitingTimes",
+        "SLAMBI.Vault.DimSD",
+        "SLAMBI.Dim.Priority",
+        "SLAMBI.Vault.ReferralStatusValues"
       ],
       "column_mappings": [
         {
           "target_column": "Backup Date",
-          "source_table": null,
+          "source_table": "N/A",
           "source_column": "Getdate()",
-          "transformation_type": "calculation",
-          "transformation_logic": "Current system date and time"
+          "transformation_type": "constant",
+          "transformation_logic": "Current system date."
         },
         {
           "target_column": "Trust_Id",
-          "source_table": "Vault.WaitingTimes",
-          "source_column": "wt.Trust_Id",
+          "source_table": "SLAMBI.Vault.WaitingTimes",
+          "source_column": "Trust_Id",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from WaitingTimes"
+          "transformation_logic": "Direct copy from Trust_Id column in WaitingTimes table."
         },
         {
           "target_column": "Gender_ID",
-          "source_table": "Vault.Patient",
-          "source_column": "vp.Gender_ID",
+          "source_table": "SLAMBI.Vault.Patient",
+          "source_column": "Gender_ID",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from Patient"
+          "transformation_logic": "Direct copy from Gender_ID column in Patient table."
         },
         {
           "target_column": "Ethnicitycleaned",
-          "source_table": "Vault.Patient",
-          "source_column": "vp.Ethnicity_Desc",
+          "source_table": "SLAMBI.Vault.Patient",
+          "source_column": "Ethnicity_Desc",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from Patient"
+          "transformation_logic": "Direct copy from Ethnicity_Desc column in Patient table."
         },
         {
           "target_column": "Trust Referral Received Date",
-          "source_table": "Vault.TrustAccessWaitingTimes",
-          "source_column": "ta.RTT Start Date",
+          "source_table": "SLAMBI.Vault.TrustAccessWaitingTimes",
+          "source_column": "RTT Start Date",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from TrustAccessWaitingTimes"
+          "transformation_logic": "Direct copy from RTT Start Date column in TrustAccessWaitingTimes table."
         },
         {
           "target_column": "Trust Referral Priority",
-          "source_table": "Vault.TrustAccessWaitingTimes",
-          "source_column": "ta.Referral Priority",
+          "source_table": "SLAMBI.Vault.TrustAccessWaitingTimes",
+          "source_column": "Referral Priority",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from TrustAccessWaitingTimes"
+          "transformation_logic": "Direct copy from Referral Priority column in TrustAccessWaitingTimes table."
         },
         {
           "target_column": "Trust Access Wait flag",
-          "source_table": "Vault.TrustAccessWaitingTimes",
-          "source_column": "ta.Waiting For First Contact",
+          "source_table": "SLAMBI.Vault.TrustAccessWaitingTimes",
+          "source_column": "Waiting For First Contact",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from TrustAccessWaitingTimes"
+          "transformation_logic": "Direct copy from Waiting For First Contact column in TrustAccessWaitingTimes table."
         },
         {
           "target_column": "Trust Access Wait Weeks",
-          "source_table": "Vault.TrustAccessWaitingTimes",
-          "source_column": "ta.Weeks Waited For First Contact",
+          "source_table": "SLAMBI.Vault.TrustAccessWaitingTimes",
+          "source_column": "Weeks Waited For First Contact",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from TrustAccessWaitingTimes"
+          "transformation_logic": "Direct copy from Weeks Waited For First Contact column in TrustAccessWaitingTimes table."
         },
         {
           "target_column": "Team",
-          "source_table": "Vault.DimSD",
-          "source_column": "wtsd.Team Name",
+          "source_table": "SLAMBI.Vault.DimSD",
+          "source_column": "Team Name",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from DimSD (aliased as wtsd)"
+          "transformation_logic": "Direct copy from Team Name column in DimSD table (aliased wtsd)."
         },
         {
           "target_column": "Team Name",
-          "source_table": "Vault.DimSD",
-          "source_column": "epsd.Team Name",
+          "source_table": "SLAMBI.Vault.DimSD",
+          "source_column": "Team Name",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from DimSD (aliased as epsd)"
+          "transformation_logic": "Direct copy from Team Name column in DimSD table (aliased epsd)."
         },
         {
           "target_column": "Directorate",
-          "source_table": "Vault.DimSD",
-          "source_column": "wtsd.Directorate",
+          "source_table": "SLAMBI.Vault.DimSD",
+          "source_column": "Directorate",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from DimSD (aliased as wtsd)"
+          "transformation_logic": "Direct copy from Directorate column in DimSD table (aliased wtsd)."
         },
         {
           "target_column": "Division",
-          "source_table": "Vault.DimSD",
-          "source_column": "wtsd.Division",
+          "source_table": "SLAMBI.Vault.DimSD",
+          "source_column": "Division",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from DimSD (aliased as wtsd)"
+          "transformation_logic": "Direct copy from Division column in DimSD table (aliased wtsd)."
         },
         {
           "target_column": "Sub Service Line",
-          "source_table": "Vault.DimSD",
-          "source_column": "wtsd.Sub Service Line",
+          "source_table": "SLAMBI.Vault.DimSD",
+          "source_column": "Sub Service Line",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from DimSD (aliased as wtsd)"
+          "transformation_logic": "Direct copy from Sub Service Line column in DimSD table (aliased wtsd)."
         },
         {
           "target_column": "Episode Priority",
-          "source_table": "Dim.Priority",
-          "source_column": "pri.PriorityDescription",
+          "source_table": "SLAMBI.Dim.Priority",
+          "source_column": "PriorityDescription",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from Dim.Priority"
+          "transformation_logic": "Direct copy from PriorityDescription column in Priority table."
         },
         {
           "target_column": "Latest Team Flag",
-          "source_table": "Vault.TrustAccessWaitingTimes, Vault.DimSD",
-          "source_column": "case when ta.Latest Active Episode Team = wtsd.Team Name then 'YES' else 'NO' end",
+          "source_table": "SLAMBI.Vault.TrustAccessWaitingTimes, SLAMBI.Vault.DimSD",
+          "source_column": "Team Name",
           "transformation_type": "conditional",
-          "transformation_logic": "Conditional check if latest active episode team matches team name from wtsd"
+          "transformation_logic": "'YES' if Latest Active Episode Team from TrustAccessWaitingTimes matches Team Name from DimSD (wtsd), otherwise 'NO'."
         },
         {
           "target_column": "Episode Referral Received Date",
-          "source_table": "Vault.WaitingTimes",
-          "source_column": "wt.Episode_Referral_Received_Date",
+          "source_table": "SLAMBI.Vault.WaitingTimes",
+          "source_column": "Episode_Referral_Received_Date",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from WaitingTimes"
+          "transformation_logic": "Direct copy from Episode_Referral_Received_Date column in WaitingTimes table."
         },
         {
           "target_column": "Team Wait Flag",
-          "source_table": "Vault.WaitingTimes",
-          "source_column": "case when wt.First_Attended_Date is null and Episode_Referral_Rejection_Date is null then 'YES' ELSE 'NO' END",
+          "source_table": "SLAMBI.Vault.WaitingTimes, SLAMBI.Vault.Episode",
+          "source_column": "First_Attended_Date,Episode_Referral_Rejection_Date",
           "transformation_type": "conditional",
-          "transformation_logic": "Conditional check if First Attended Date and Episode Referral Rejection Date are null"
+          "transformation_logic": "'YES' if First_Attended_Date from WaitingTimes and Episode_Referral_Rejection_Date (from Episode) are both NULL, otherwise 'NO'."
         },
         {
           "target_column": "Team Wait Weeks",
-          "source_table": "Vault.WaitingTimes",
-          "source_column": "floor(datediff(dd,wt.Episode_Referral_Received_Date,getDate()) / 7)",
+          "source_table": "SLAMBI.Vault.WaitingTimes",
+          "source_column": "Episode_Referral_Received_Date",
           "transformation_type": "calculation",
-          "transformation_logic": "Calculates full weeks between Episode Referral Received Date and current date"
+          "transformation_logic": "Calculates the number of full weeks between Episode_Referral_Received_Date from WaitingTimes and the current date."
         },
         {
           "target_column": "Trust Referral ID",
-          "source_table": "Vault.TrustAccessWaitingTimes",
-          "source_column": "ta.ReferralId",
+          "source_table": "SLAMBI.Vault.TrustAccessWaitingTimes",
+          "source_column": "ReferralId",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from TrustAccessWaitingTimes"
+          "transformation_logic": "Direct copy from ReferralId column in TrustAccessWaitingTimes table."
         },
         {
           "target_column": "Episode ID",
-          "source_table": "Vault.WaitingTimes",
-          "source_column": "wt.Episode_Id",
+          "source_table": "SLAMBI.Vault.WaitingTimes",
+          "source_column": "Episode_Id",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from WaitingTimes"
+          "transformation_logic": "Direct copy from Episode_Id column in WaitingTimes table."
         },
         {
           "target_column": "Deceased",
-          "source_table": "Vault.Patient",
-          "source_column": "case when vp.Date_of_Death is not null then 'Deceased' end",
+          "source_table": "SLAMBI.Vault.Patient",
+          "source_column": "Date_of_Death",
           "transformation_type": "conditional",
-          "transformation_logic": "Sets to 'Deceased' if patient has a date of death"
+          "transformation_logic": "'Deceased' if Date_of_Death from Patient is not NULL, otherwise NULL."
         },
         {
           "target_column": "Trust 52+ wks",
-          "source_table": "Vault.TrustAccessWaitingTimes",
-          "source_column": "case when ta.Weeks Waited For First Contact >= 52 then 1 else 0 end",
+          "source_table": "SLAMBI.Vault.TrustAccessWaitingTimes",
+          "source_column": "Weeks Waited For First Contact",
           "transformation_type": "conditional",
-          "transformation_logic": "Flag if Trust Access Wait Weeks is 52 or more"
+          "transformation_logic": "1 if Weeks Waited For First Contact from TrustAccessWaitingTimes is 52 or more, otherwise 0."
         },
         {
           "target_column": "Trust 26+ wks",
-          "source_table": "Vault.TrustAccessWaitingTimes",
-          "source_column": "case when ta.Weeks Waited For First Contact >= 26 then 1 else 0 end",
+          "source_table": "SLAMBI.Vault.TrustAccessWaitingTimes",
+          "source_column": "Weeks Waited For First Contact",
           "transformation_type": "conditional",
-          "transformation_logic": "Flag if Trust Access Wait Weeks is 26 or more"
+          "transformation_logic": "1 if Weeks Waited For First Contact from TrustAccessWaitingTimes is 26 or more, otherwise 0."
         },
         {
           "target_column": "Trust 10+ wks",
-          "source_table": "Vault.TrustAccessWaitingTimes",
-          "source_column": "case when ta.Weeks Waited For First Contact >= 10 then 1 else 0 end",
+          "source_table": "SLAMBI.Vault.TrustAccessWaitingTimes",
+          "source_column": "Weeks Waited For First Contact",
           "transformation_type": "conditional",
-          "transformation_logic": "Flag if Trust Access Wait Weeks is 10 or more"
+          "transformation_logic": "1 if Weeks Waited For First Contact from TrustAccessWaitingTimes is 10 or more, otherwise 0."
         },
         {
           "target_column": "Trust 4+ wks",
-          "source_table": "Vault.TrustAccessWaitingTimes",
-          "source_column": "case when ta.Weeks Waited For First Contact >= 4 then 1 else 0 end",
+          "source_table": "SLAMBI.Vault.TrustAccessWaitingTimes",
+          "source_column": "Weeks Waited For First Contact",
           "transformation_type": "conditional",
-          "transformation_logic": "Flag if Trust Access Wait Weeks is 4 or more"
+          "transformation_logic": "1 if Weeks Waited For First Contact from TrustAccessWaitingTimes is 4 or more, otherwise 0."
         },
         {
           "target_column": "Referral_Status_Desc",
-          "source_table": "Vault.ReferralStatusValues",
-          "source_column": "rsv.Referral_Status_Desc",
+          "source_table": "SLAMBI.Vault.ReferralStatusValues",
+          "source_column": "Referral_Status_Desc",
           "transformation_type": "direct_copy",
-          "transformation_logic": "Direct copy from ReferralStatusValues"
+          "transformation_logic": "Direct copy from Referral_Status_Desc column in ReferralStatusValues table."
         }
       ],
       "joins": [
         {
-          "left_table": "Vault.WaitingTimes",
-          "right_table": "Vault.Patient",
+          "left_table": "SLAMBI.Vault.WaitingTimes",
+          "right_table": "SLAMBI.Vault.Patient",
           "join_type": "LEFT",
           "condition": "wt.Patient_Id = vp.Patient_ID"
         },
         {
-          "left_table": "Vault.WaitingTimes",
-          "right_table": "Vault.Episode",
+          "left_table": "SLAMBI.Vault.WaitingTimes",
+          "right_table": "SLAMBI.Vault.Episode",
           "join_type": "LEFT",
           "condition": "wt.Episode_Id = ep.Episode_ID"
         },
         {
-          "left_table": "Vault.WaitingTimes",
-          "right_table": "Vault.TrustAccessWaitingTimes",
+          "left_table": "SLAMBI.Vault.WaitingTimes",
+          "right_table": "SLAMBI.Vault.TrustAccessWaitingTimes",
           "join_type": "LEFT",
           "condition": "wt.Referral_ID = ta.ReferralID and ta.Crisis RefID is null"
         },
         {
-          "left_table": "Vault.WaitingTimes",
-          "right_table": "Vault.DimSD",
+          "left_table": "SLAMBI.Vault.WaitingTimes",
+          "right_table": "SLAMBI.Vault.DimSD",
           "join_type": "LEFT",
           "condition": "wt.Location_Id = wtsd.Location_ID"
         },
         {
-          "left_table": "Vault.Episode",
-          "right_table": "Vault.DimSD",
+          "left_table": "SLAMBI.Vault.Episode",
+          "right_table": "SLAMBI.Vault.DimSD",
           "join_type": "LEFT",
           "condition": "ep.Location_Id = epsd.Location_ID"
         },
         {
-          "left_table": "Vault.Episode",
-          "right_table": "Dim.Priority",
+          "left_table": "SLAMBI.Vault.Episode",
+          "right_table": "SLAMBI.Dim.Priority",
           "join_type": "LEFT",
           "condition": "ep.Episode_Priority_ID = pri.PriorityID"
         },
         {
-          "left_table": "Vault.Episode",
-          "right_table": "Vault.ReferralStatusValues",
+          "left_table": "SLAMBI.Vault.Episode",
+          "right_table": "SLAMBI.Vault.ReferralStatusValues",
           "join_type": "LEFT",
           "condition": "ep.Referral_Status_ID = rsv.Referral_Status_ID"
         }
@@ -1071,8 +1071,8 @@
         "wt.Referral_Referral_Rejection_Date is null",
         "vp.Date_Of_Death is null",
         "wt.First_Attended_Date is null",
-        "Episode_Referral_Discharged_Date is null",
-        "Episode_Referral_Rejection_Date is null",
+        "ep.Episode_Referral_Discharged_Date is null",
+        "ep.Episode_Referral_Rejection_Date is null",
         "wtsd.Team Name not in ('Test Team','testing team')",
         "ep.Referral_Status_ID in (1,0)"
       ],
@@ -1084,928 +1084,2779 @@
   "catalogue": {
     "PRIORITY": {
       "qualified_name": "DIM.Priority",
-      "database": "DIM",
-      "schema": "",
+      "database": "",
+      "schema": "DIM",
       "columns": [
         {
-          "name": "PRIORITYSK",
-          "type": "ASC",
+          "name": "PrioritySK",
+          "type": "smallint",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "PriorityID",
+          "type": "smallint",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "PriorityDescription",
+          "type": "varchar(50)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "PriorityNationalCode",
+          "type": "varchar(50)",
           "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "DisplayOrder",
+          "type": "smallint",
+          "nullable": false,
           "primary_key": false
         }
       ],
-      "source_file": "tables.sql"
+      "source_file": "TrustAccessWaitTables.sql"
     },
     "DIMSD": {
       "qualified_name": "Vault.DimSD",
-      "database": "VAULT",
-      "schema": "",
+      "database": "",
+      "schema": "VAULT",
       "columns": [
         {
-          "name": "TEAM",
-          "type": "NAME",
+          "name": "TeamPK",
+          "type": "int",
           "nullable": false,
           "primary_key": false
         },
         {
-          "name": "TEAM",
-          "type": "STATUS",
+          "name": "HubTeamPK",
+          "type": "int",
           "nullable": false,
           "primary_key": false
         },
         {
-          "name": "TEAM",
-          "type": "OR",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "TEAM",
-          "type": "POSTCODE",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "NATIONAL",
-          "type": "SITE",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "NATIONAL",
-          "type": "TEAM",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "NATIONAL",
-          "type": "WARD",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "WARD",
-          "type": "INTENDED",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "WARD",
-          "type": "GENDER",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "WARD",
-          "type": "CARE",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "WARD",
-          "type": "SECURITY",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "WARD",
-          "type": "LOCKED",
+          "name": "Location_ID",
+          "type": "int",
           "nullable": false,
           "primary_key": false
         },
         {
-          "name": "NATIONAL",
-          "type": "BED",
+          "name": "Team Name",
+          "type": "varchar(255)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Team Status",
+          "type": "varchar(255)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Team or Ward",
+          "type": "varchar(255)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "WARD",
-          "type": "TYPE",
+          "name": "Team Postcode",
+          "type": "varchar(50)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "WARD",
-          "type": "CARE",
+          "name": "Address1",
+          "type": "varchar(255)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "WARD",
-          "type": "PATHWAY",
+          "name": "Address2",
+          "type": "varchar(255)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "SERVICE",
-          "type": "TYPE",
+          "name": "Address3",
+          "type": "varchar(255)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "CARE",
-          "type": "GROUP",
+          "name": "Address4",
+          "type": "varchar(255)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "CONTRACT",
-          "type": "SERVICE",
+          "name": "Address5",
+          "type": "varchar(255)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "LSLC",
-          "type": "CONTRACT",
+          "name": "Phone",
+          "type": "varchar(255)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "CASE",
-          "type": "MANAGEMENT",
+          "name": "National Site Code",
+          "type": "varchar(10)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "SERVICE",
-          "type": "LINE",
+          "name": "National Team Type",
+          "type": "varchar(255)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "SUB",
-          "type": "SERVICE",
+          "name": "Beds",
+          "type": "smallint",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "FINANCIAL",
-          "type": "SERVICE",
+          "name": "National Ward Type",
+          "type": "varchar(2)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "FINANCIAL",
-          "type": "SERVICE",
+          "name": "Ward Intended Age Group",
+          "type": "varchar(255)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "COST",
-          "type": "CENTRE",
+          "name": "Ward Gender",
+          "type": "varchar(255)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "COST",
-          "type": "CENTRE",
+          "name": "Ward Care Intensity",
+          "type": "varchar(255)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "SITE",
-          "type": "LOCATION",
+          "name": "Ward Security Level",
+          "type": "varchar(255)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "TEAM",
-          "type": "CODE",
+          "name": "Ward Locked Indicator",
+          "type": "varchar(1)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "National Bed Type",
+          "type": "varchar(255)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "MONITOR",
-          "type": "GROUP",
+          "name": "Ward Type",
+          "type": "varchar(255)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "MONITOR",
-          "type": "LOS",
+          "name": "Ward Care Group",
+          "type": "varchar(255)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "CQC",
-          "type": "CORE",
+          "name": "Ward Pathway",
+          "type": "varchar(255)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "SERVICE",
-          "type": "CATEGORY",
+          "name": "Service Type",
+          "type": "varchar(255)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "CARE",
-          "type": "OPTION",
+          "name": "Clustering",
+          "type": "varchar(255)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "MHSDS",
-          "type": "SERVICE",
+          "name": "Care Group",
+          "type": "varchar(255)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "MHSDS",
-          "type": "TEAM",
+          "name": "Speciality",
+          "type": "varchar(255)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "MHSDS",
-          "type": "WARD",
+          "name": "Contract Service Line",
+          "type": "nvarchar(255)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "MHSDS",
-          "type": "WARD",
+          "name": "LSLC Contract",
+          "type": "varchar(3)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "MHSDS",
-          "type": "WARD",
+          "name": "Case Management Team",
+          "type": "varchar(255)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "MHSDS",
-          "type": "WARD",
+          "name": "Borough",
+          "type": "varchar(255)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "MHSDS",
-          "type": "WARD",
+          "name": "CAG",
+          "type": "varchar(255)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "MHSDS",
-          "type": "ADMITTED",
+          "name": "Directorate",
+          "type": "nvarchar(30)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "MHSDS",
-          "type": "SITE",
+          "name": "CAP",
+          "type": "nvarchar(30)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Division",
+          "type": "nvarchar(30)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Service Line",
+          "type": "nvarchar(30)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Sub Service Line",
+          "type": "nvarchar(30)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Financial Service Unit Name",
+          "type": "nvarchar(30)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Financial Service Unit Code",
+          "type": "nvarchar(6)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Cost Centre Code",
+          "type": "varchar(50)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Cost Centre Name",
+          "type": "nvarchar(30)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Site Location",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Funding",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Commissioning",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Team Code",
+          "type": "varchar(50)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Monitor Group",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Monitor LOS Group",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "CQC Core Service Provided",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Service Category",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Care Option",
+          "type": "varchar(10)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "MHSDS Service Team Type",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "MHSDS Team Intended Age Group",
+          "type": "varchar(100)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "MHSDS Ward Intended Age Group",
+          "type": "varchar(100)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "MHSDS Ward Intended Gender",
+          "type": "varchar(100)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "MHSDS Ward Care Intensity Code",
+          "type": "varchar(200)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "MHSDS Ward Setting Type",
+          "type": "varchar(100)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "MHSDS Ward Sec Level",
+          "type": "varchar(100)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "MHSDS Admitted Patient Classification Type",
+          "type": "varchar(100)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "MHSDS Site Code of Treat",
+          "type": "varchar(100)",
           "nullable": true,
           "primary_key": false
         }
       ],
-      "source_file": "tables.sql"
+      "source_file": "TrustAccessWaitTables.sql"
     },
     "EPISODE": {
       "qualified_name": "Vault.Episode",
-      "database": "VAULT",
-      "schema": "",
-      "columns": [],
-      "source_file": "tables.sql"
+      "database": "",
+      "schema": "VAULT",
+      "columns": [
+        {
+          "name": "LinkEpisodePK",
+          "type": "int",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "RecordSource",
+          "type": "varchar(3)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Episode_ID",
+          "type": "int",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "cnreferral_id",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "cnepisode_id",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "cn_doc_id",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "cnobject_type_id",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Episode_Type_ID",
+          "type": "int",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Patient_ID",
+          "type": "int",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_Date",
+          "type": "datetime",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_Time",
+          "type": "varchar(5)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_Received_Date",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Episode_Status",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Episode_Type",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Last_Contact_Date",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_Source_ID",
+          "type": "int",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_Source_Type_ID",
+          "type": "int",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Agency_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Contact_Name",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Contact_Job_Title",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Contact_Telephone",
+          "type": "varchar(50)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "GP_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Practice_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "GP_Code",
+          "type": "varchar(20)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Practice_Code",
+          "type": "varchar(20)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "School_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Contact_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Staff_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Episode_Priority_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_Reason_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Presentation_Reason_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referrer_Address1",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referrer_Address2",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referrer_Address3",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referrer_Address4",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referrer_Address5",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referrer_Post_Code",
+          "type": "varchar(20)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referrer_Telephone",
+          "type": "varchar(50)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referrer_Fax",
+          "type": "varchar(50)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referrer_Email",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referrer_PCT_Code",
+          "type": "varchar(10)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referrer_PCT_Name",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Service_ID",
+          "type": "int",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Location_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Client_Normally_Seen_At_Location_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_Format_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_Status_ID",
+          "type": "int",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_Admin_Status_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_Administrative_Category_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Episode_Admin_Priority_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Accepted_Date",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Accepted_By_Staff_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Accepted_By_Staff_Name",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Wait_Weeks",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Open_Weeks",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Start_Date",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Accommodation_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Employment_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Administration_Comments",
+          "type": "text",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Rejection_Date",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Rejection_Reason_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Rejection_Detail",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Rejected_By_Staff_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Rejected_By_Staff_Name",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Discharge_Date",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Discharge_Time",
+          "type": "varchar(5)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Discharge_Method_Episode_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Discharge_Destination_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Healthcare_Resource_Group_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Discharge_Agreed_By_Staff_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Discharge_Agreed_By_Staff_Name",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Discharge_Detail",
+          "type": "text",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Comments",
+          "type": "text",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Transport_Required_ID",
+          "type": "int",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "User_Created",
+          "type": "varchar(100)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Create_Dttm",
+          "type": "datetime",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "User_Updated",
+          "type": "varchar(100)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Updated_Dttm",
+          "type": "datetime",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Referrer_CCG_Code",
+          "type": "varchar(5)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referrer_CCG_Name",
+          "type": "varchar(100)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_Received_Time",
+          "type": "varchar(5)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Agency_Staff_Category_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Staff_Professional_Group_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Discharge_Letter_Issued_Date",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_Closure_Reason_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "NHS_Service_Agreement_Line_Number",
+          "type": "varchar(10)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Episode_Priority_Desc",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "extracteddate",
+          "type": "datetime",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "VaultLoaddate",
+          "type": "datetime",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "VaultUpdateDate",
+          "type": "datetime",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "IsDeleted",
+          "type": "varchar(1)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "TestRecord",
+          "type": "varchar(1)",
+          "nullable": true,
+          "primary_key": false
+        }
+      ],
+      "source_file": "TrustAccessWaitTables.sql"
     },
     "PATIENT": {
       "qualified_name": "Vault.Patient",
-      "database": "VAULT",
-      "schema": "",
+      "database": "",
+      "schema": "VAULT",
       "columns": [
         {
-          "name": "PATIENT_ID",
-          "type": "ASC",
+          "name": "SatPatientPK",
+          "type": "int",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "HubPatientPK",
+          "type": "int",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "RecordSource",
+          "type": "varchar(25)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "NHS_Number",
+          "type": "varchar(11)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Shared_Id",
+          "type": "nvarchar(max)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Title_ID",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Forename",
+          "type": "varchar(50)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Middle_Name",
+          "type": "varchar(50)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Surname",
+          "type": "varchar(50)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Date_Of_Birth",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "cleaneddateofbirth",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Date_Of_Death",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "First_Year_Of_Care_Date",
+          "type": "varchar(4)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "First_Year_Of_Care_Text",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "First_Language_ID",
+          "type": "varchar(255)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Gender_ID",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Gender",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Religion_ID",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Marital_Status_ID",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Lives_With_ID",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Ethnicitycleaned",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Country_Of_Origin_ID",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Employment_ID",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Welfare_Benefits_Client_ID",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Mobility_Problem_ID",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Hearing_Impairment_ID",
+          "type": "varchar(255)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Visual_Impairment_ID",
+          "type": "varchar(255)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "DAT_Of_Residence_ID",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Housing_Status",
+          "type": "varchar(100)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Is_Interpreter_Needed_ID",
+          "type": "varchar(255)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Occupation_ID",
+          "type": "varchar(255)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Overseas_Visitor_ID",
+          "type": "varchar(255)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Asylum_Seeker_ID",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Has_A_Twin_ID",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Create_Dttm",
+          "type": "datetime",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Updated_Dttm",
+          "type": "datetime",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "ViewDate",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Is_Active",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Spell_Number",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "ViewText",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Patient_ID",
+          "type": "int",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Other_ID1",
+          "type": "varchar(100)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "TrustID",
+          "type": "varchar(8000)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "CN_Doc_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "QualityInd",
+          "type": "varchar(1)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Ethnicity_Desc",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Ethnicity_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "GenderCode",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "MaritalCode",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "EthnicityCode",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "LanguageCode",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "LatestPostCode",
+          "type": "varchar(50)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "LatestPractiseCode",
+          "type": "varchar(20)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "VaultLoaddate",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "VaultUpdateDate",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "IsDeleted",
+          "type": "varchar(1)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "TestRecord",
+          "type": "varchar(1)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "PoorDQFlag",
+          "type": "varchar(1)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "PoorDQReason",
+          "type": "varchar(250)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Sexual_Orientation_ID",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Stated_Gender_Identity_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Gender_Identity_Same_At_Birth_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "GenderIdentitySameAtBirthCode",
+          "type": "varchar(1)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "PersonStatedGenderID",
+          "type": "varchar(1)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Ex_British_Armed_Forces_ID",
+          "type": "int",
           "nullable": true,
           "primary_key": false
         }
       ],
-      "source_file": "tables.sql"
+      "source_file": "TrustAccessWaitTables.sql"
     },
     "REFERRALSTATUSVALUES": {
       "qualified_name": "Vault.ReferralStatusValues",
-      "database": "VAULT",
-      "schema": "",
-      "columns": [],
-      "source_file": "tables.sql"
+      "database": "",
+      "schema": "VAULT",
+      "columns": [
+        {
+          "name": "ReferralStatusValuesPK",
+          "type": "int",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "RecordSource",
+          "type": "varchar(3)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Create_Dttm",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "User_Created",
+          "type": "varchar(100)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "User_Updated",
+          "type": "varchar(100)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Updated_Dttm",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Active",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Default_Flag",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "External_Code1",
+          "type": "varchar(20)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "External_Code2",
+          "type": "varchar(20)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Display_Order",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_Status_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_Status_Desc",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "VaultLoaddate",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "VaultUpdateDate",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "IsDeleted",
+          "type": "varchar(1)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "TestRecord",
+          "type": "varchar(1)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "PoorDQFlag",
+          "type": "varchar(1)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "PoorDQReason",
+          "type": "varchar(250)",
+          "nullable": true,
+          "primary_key": false
+        }
+      ],
+      "source_file": "TrustAccessWaitTables.sql"
     },
     "TRUSTACCESSWAITINGTIMES": {
       "qualified_name": "Vault.TrustAccessWaitingTimes",
-      "database": "VAULT",
-      "schema": "",
+      "database": "",
+      "schema": "VAULT",
       "columns": [
         {
-          "name": "RTT",
-          "type": "STARTID",
+          "name": "TrustID",
+          "type": "nvarchar(max)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "RTT",
-          "type": "START",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "RTT",
-          "type": "START",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "FIRST",
-          "type": "CONTACTID",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "FIRST",
-          "type": "CONTACT",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "FIRST",
-          "type": "CONTACT",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "FIRST",
-          "type": "CONTACT",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "FIRST",
-          "type": "CONTACT",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "RTT",
-          "type": "STOPID",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "RTT",
-          "type": "STOP",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "RTT",
-          "type": "STOP",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "RTT",
-          "type": "STOP",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "RTT",
-          "type": "STOP",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "REF",
-          "type": "TRIAGEID",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "REF",
-          "type": "TRIAGE",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "REF",
-          "type": "TRIAGE",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "REF",
-          "type": "TRIAGE",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "CRISIS",
-          "type": "REFID",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "CRISIS",
-          "type": "REF",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "CRISIS",
-          "type": "REF",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "CRISIS",
-          "type": "REF",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "CRISIS",
-          "type": "REF",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "CRISIS",
-          "type": "CONTACTID",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "CRISIS",
-          "type": "CONTACT",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "CRISIS",
-          "type": "CONTACT",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "CRISIS",
-          "type": "CONTACT",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "REFERRAL",
-          "type": "SOURCEID",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "REFERRAL",
-          "type": "PRIORITY",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "REFERRAL",
-          "type": "TEAM",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "REFERRAL",
-          "type": "DIRECTORATE",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "REFERRAL",
-          "type": "DIVISION",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "REFERRAL",
-          "type": "SERVICE",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "REFERRAL",
-          "type": "SUB",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "REFERRAL",
-          "type": "RECEIVED",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "FIRST",
-          "type": "CONTACT",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "FIRST",
-          "type": "CONTACT",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "FIRST",
-          "type": "CONTACT",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "FIRST",
-          "type": "CONTACT",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "FIRST",
-          "type": "CONTACT",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "EARLIEST",
-          "type": "ACCEPTED",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "EARLIEST",
-          "type": "ACCEPTED",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "EARLIEST",
-          "type": "ACCEPTED",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "EARLIEST",
-          "type": "ACCEPTED",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "EARLIEST",
-          "type": "ACCEPTED",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "EARLIEST",
-          "type": "ACCEPTED",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "EARLIEST",
-          "type": "ACCEPTED",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "LATEST",
-          "type": "ACTIVE",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "LATEST",
-          "type": "ACTIVE",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "LATEST",
-          "type": "ACTIVE",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "LATEST",
-          "type": "ACTIVE",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "LATEST",
-          "type": "ACTIVE",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "LATEST",
-          "type": "ACTIVE",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "TEAM",
-          "type": "TRIAGED",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "DAYS",
-          "type": "WITH",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "LATEST",
-          "type": "TEAM",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "LATEST",
-          "type": "TEAM",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "LATEST",
-          "type": "TEAM",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "CRISIS",
-          "type": "CONTACT",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "CRISIS",
-          "type": "CONTACT",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "CRISIS",
-          "type": "CONTACT",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "CRISIS",
-          "type": "CONTACT",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "CRISIS",
-          "type": "CONTACT",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "PATIENT",
-          "type": "GENDERID",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "FIRST",
-          "type": "CONTACT",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "DAYS",
-          "type": "WAITED",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "WEEKS",
-          "type": "WAITED",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "WEEKS",
-          "type": "WAITED",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "WEEKS",
-          "type": "WAITED",
+          "name": "PathwayId",
+          "type": "varchar(20)",
           "nullable": false,
           "primary_key": false
         },
         {
-          "name": "DAYS",
-          "type": "REF",
+          "name": "PatientId",
+          "type": "int",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "DAYS",
-          "type": "TRIAGE",
+          "name": "RTT StartID",
+          "type": "int",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "DAYS",
-          "type": "WAITED",
+          "name": "RTT Start Date",
+          "type": "datetime2(7)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "WEEKS",
-          "type": "WAITED",
+          "name": "RTT Start Type",
+          "type": "varchar(255)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "WEEKS",
-          "type": "WAITED",
+          "name": "First ContactID",
+          "type": "int",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "WEEKS",
-          "type": "WAITED",
+          "name": "First Contact Date",
+          "type": "datetime2(7)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "First Contact Type",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "First Contact LocationID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "First Contact EpisodeID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "RTT StopID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "RTT Stop Date",
+          "type": "datetime2(7)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "RTT Stop Type",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "RTT Stop LocationID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Rtt Stop EpisodeID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Ref TriageID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Ref Triage Date",
+          "type": "datetime2(7)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Ref Triage LocationID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Ref Triage EpisodeID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "A&E Liaison RefID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "A&E Liaison Ref Date",
+          "type": "datetime2(7)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "A&E Liaison Ref LocationID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "A&E Liaison Ref EpisodeID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "A&E Liaison ContactID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "A&E Liaison Contact Date",
+          "type": "datetime2(7)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "A&E Liaison Contact LocationID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "A&E Liaison Contact EpisodeID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Crisis RefID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Crisis Ref Date",
+          "type": "datetime2(7)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Crisis Ref Priority",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Crisis Ref LocationID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Crisis Ref EpisodeID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Crisis ContactID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Crisis Contact Date",
+          "type": "datetime2(7)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Crisis Contact LocationID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Crisis Contact EpisodeID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "ReferralID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral SourceID",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral Priority",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral Team",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral Directorate",
+          "type": "nvarchar(30)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral Division",
+          "type": "nvarchar(30)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral Service Type",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral Sub Service Line",
+          "type": "nvarchar(30)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral Received Time",
+          "type": "varchar(5)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "First Contact Team",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "First Contact Directorate",
+          "type": "nvarchar(30)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "First Contact Division",
+          "type": "nvarchar(30)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "First Contact Service Type",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "First Contact Sub Service Line",
+          "type": "nvarchar(30)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Earliest Accepted Episode Team",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Earliest Accepted Episode Directorate",
+          "type": "nvarchar(30)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Earliest Accepted Episode Division",
+          "type": "nvarchar(30)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Earliest Accepted Episode Service Type",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Earliest Accepted Episode Sub Service Line",
+          "type": "nvarchar(30)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Earliest Accepted Episode Referral Status",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Earliest Accepted EpisodeID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Latest Active Episode Team",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Latest Active Episode Directorate",
+          "type": "nvarchar(30)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Latest Active Episode Division",
+          "type": "nvarchar(30)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Latest Active Episode Service Type",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Latest Active Episode Sub Service Line",
+          "type": "nvarchar(30)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Latest Active Episode ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Team Triaged Date",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Days With Latest Active Team",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Latest Team Referred To Date",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Latest Team Priority",
+          "type": "varchar(50)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Latest Team Referral Status",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "A&E Liaison Contact Team",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "A&E Liaison Contact Directorate",
+          "type": "nvarchar(30)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "A&E Liaison Contact Division",
+          "type": "nvarchar(30)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "A&E Liaison Contact Service Type",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "A&E Liaison Contact Sub Service Line",
+          "type": "nvarchar(30)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Crisis Contact Team",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Crisis Contact Directorate",
+          "type": "nvarchar(30)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Crisis Contact Division",
+          "type": "nvarchar(30)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Crisis Contact Service Type",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Crisis Contact Sub Service Line",
+          "type": "nvarchar(30)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Age",
+          "type": "numeric(18, 0)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "EthnicityID",
+          "type": "int",
           "nullable": false,
           "primary_key": false
         },
         {
-          "name": "WAITING",
-          "type": "FOR",
+          "name": "Patient GenderID",
+          "type": "varchar(255)",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "FIRST",
-          "type": "CONTACT",
+          "name": "Deceased",
+          "type": "varchar(8)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "First Contact Month",
+          "type": "datetime2(7)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Days Waited For First Contact",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Weeks Waited For First Contact",
+          "type": "decimal(14, 0)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Weeks Waited Group For First Contact",
+          "type": "varchar(6)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Weeks Waited Group For First Contact Order",
+          "type": "int",
           "nullable": false,
           "primary_key": false
         },
         {
-          "name": "CRISIS",
-          "type": "WAIT",
+          "name": "Days Ref To Triage",
+          "type": "int",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "CRISIS",
-          "type": "WAIT",
+          "name": "Days Triage To First Contact",
+          "type": "int",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "CENSUS",
-          "type": "DATE",
+          "name": "Days Waited",
+          "type": "int",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "EXCLUSION",
-          "type": "FLAG",
+          "name": "Weeks Waited",
+          "type": "decimal(14, 0)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Weeks Waited Group",
+          "type": "varchar(6)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Weeks Waited Group Order",
+          "type": "int",
           "nullable": false,
           "primary_key": false
         },
         {
-          "name": "EXCLUSION",
-          "type": "REASON",
+          "name": "Waiting For First Contact",
+          "type": "varchar(1)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "First Contact 52 Week Breach",
+          "type": "varchar(4)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "A&E Liaison Wait Time",
+          "type": "varchar(5)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "A&E Liaison Wait Breach Flag",
+          "type": "varchar(1)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Crisis Wait Time",
+          "type": "varchar(5)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Crisis Wait Breach Flag",
+          "type": "varchar(1)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Census Date",
+          "type": "datetime2(7)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Exclusion Flag",
+          "type": "int",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Exclusion Reason",
+          "type": "varchar(19)",
           "nullable": true,
           "primary_key": false
         }
       ],
-      "source_file": "tables.sql"
+      "source_file": "TrustAccessWaitTables.sql"
     },
     "WAITINGTIMES": {
       "qualified_name": "Vault.WaitingTimes",
-      "database": "VAULT",
-      "schema": "",
-      "columns": [],
-      "source_file": "tables.sql"
-    },
-    "TRUSTACCESSWAITS": {
-      "qualified_name": "Vault.TrustAccessWaits",
-      "database": "VAULT",
-      "schema": "",
+      "database": "",
+      "schema": "VAULT",
       "columns": [
         {
-          "name": "BACKUP",
-          "type": "DATE",
+          "name": "Trust_Id",
+          "type": "varchar(255)",
           "nullable": false,
           "primary_key": false
         },
         {
-          "name": "TRUST",
-          "type": "REFERRAL",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "TRUST",
-          "type": "REFERRAL",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "TRUST",
-          "type": "ACCESS",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "TRUST",
-          "type": "ACCESS",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "TEAM",
-          "type": "NAME",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "SUB",
-          "type": "SERVICE",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "EPISODE",
-          "type": "PRIORITY",
-          "nullable": true,
-          "primary_key": false
-        },
-        {
-          "name": "LATEST",
-          "type": "TEAM",
+          "name": "Patient_Id",
+          "type": "int",
           "nullable": false,
           "primary_key": false
         },
         {
-          "name": "EPISODE",
-          "type": "REFERRAL",
+          "name": "Episode_Id",
+          "type": "int",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_ID",
+          "type": "int",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "TEAM",
-          "type": "WAIT",
-          "nullable": false,
-          "primary_key": false
-        },
-        {
-          "name": "TEAM",
-          "type": "WAIT",
+          "name": "Location_Id",
+          "type": "int",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "TRUST",
-          "type": "REFERRAL",
+          "name": "Episode_Referral_Received_Date",
+          "type": "datetime",
           "nullable": true,
           "primary_key": false
         },
         {
-          "name": "EPISODE",
-          "type": "ID",
-          "nullable": false,
+          "name": "Episode_Referral_Accepted_Date",
+          "type": "datetime",
+          "nullable": true,
           "primary_key": false
         },
         {
-          "name": "TEAM",
-          "type": "52",
-          "nullable": false,
+          "name": "Episode_Referral_Discharged_Date",
+          "type": "datetime",
+          "nullable": true,
           "primary_key": false
         },
         {
-          "name": "TEAM",
-          "type": "26",
-          "nullable": false,
+          "name": "Episode_Referral_Rejection_Date",
+          "type": "datetime",
+          "nullable": true,
           "primary_key": false
         },
         {
-          "name": "TEAM",
-          "type": "10",
-          "nullable": false,
+          "name": "Referral_Referral_Received_Date",
+          "type": "datetime",
+          "nullable": true,
           "primary_key": false
         },
         {
-          "name": "TEAM",
-          "type": "4",
-          "nullable": false,
+          "name": "Referral_Referral_Discharged_Date",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_Referral_Rejection_Date",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "WaitingTimeScope",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "First_Attended_Date",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "First_Attended_ContactID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "First_Attended_Medium",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "First_Attended_Happened",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Second_Attended_Date",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Second_Attended_ContactID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Second_Attended_Medium",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Second_Attended_Happened",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "First_Attended_InPerson_Date",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "First_Attended_InPerson_ContactID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "First_Attended_InPerson_Happened",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "First_Attended_Telephone_Date",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "First_Attended_Telephone_ContactID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "First_Attended_Telephone_Happened",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "First_Attended_Video_Date",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "First_Attended_Video_ContactID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "First_Attended_Video_Happened",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "First_Attended_Appointment_Date",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "First_Attended_Appointment_ContactID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "First_Attended_Appointment_Happened",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Second_Attended_InPerson_Date",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Second_Attended_InPerson_ContactID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Second_Attended_InPerson_Happened",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Second_Attended_Telephone_Date",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Second_Attended_Telephone_ContactID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Second_Attended_Telephone_Happened",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Second_Attended_Video_Date",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Second_Attended_Video_ContactID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Second_Attended_Video_Happened",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Second_Attended_Appointment_Date",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Second_Attended_Appointment_ContactID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Second_Attended_Appointment_Happened",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Episode_Priority_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_First_Attended_InPerson_Date",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_First_Attended_InPerson_ContactID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_First_Attended_InPerson_Location_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_First_Attended_Telephone_Date",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_First_Attended_Telephone_ContactID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_First_Attended_Telephone_Location_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_First_Attended_Video_Date",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_First_Attended_Video_ContactID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_First_Attended_Video_Location_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_First_Attended_Appointment_Date",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_First_Attended_Appointment_ContactID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_First_Attended_Appointment_Location_ID",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_Second_Attended_InPerson_Date",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_Second_Attended_InPerson_ContactID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_Second_Attended_InPerson_Location_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_Second_Attended_Telephone_Date",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_Second_Attended_Telephone_ContactID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_Second_Attended_Telephone_Location_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_Second_Attended_Video_Date",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_Second_Attended_Video_ContactID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_Second_Attended_Video_Location_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_Second_Attended_Appointment_Date",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_Second_Attended_Appointment_ContactID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_Second_Attended_Appointment_Location_ID",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_First_Attended_Date",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_First_Attended_ContactID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_First_Attended_Medium",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_First_Attended_Location_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_Second_Attended_Date",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_Second_Attended_ContactID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_Second_Attended_Medium",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_Second_Attended_Location_ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Created_Dttm",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Updated_Dttm",
+          "type": "datetime",
+          "nullable": true,
           "primary_key": false
         }
       ],
-      "source_file": "tables.sql"
+      "source_file": "TrustAccessWaitTables.sql"
+    },
+    "TRUSTACCESSWAITS": {
+      "qualified_name": "Vault.TrustAccessWaits",
+      "database": "",
+      "schema": "VAULT",
+      "columns": [
+        {
+          "name": "Backup Date",
+          "type": "datetime",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Trust_Id",
+          "type": "varchar(255)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Gender_ID",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Ethnicitycleaned",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Trust Referral Received Date",
+          "type": "datetime2(7)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Trust Referral Priority",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Trust Access Wait flag",
+          "type": "varchar(1)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Trust Access Wait Weeks",
+          "type": "decimal(14, 0)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Team",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Team Name",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Directorate",
+          "type": "nvarchar(30)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Division",
+          "type": "nvarchar(30)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Sub Service Line",
+          "type": "nvarchar(30)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Episode Priority",
+          "type": "varchar(50)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Latest Team Flag",
+          "type": "varchar(3)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Episode Referral Received Date",
+          "type": "datetime",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Team Wait Flag",
+          "type": "varchar(3)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Team Wait Weeks",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Trust Referral ID",
+          "type": "int",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Episode ID",
+          "type": "int",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Deceased",
+          "type": "varchar(8)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "Team 52+ wks",
+          "type": "int",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Team 26+ wks",
+          "type": "int",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Team 10+ wks",
+          "type": "int",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Team 4+ wks",
+          "type": "int",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "Referral_Status_Desc",
+          "type": "varchar(255)",
+          "nullable": true,
+          "primary_key": false
+        }
+      ],
+      "source_file": "TrustAccessWaitTables.sql"
     }
   }
 }
