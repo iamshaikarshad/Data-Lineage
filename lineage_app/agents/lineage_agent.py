@@ -488,6 +488,10 @@ class LineageAgent:
     def _build_reverse_mapping_index(self) -> Dict[str, List[Dict]]:
         """
         Build source_table.source_column -> list of (target_table, mapping) pairs.
+
+        Deduplicates by (target_table, target_column) per key so that the same
+        mapping copied onto multiple graph edges by the graph builder does not
+        produce duplicate entries.
         """
         if hasattr(self, '_reverse_index'):
             return self._reverse_index
@@ -498,14 +502,20 @@ class LineageAgent:
                 st = normalise_table(m.get("source_table", "")) or src
                 sc = m.get("source_column", "")
                 key = f"{st}|{sc}"
-                index.setdefault(key, []).append({
+                entry = {
                     "source_table": st,
                     "source_column": sc,
                     "target_table": tgt,
                     "target_column": m.get("target_column", ""),
                     "transformation_type": m.get("transformation_type", ""),
                     "transformation_logic": m.get("transformation_logic", ""),
-                })
+                }
+                # Dedup: skip if we already have this (target_table, target_column)
+                # for the same source key
+                existing = index.setdefault(key, [])
+                dedup = f"{tgt}|{entry['target_column']}"
+                if not any(f"{e['target_table']}|{e['target_column']}" == dedup for e in existing):
+                    existing.append(entry)
         self._reverse_index = index
         return index
 
@@ -558,6 +568,7 @@ class LineageAgent:
             visited = visited | {key}  # create a new set for this path
 
             chains = []
+            seen_local: set = set()  # dedup same mapping across multiple predecessor edges
             for pred in self.graph.predecessors(current_table):
                 edge_data = self.graph[pred][current_table]
                 for mapping in edge_data.get("column_mappings", []):
@@ -565,6 +576,16 @@ class LineageAgent:
                         source_table = normalise_table(mapping.get("source_table", "")) or pred
                         source_column = mapping.get("source_column", "")
                         trans_type = mapping.get("transformation_type", "")
+
+                        # Deduplicate: skip if we've already processed this exact
+                        # (source_table, source_column, target_column) triple on
+                        # another predecessor edge.  The graph builder copies an
+                        # SP's full mapping list onto every edge, so the same
+                        # mapping appears on multiple predecessor edges.
+                        dedup_key = f"{source_table}|{source_column}|{current_column}"
+                        if dedup_key in seen_local:
+                            continue
+                        seen_local.add(dedup_key)
 
                         if not source_table or trans_type == "constant":
                             chains.append([{
@@ -633,7 +654,20 @@ class LineageAgent:
 
             rev_index = self._build_reverse_mapping_index()
             key = f"{normalise_table(current_table)}|{current_column}"
-            mappings = rev_index.get(key, [])
+            all_mappings = rev_index.get(key, [])
+
+            # Deduplicate: the same (target_table, target_column) pair can appear
+            # multiple times in the reverse index because the graph builder copies
+            # an SP's full mapping list onto every edge.  Keep only unique
+            # (target_table, target_column) combos to avoid producing the same
+            # outbound branch multiple times.
+            seen_local: set = set()
+            mappings = []
+            for m in all_mappings:
+                dedup_key = f"{m['target_table']}|{m['target_column']}"
+                if dedup_key not in seen_local:
+                    seen_local.add(dedup_key)
+                    mappings.append(m)
 
             chains = []
             if not mappings:
@@ -661,6 +695,22 @@ class LineageAgent:
 
         inbound = _trace_inbound(table, column, set(), 0)
         outbound = _trace_outbound(table, column, set(), 0)
+
+        # Final safety-net dedup: remove byte-for-byte identical chains.
+        # This preserves genuine fan-in (different source columns per branch)
+        # but strips any residual exact duplicates the per-hop dedup missed.
+        def _dedup_chains(chains):
+            seen = set()
+            result = []
+            for chain in chains:
+                sig = "|".join(f"{s['table']}.{s['column']}" for s in chain)
+                if sig not in seen:
+                    seen.add(sig)
+                    result.append(chain)
+            return result
+
+        inbound = _dedup_chains(inbound)
+        outbound = _dedup_chains(outbound)
 
         tables_in_chain = set()
         for chain in inbound + outbound:
