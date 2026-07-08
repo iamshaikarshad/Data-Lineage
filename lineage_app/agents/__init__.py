@@ -3,6 +3,31 @@
 import re
 
 
+def strip_brackets(identifier: str) -> str:
+    """
+    Remove every SQL Server square bracket from an identifier, preserving
+    everything else (including any dotted schema.table qualification).
+
+    Use this at the point where identifiers are captured from SP text so
+    downstream consumers never see bracketed names. Unlike
+    ``normalise_table`` it does NOT collapse a qualified name to its last
+    segment nor change case -- it only removes the brackets.
+
+    Examples:
+        "[TableName]"        -> "TableName"
+        "[dbo].[TableName]"  -> "dbo.TableName"
+        "[Vault].Patient"    -> "Vault.Patient"
+        "[ColumnName]"       -> "ColumnName"
+        "TableName"          -> "TableName"
+        "[a].[RTT Start Date]" -> "a.RTT Start Date"
+
+    Non-string input is returned unchanged.
+    """
+    if not isinstance(identifier, str):
+        return identifier
+    return identifier.replace('[', '').replace(']', '')
+
+
 def normalise_table(name: str) -> str:
     """
     Normalise a table reference to uppercase table name only.

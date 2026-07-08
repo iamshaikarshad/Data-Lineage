@@ -9,7 +9,7 @@ import time
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Union, Literal
 
-from . import normalise_table
+from . import normalise_table, strip_brackets
 from .sp_parser import extract_lineage
 from .master_agent import MasterAgent, ExtractionMethod
 
@@ -473,6 +473,64 @@ class SPAgent:
             normalised.append(res)
         return normalised
 
+    @staticmethod
+    def _strip_brackets_from_result(result: Dict[str, Any]) -> None:
+        """
+        Strip SQL Server square brackets from every identifier-bearing
+        field of an LLM extraction result, in place.
+
+        Applied at the point of extraction (right after the LLM JSON is
+        parsed) so that downstream consumers -- the cache, the normaliser,
+        and the LineageAgent -- never see bracketed names like
+        ``[dbo].[TableName]`` or ``[ColumnName]``. Uses the shared
+        ``strip_brackets`` helper so the cleanup logic lives in one place.
+
+        Table-name fields (target_table, source_tables, source_table,
+        join left/right) are later collapsed to their last segment by
+        ``normalise_table`` anyway, but their bracketed relatives embedded
+        in free-text fields (source_column, transformation_logic,
+        join conditions, filters, grouping) are NOT normalised and would
+        otherwise leak the brackets straight into the UI.
+        """
+        if not isinstance(result, dict):
+            return
+
+        def _clean_str(value: Any) -> Any:
+            return strip_brackets(value) if isinstance(value, str) else value
+
+        if isinstance(result.get("procedure_name"), str):
+            result["procedure_name"] = strip_brackets(result["procedure_name"])
+        if isinstance(result.get("target_table"), str):
+            result["target_table"] = strip_brackets(result["target_table"])
+        if isinstance(result.get("source_tables"), list):
+            result["source_tables"] = [
+                _clean_str(t) for t in result["source_tables"] if isinstance(t, str)
+            ]
+
+        for mapping in result.get("column_mappings", []) or []:
+            if not isinstance(mapping, dict):
+                continue
+            for key in ("target_column", "source_table", "source_column",
+                        "transformation_logic"):
+                if isinstance(mapping.get(key), str):
+                    mapping[key] = strip_brackets(mapping[key])
+
+        for join in result.get("joins", []) or []:
+            if not isinstance(join, dict):
+                continue
+            for key in ("left_table", "right_table", "condition"):
+                if isinstance(join.get(key), str):
+                    join[key] = strip_brackets(join[key])
+
+        if isinstance(result.get("filters"), list):
+            result["filters"] = [
+                _clean_str(f) for f in result["filters"] if isinstance(f, str)
+            ]
+        if isinstance(result.get("grouping"), list):
+            result["grouping"] = [
+                _clean_str(g) for g in result["grouping"] if isinstance(g, str)
+            ]
+
     def _extract_with_claude(self, sp_code: str) -> Optional[Dict[str, Any]]:
         """Extract lineage using Claude AI. Returns the parsed JSON dict or None."""
         if not self.claude_client:
@@ -550,11 +608,14 @@ class SPAgent:
             return None
 
         try:
-            return json.loads(cleaned)
+            parsed = json.loads(cleaned)
         except json.JSONDecodeError as e:
             logger.error("Failed to parse Claude response as JSON: %s", e)
             logger.debug("Claude response text: %s", text[:500])
             return None
+
+        self._strip_brackets_from_result(parsed)
+        return parsed
 
     def _extract_with_gemini(self, sp_code: str) -> Optional[Dict[str, Any]]:
         """Extract lineage using Google Gemini. Returns the parsed JSON dict or None."""
@@ -628,11 +689,14 @@ class SPAgent:
             return None
 
         try:
-            return json.loads(cleaned)
+            parsed = json.loads(cleaned)
         except json.JSONDecodeError as e:
             logger.error("Failed to parse Gemini response as JSON: %s", e)
             logger.debug("Gemini response text: %s", text[:500])
             return None
+
+        self._strip_brackets_from_result(parsed)
+        return parsed
 
     def _extract_with_nvidia(self, sp_code: str) -> Optional[Dict[str, Any]]:
         """Extract lineage using NVIDIA NIM (OpenAI-compatible API).
@@ -717,11 +781,14 @@ class SPAgent:
             return None
 
         try:
-            return json.loads(cleaned)
+            parsed = json.loads(cleaned)
         except json.JSONDecodeError as e:
             logger.error("Failed to parse NVIDIA response as JSON: %s", e)
             logger.info("NVIDIA cleaned text preview (first 500 chars): %s", cleaned[:500])
             return None
+
+        self._strip_brackets_from_result(parsed)
+        return parsed
 
     def _log_failure(
         self,

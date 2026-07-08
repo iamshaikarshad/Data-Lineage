@@ -17,26 +17,19 @@ from typing import Dict, List, Any, Optional
 import sqlparse
 from sqlparse.tokens import Keyword, DML
 
-from . import normalise_table
+from . import normalise_table, strip_brackets
 
 logger = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
-# 1.4a Utility: strip square brackets and resolve aliases in column refs
+# 1.4a Utility: resolve aliases in column refs (bracket stripping is shared)
 # ---------------------------------------------------------------------------
-
-def _strip_brackets(text: str) -> str:
-    """Remove all [ and ] characters from a string."""
-    if not isinstance(text, str):
-        return text
-    return text.replace('[', '').replace(']', '')
-
 
 def _resolve_alias_in_expr(expr: str, alias_map: Dict[str, str]) -> str:
     """
     Replace SQL alias prefixes in a column expression with real table names.
-    Also strips square brackets.
+    Also strips square brackets (via the shared ``strip_brackets`` helper).
 
     For example, with alias_map = {'a': 'PATIENT', 'b': 'REFERRAL'}:
       'a.Gender_ID + b.RefDate' -> 'Patient.Gender_ID + Referral.RefDate'
@@ -44,7 +37,7 @@ def _resolve_alias_in_expr(expr: str, alias_map: Dict[str, str]) -> str:
 
     Handles bracketed column names like a.[Col Name] and alias.Column.
     """
-    result = _strip_brackets(expr)
+    result = strip_brackets(expr)
     # Sort aliases longest-first to avoid partial replacement
     sorted_aliases = sorted(alias_map.items(), key=lambda kv: len(kv[0]), reverse=True)
     for alias, table_name in sorted_aliases:
@@ -64,9 +57,9 @@ def _strip_alias_prefix(col_name: str, alias_map: Dict[str, str]) -> str:
     'a.Gender_ID' -> 'Gender_ID'
     'Patient.Gender_ID' -> 'Gender_ID' (non-alias table prefix also stripped)
     '[Vault].Patient.Gender_ID' -> 'Gender_ID'
-    Also strips square brackets.
+    Also strips square brackets (via the shared ``strip_brackets`` helper).
     """
-    col_name = _strip_brackets(col_name)
+    col_name = strip_brackets(col_name)
     # If alias.column, strip the alias part
     for alias in alias_map:
         if col_name.lower().startswith(alias.lower() + '.'):
@@ -399,14 +392,14 @@ def extract_lineage(sp_code: str, catalogue: Dict[str, Dict[str, Any]]) -> Optio
     filters = _parse_filters(stmt_text, alias_map)
     grouping = _parse_grouping(stmt_text, alias_map)
 
-    # Strip brackets from all string outputs
-    target_table = _strip_brackets(target_table)
-    source_tables = [_strip_brackets(t) for t in source_tables]
+    # Strip brackets from all string outputs (shared helper)
+    target_table = strip_brackets(target_table)
+    source_tables = [strip_brackets(t) for t in source_tables]
     for mapping in column_mappings:
-        mapping["target_column"] = _strip_brackets(mapping.get("target_column", ""))
-        mapping["source_column"] = _strip_brackets(mapping.get("source_column", ""))
-    filters = [_strip_brackets(f) for f in filters]
-    grouping = [_strip_brackets(g) for g in grouping]
+        mapping["target_column"] = strip_brackets(mapping.get("target_column", ""))
+        mapping["source_column"] = strip_brackets(mapping.get("source_column", ""))
+    filters = [strip_brackets(f) for f in filters]
+    grouping = [strip_brackets(g) for g in grouping]
 
     return {
         "procedure_name": _find_procedure_name(sp_code),
@@ -640,8 +633,8 @@ def _parse_joins(sp_code: str, alias_map: Dict[str, str]) -> List[Dict[str, str]
     for match in pattern.finditer(sp_code):
         join_type = match.group(1).strip().upper()
         right_table = normalise_table(match.group(2))
-        # Strip brackets from right_table
-        right_table = _strip_brackets(right_table)
+        # Strip brackets from right_table (shared helper)
+        right_table = strip_brackets(right_table)
         on_start = match.end()
         condition = _extract_until_keyword(sp_code[on_start:])
         # Resolve aliases and strip brackets in the condition
@@ -664,7 +657,7 @@ def _resolve_join_left_tables(
     from_pattern = re.compile(r'\bFROM\s+(' + QUALIFIED_IDENTIFIER + r')', re.IGNORECASE)
     from_match = from_pattern.search(stmt_text)
     if from_match:
-        left_table = _strip_brackets(normalise_table(from_match.group(1)))
+        left_table = strip_brackets(normalise_table(from_match.group(1)))
         for join in joins:
             join["left_table"] = left_table
 

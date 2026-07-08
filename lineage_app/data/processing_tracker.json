@@ -56,9 +56,15 @@
     },
     "Dim.Priority.sql": {
       "status": "success",
-      "processed_at": "2026-07-08T10:17:00Z",
+      "processed_at": "2026-07-08T11:21:57Z",
       "method": "gemini",
-      "target_table": "[DIM].[Priority]"
+      "target_table": "DIM.Priority"
+    },
+    "Vault.FactInpatientActivityLoad.sql": {
+      "status": "success",
+      "processed_at": "2026-07-08T11:30:04Z",
+      "method": "gemini",
+      "target_table": "SLAMBI.Vault.FactInpatientActivity"
     }
   },
   "schemas": {
