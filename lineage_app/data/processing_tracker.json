@@ -12,11 +12,53 @@
       "method": "gemini",
       "target_table": "[SLAMBI].[Vault].[TrustAccessWaits]"
     },
+    "Vault.loadDimSD.sql": {
+      "status": "success",
+      "processed_at": "2026-06-26T15:24:04Z",
+      "method": "gemini",
+      "target_table": "[Vault].DimSD"
+    },
     "Vault.LoadCostCentre.sql": {
       "status": "success",
-      "processed_at": "2026-06-26T12:35:11Z",
+      "processed_at": "2026-06-29T10:50:31Z",
       "method": "gemini",
       "target_table": "Vault.CostCentre"
+    },
+    "Vault.LoadEpisode.sql": {
+      "status": "success",
+      "processed_at": "2026-06-29T15:19:36Z",
+      "method": "gemini",
+      "target_table": "[Vault].[Episode]"
+    },
+    "Vault.LoadFactTrustAccessWaitingTimes.sql": {
+      "status": "success",
+      "processed_at": "2026-06-29T15:22:02Z",
+      "method": "gemini",
+      "target_table": "SLAMBI.Vault.TrustAccessWaitingTimes"
+    },
+    "Vault.LoadReferral.sql": {
+      "status": "success",
+      "processed_at": "2026-06-29T15:22:44Z",
+      "method": "gemini",
+      "target_table": "[Vault].[ReferralStatusValues]"
+    },
+    "Vautl.USpWaitingTimes.sql": {
+      "status": "success",
+      "processed_at": "2026-06-29T15:24:43Z",
+      "method": "gemini",
+      "target_table": "[Vault].[WaitingTimes]"
+    },
+    "Vault.TrustAccessEvents.sql": {
+      "status": "success",
+      "processed_at": "2026-06-29T16:32:43Z",
+      "method": "gemini",
+      "target_table": "SLAMBI.Vault.TrustAccessEvents"
+    },
+    "Dim.Priority.sql": {
+      "status": "success",
+      "processed_at": "2026-07-08T10:17:00Z",
+      "method": "gemini",
+      "target_table": "[DIM].[Priority]"
     }
   },
   "schemas": {

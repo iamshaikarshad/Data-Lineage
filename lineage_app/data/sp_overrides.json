@@ -1,4 +1,5 @@
 {
   "Vault.TrustAccessWaits.sql": "gemini",
-  "Vault.Loadpatient.sql": "gemini"
+  "Vault.Loadpatient.sql": "gemini",
+  "Vault.LoadDimSD.sql": "gemini"
 }

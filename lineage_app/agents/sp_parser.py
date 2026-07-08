@@ -21,6 +21,62 @@ from . import normalise_table
 
 logger = logging.getLogger(__name__)
 
+
+# ---------------------------------------------------------------------------
+# 1.4a Utility: strip square brackets and resolve aliases in column refs
+# ---------------------------------------------------------------------------
+
+def _strip_brackets(text: str) -> str:
+    """Remove all [ and ] characters from a string."""
+    if not isinstance(text, str):
+        return text
+    return text.replace('[', '').replace(']', '')
+
+
+def _resolve_alias_in_expr(expr: str, alias_map: Dict[str, str]) -> str:
+    """
+    Replace SQL alias prefixes in a column expression with real table names.
+    Also strips square brackets.
+
+    For example, with alias_map = {'a': 'PATIENT', 'b': 'REFERRAL'}:
+      'a.Gender_ID + b.RefDate' -> 'Patient.Gender_ID + Referral.RefDate'
+      'a.[RTT Start Date]'      -> 'Patient.RTT Start Date'
+
+    Handles bracketed column names like a.[Col Name] and alias.Column.
+    """
+    result = _strip_brackets(expr)
+    # Sort aliases longest-first to avoid partial replacement
+    sorted_aliases = sorted(alias_map.items(), key=lambda kv: len(kv[0]), reverse=True)
+    for alias, table_name in sorted_aliases:
+        # Replace alias. (case-insensitive) with TableName.
+        # Pattern: word-boundary + alias + dot (possibly with spaces around dot)
+        pattern = re.compile(
+            rf'\b{re.escape(alias)}\s*\.',
+            re.IGNORECASE
+        )
+        result = pattern.sub(f'{table_name}.', result)
+    return result
+
+
+def _strip_alias_prefix(col_name: str, alias_map: Dict[str, str]) -> str:
+    """
+    Strip a leading alias prefix from a simple column name.
+    'a.Gender_ID' -> 'Gender_ID'
+    'Patient.Gender_ID' -> 'Gender_ID' (non-alias table prefix also stripped)
+    '[Vault].Patient.Gender_ID' -> 'Gender_ID'
+    Also strips square brackets.
+    """
+    col_name = _strip_brackets(col_name)
+    # If alias.column, strip the alias part
+    for alias in alias_map:
+        if col_name.lower().startswith(alias.lower() + '.'):
+            col_name = col_name[len(alias) + 1:]
+            return col_name
+    # If it has a dot, take the last segment (table.column -> column)
+    if '.' in col_name:
+        col_name = col_name.rsplit('.', 1)[-1]
+    return col_name
+
 # ---------------------------------------------------------------------------
 # 1.4 Shared identifier regex fragments
 # ---------------------------------------------------------------------------
@@ -335,10 +391,22 @@ def extract_lineage(sp_code: str, catalogue: Dict[str, Dict[str, Any]]) -> Optio
         logger.debug("Step 1 failed: no column mappings found in primary statement")
         return None
 
-    joins = _parse_joins(stmt_text)
+    # Build alias map once for reuse in joins, filters, grouping
+    alias_map = _build_alias_map(stmt_text)
+
+    joins = _parse_joins(stmt_text, alias_map)
     joins = _resolve_join_left_tables(joins, stmt_text, target_table)
-    filters = _parse_filters(stmt_text)
-    grouping = _parse_grouping(stmt_text)
+    filters = _parse_filters(stmt_text, alias_map)
+    grouping = _parse_grouping(stmt_text, alias_map)
+
+    # Strip brackets from all string outputs
+    target_table = _strip_brackets(target_table)
+    source_tables = [_strip_brackets(t) for t in source_tables]
+    for mapping in column_mappings:
+        mapping["target_column"] = _strip_brackets(mapping.get("target_column", ""))
+        mapping["source_column"] = _strip_brackets(mapping.get("source_column", ""))
+    filters = [_strip_brackets(f) for f in filters]
+    grouping = [_strip_brackets(g) for g in grouping]
 
     return {
         "procedure_name": _find_procedure_name(sp_code),
@@ -496,18 +564,22 @@ def _parse_column_expression(expr: str, alias_map: Dict[str, str], source_tables
             possible_alias = table_alias_part.strip('[]').strip('"').lower()
             source_table = alias_map.get(possible_alias, normalise_table(table_alias_part))
 
-        source_col = normalise_table(col_part) if col_part else ""
+        # source_column: just the column name, no alias prefix, no brackets
+        source_col = _strip_alias_prefix(
+            normalise_table(col_part) if col_part else "", alias_map
+        )
         trans_type, trans_logic = _classify_transformation(expr_without_as)
         return (target_col or source_col, source_table, source_col, trans_type, trans_logic)
 
-    # Not a simple qualified reference — try to find a table reference in the expression
+    # Not a simple qualified reference — complex expression (calculation, CASE, etc.)
     source_table = ""
     for m in re.finditer(r'(' + QUALIFIED_IDENTIFIER + r')', expr_without_as):
         norm = normalise_table(m.group(1))
         if norm in source_tables:
             source_table = norm
             break
-    source_col = expr_without_as
+    # Resolve aliases in the expression and strip brackets
+    source_col = _resolve_alias_in_expr(expr_without_as, alias_map)
     trans_type, trans_logic = _classify_transformation(expr_without_as)
     return (target_col or source_col, source_table, source_col, trans_type, trans_logic)
 
@@ -555,7 +627,7 @@ def _classify_transformation(expr: str) -> tuple[str, str]:
 # Joins (updated for QUALIFIED_IDENTIFIER + left-table resolution)
 # ---------------------------------------------------------------------------
 
-def _parse_joins(sp_code: str) -> List[Dict[str, str]]:
+def _parse_joins(sp_code: str, alias_map: Dict[str, str]) -> List[Dict[str, str]]:
     """Parse JOIN clauses from the stored procedure."""
     joins = []
     # T-SQL pattern: JOIN <table> [alias] [WITH (hint)] ON
@@ -568,8 +640,12 @@ def _parse_joins(sp_code: str) -> List[Dict[str, str]]:
     for match in pattern.finditer(sp_code):
         join_type = match.group(1).strip().upper()
         right_table = normalise_table(match.group(2))
+        # Strip brackets from right_table
+        right_table = _strip_brackets(right_table)
         on_start = match.end()
         condition = _extract_until_keyword(sp_code[on_start:])
+        # Resolve aliases and strip brackets in the condition
+        condition = _resolve_alias_in_expr(condition, alias_map)
         joins.append({"left_table": "", "right_table": right_table, "join_type": join_type, "condition": condition})
     return joins
 
@@ -588,7 +664,7 @@ def _resolve_join_left_tables(
     from_pattern = re.compile(r'\bFROM\s+(' + QUALIFIED_IDENTIFIER + r')', re.IGNORECASE)
     from_match = from_pattern.search(stmt_text)
     if from_match:
-        left_table = normalise_table(from_match.group(1))
+        left_table = _strip_brackets(normalise_table(from_match.group(1)))
         for join in joins:
             join["left_table"] = left_table
 
@@ -690,8 +766,11 @@ def _split_by_top_level_and_or(s: str) -> List[str]:
     return parts
 
 
-def _parse_filters(sp_code: str) -> List[str]:
-    """Extract conditions from the WHERE clause, split into individual conditions."""
+def _parse_filters(sp_code: str, alias_map: Dict[str, str] = None) -> List[str]:
+    """Extract conditions from the WHERE clause, split into individual conditions.
+    Resolves SQL aliases in conditions and strips square brackets."""
+    if alias_map is None:
+        alias_map = {}
     where_match = re.search(r'\bWHERE\b\s+', sp_code, re.IGNORECASE)
     if not where_match:
         return []
@@ -703,20 +782,24 @@ def _parse_filters(sp_code: str) -> List[str]:
     if not where_clause:
         return []
 
-    # Split into individual conditions
+    # Split into individual conditions, then resolve aliases and strip brackets
     conditions = _split_by_top_level_and_or(where_clause)
-    return [c for c in conditions if c]
+    return [_resolve_alias_in_expr(c, alias_map) for c in conditions if c]
 
 
-def _parse_grouping(sp_code: str) -> List[str]:
-    """Extract expressions from the GROUP BY clause."""
+def _parse_grouping(sp_code: str, alias_map: Dict[str, str] = None) -> List[str]:
+    """Extract expressions from the GROUP BY clause.
+    Resolves SQL aliases and strips square brackets."""
+    if alias_map is None:
+        alias_map = {}
     group_match = re.search(r'GROUP\s+BY\s+(.*)', sp_code, re.IGNORECASE | re.DOTALL)
     if not group_match:
         return []
     group_clause = group_match.group(1)
     # Use _extract_until_keyword to properly bound the clause
     group_clause = _extract_until_keyword(group_clause)
-    return _split_by_top_level_comma(group_clause)
+    items = _split_by_top_level_comma(group_clause)
+    return [_resolve_alias_in_expr(g, alias_map) for g in items]
 
 
 # ---------------------------------------------------------------------------

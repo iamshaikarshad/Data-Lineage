@@ -1,6 +1,3715 @@
 {
   "sp_results": [
     {
+      "procedure_name": "Vault.LoadFactTrustAccessWaitingTimes",
+      "target_table": "Vault.TrustAccessEvents",
+      "source_tables": [
+        "Vault.Referral",
+        "Vault.DimSD",
+        "Vault.SLAMEvent",
+        "Vault.Episode",
+        "Vault.CAMHSEvent",
+        "Vault.Appointment",
+        "Vault.AddictionsEvent",
+        "Vault.Patient",
+        "Vault.FactInpatientActivity",
+        "Vault.udfAdultLiaisonProforma",
+        "Vault.TeamEpisode",
+        "DIM.EpisodeDetails",
+        "Vault.TrustAccessEvents"
+      ],
+      "column_mappings": [
+        {
+          "target_column": "PathwayId",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "PathwayId",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from TrustAccessEvents.PathwayId, grouped by."
+        },
+        {
+          "target_column": "PatientId",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "PatientId",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from TrustAccessEvents.PatientId, grouped by."
+        },
+        {
+          "target_column": "RTT StartID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "SourceId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum SourceId where MilestoneTypeId is 1 (Referral event)."
+        },
+        {
+          "target_column": "RTT Start Date",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "MilestoneDate",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum MilestoneDate where MilestoneTypeId is 1 (Referral event)."
+        },
+        {
+          "target_column": "RTT Start Type",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "EventType",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum EventType where MilestoneTypeId is 1 (Referral event)."
+        },
+        {
+          "target_column": "First ContactID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "SourceId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum SourceId where MilestoneTypeId is 2 (First Contact event)."
+        },
+        {
+          "target_column": "First Contact Date",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "MilestoneDate",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum MilestoneDate where MilestoneTypeId is 2 (First Contact event)."
+        },
+        {
+          "target_column": "First Contact Type",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "EventType",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum EventType where MilestoneTypeId is 2 (First Contact event)."
+        },
+        {
+          "target_column": "First Contact LocationID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "EventLocationId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum EventLocationId where MilestoneTypeId is 2 (First Contact event)."
+        },
+        {
+          "target_column": "First Contact EpisodeID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "EventEpisodeId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum EventEpisodeId where MilestoneTypeId is 2 (First Contact event)."
+        },
+        {
+          "target_column": "RTT StopID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "SourceId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum SourceId where MilestoneTypeId is 3 (RTT Stop event)."
+        },
+        {
+          "target_column": "RTT Stop Date",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "MilestoneDate",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum MilestoneDate where MilestoneTypeId is 3 (RTT Stop event)."
+        },
+        {
+          "target_column": "RTT Stop Type",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "EventType",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum EventType where MilestoneTypeId is 3 (RTT Stop event)."
+        },
+        {
+          "target_column": "RTT Stop LocationID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "EventLocationId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum EventLocationId where MilestoneTypeId is 3 (RTT Stop event)."
+        },
+        {
+          "target_column": "Rtt Stop EpisodeID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "EventEpisodeId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum EventEpisodeId where MilestoneTypeId is 3 (RTT Stop event)."
+        },
+        {
+          "target_column": "Ref TriageID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "SourceId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum SourceId where MilestoneTypeId is 4 (Referral Triage event)."
+        },
+        {
+          "target_column": "Ref Triage Date",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "MilestoneDate",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum MilestoneDate where MilestoneTypeId is 4 (Referral Triage event)."
+        },
+        {
+          "target_column": "Ref Triage LocationID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "EventLocationId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum EventLocationId where MilestoneTypeId is 4 (Referral Triage event)."
+        },
+        {
+          "target_column": "Ref Triage EpisodeID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "EventEpisodeId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum EventEpisodeId where MilestoneTypeId is 4 (Referral Triage event)."
+        },
+        {
+          "target_column": "A&E Liaison RefID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "SourceId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum SourceId where MilestoneTypeId is 5 (A&E Liaison Referral event)."
+        },
+        {
+          "target_column": "A&E Liaison Ref Date",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "MilestoneDate",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum MilestoneDate where MilestoneTypeId is 5 (A&E Liaison Referral event)."
+        },
+        {
+          "target_column": "A&E Liaison Ref LocationID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "EventLocationId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum EventLocationId where MilestoneTypeId is 5 (A&E Liaison Referral event)."
+        },
+        {
+          "target_column": "A&E Liaison Ref EpisodeID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "EventEpisodeId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum EventEpisodeId where MilestoneTypeId is 5 (A&E Liaison Referral event)."
+        },
+        {
+          "target_column": "A&E Liaison ContactID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "SourceId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum SourceId where MilestoneTypeId is 6 (A&E Liaison Contact event)."
+        },
+        {
+          "target_column": "A&E Liaison Contact Date",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "MilestoneDate",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum MilestoneDate where MilestoneTypeId is 6 (A&E Liaison Contact event)."
+        },
+        {
+          "target_column": "A&E Liaison Contact LocationID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "EventLocationId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum EventLocationId where MilestoneTypeId is 6 (A&E Liaison Contact event)."
+        },
+        {
+          "target_column": "A&E Liaison Contact EpisodeID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "EventEpisodeId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum EventEpisodeId where MilestoneTypeId is 6 (A&E Liaison Contact event)."
+        },
+        {
+          "target_column": "Crisis RefID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "SourceId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum SourceId where MilestoneTypeId is 7 (Crisis Referral event)."
+        },
+        {
+          "target_column": "Crisis Ref Date",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "MilestoneDate",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum MilestoneDate where MilestoneTypeId is 7 (Crisis Referral event)."
+        },
+        {
+          "target_column": "Crisis Ref Priority",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "EventTypeDetail",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum EventTypeDetail where MilestoneTypeId is 7 (Crisis Referral event)."
+        },
+        {
+          "target_column": "Crisis Ref LocationID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "EventLocationId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum EventLocationId where MilestoneTypeId is 7 (Crisis Referral event)."
+        },
+        {
+          "target_column": "Crisis Ref EpisodeID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "EventEpisodeId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum EventEpisodeId where MilestoneTypeId is 7 (Crisis Referral event)."
+        },
+        {
+          "target_column": "Crisis ContactID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "SourceId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum SourceId where MilestoneTypeId is 8 (Crisis Contact event)."
+        },
+        {
+          "target_column": "Crisis Contact Date",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "MilestoneDate",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum MilestoneDate where MilestoneTypeId is 8 (Crisis Contact event)."
+        },
+        {
+          "target_column": "Crisis Contact LocationID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "EventLocationId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum EventLocationId where MilestoneTypeId is 8 (Crisis Contact event)."
+        },
+        {
+          "target_column": "Crisis Contact EpisodeID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "EventEpisodeId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Maximum EventEpisodeId where MilestoneTypeId is 8 (Crisis Contact event)."
+        }
+      ],
+      "joins": [
+        {
+          "left_table": "Vault.Referral",
+          "right_table": "Vault.DimSD",
+          "join_type": "LEFT",
+          "condition": "Vault.Referral.Referred_To_Location_ID = Vault.DimSD.Team Name"
+        },
+        {
+          "left_table": "Vault.SLAMEvent",
+          "right_table": "Vault.Referral",
+          "join_type": "LEFT",
+          "condition": "Vault.SLAMEvent.cnreferral_id = Vault.Referral.Referral_ID"
+        },
+        {
+          "left_table": "Vault.SLAMEvent",
+          "right_table": "Vault.DimSD",
+          "join_type": "LEFT",
+          "condition": "Vault.SLAMEvent.Location_ID = Vault.DimSD.Location_ID"
+        },
+        {
+          "left_table": "Vault.SLAMEvent",
+          "right_table": "Vault.Episode",
+          "join_type": "LEFT",
+          "condition": "Vault.SLAMEvent.ServiceRequestIdentifier = Vault.Episode.cnepisode_id"
+        },
+        {
+          "left_table": "Vault.CAMHSEvent",
+          "right_table": "Vault.Referral",
+          "join_type": "LEFT",
+          "condition": "Vault.CAMHSEvent.cnreferral_id = Vault.Referral.Referral_ID"
+        },
+        {
+          "left_table": "Vault.CAMHSEvent",
+          "right_table": "Vault.DimSD",
+          "join_type": "LEFT",
+          "condition": "Vault.CAMHSEvent.Site_Code = Vault.DimSD.Team Code"
+        },
+        {
+          "left_table": "Vault.CAMHSEvent",
+          "right_table": "Vault.Episode",
+          "join_type": "LEFT",
+          "condition": "Vault.CAMHSEvent.ServiceRequestIdentifier = Vault.Episode.cnepisode_id"
+        },
+        {
+          "left_table": "Vault.Appointment",
+          "right_table": "Vault.Referral",
+          "join_type": "LEFT",
+          "condition": "Vault.Appointment.cnreferral_id = Vault.Referral.Referral_ID"
+        },
+        {
+          "left_table": "Vault.Appointment",
+          "right_table": "Vault.DimSD",
+          "join_type": "LEFT",
+          "condition": "Vault.Appointment.Location_ID = Vault.DimSD.Location_ID"
+        },
+        {
+          "left_table": "Vault.Appointment",
+          "right_table": "Vault.Episode",
+          "join_type": "LEFT",
+          "condition": "Vault.Appointment.ServiceRequestIdentifier = Vault.Episode.cnepisode_id"
+        },
+        {
+          "left_table": "Vault.AddictionsEvent",
+          "right_table": "Vault.Referral",
+          "join_type": "LEFT",
+          "condition": "Vault.AddictionsEvent.cnreferral_id = Vault.Referral.Referral_ID"
+        },
+        {
+          "left_table": "Vault.AddictionsEvent",
+          "right_table": "Vault.Episode",
+          "join_type": "LEFT",
+          "condition": "Vault.AddictionsEvent.cnepisode_id = Vault.Episode.cnepisode_id"
+        },
+        {
+          "left_table": "Vault.AddictionsEvent",
+          "right_table": "Vault.Patient",
+          "join_type": "LEFT",
+          "condition": "Vault.AddictionsEvent.Patient_ID = Vault.Patient.Patient_ID"
+        },
+        {
+          "left_table": "Vault.AddictionsEvent",
+          "right_table": "Vault.DimSD",
+          "join_type": "LEFT",
+          "condition": "Vault.AddictionsEvent.LocationID = Vault.DimSD.Location_ID"
+        },
+        {
+          "left_table": "Vault.FactInpatientActivity",
+          "right_table": "Vault.Referral",
+          "join_type": "LEFT",
+          "condition": "Vault.FactInpatientActivity.Referral_ID = Vault.Referral.Referral_ID"
+        },
+        {
+          "left_table": "Vault.FactInpatientActivity",
+          "right_table": "Vault.DimSD",
+          "join_type": "LEFT",
+          "condition": "Vault.FactInpatientActivity.Location_ID = Vault.DimSD.Location_ID"
+        },
+        {
+          "left_table": "Vault.Patient",
+          "right_table": "Vault.TrustAccessEvents",
+          "join_type": "INNER",
+          "condition": "Vault.Patient.Patient_ID = Vault.TrustAccessEvents.PatientId"
+        },
+        {
+          "left_table": "Vault.udfAdultLiaisonProforma",
+          "right_table": "Vault.Referral",
+          "join_type": "LEFT",
+          "condition": "Vault.udfAdultLiaisonProforma.cnreferral_id = Vault.Referral.Referral_ID"
+        },
+        {
+          "left_table": "Vault.Referral",
+          "right_table": "Vault.DimSD",
+          "join_type": "LEFT",
+          "condition": "Vault.Referral.Referred_To_Location_ID = Vault.DimSD.Team Name"
+        },
+        {
+          "left_table": "Vault.TeamEpisode",
+          "right_table": "Vault.DimSD",
+          "join_type": "LEFT",
+          "condition": "Vault.TeamEpisode.Location_ID = Vault.DimSD.Location_ID"
+        },
+        {
+          "left_table": "Vault.TeamEpisode",
+          "right_table": "Vault.Episode",
+          "join_type": "LEFT",
+          "condition": "Vault.TeamEpisode.Episode_ID = Vault.Episode.Episode_ID"
+        },
+        {
+          "left_table": "Vault.TeamEpisode",
+          "right_table": "DIM.EpisodeDetails",
+          "join_type": "LEFT",
+          "condition": "Vault.TeamEpisode.Episode_ID = DIM.EpisodeDetails.EpisodeId"
+        }
+      ],
+      "filters": [
+        "Vault.Referral.IsDeleted = 'N'",
+        "Vault.Referral.TestRecord = 'N'",
+        "Vault.TrustAccessEvents.MilestoneTypeId IS NOT NULL",
+        "Vault.SLAMEvent.EventTypeOfContactID IN (0, 9, 10, 11, 6, 23, 1, 26)",
+        "Vault.SLAMEvent.SLAM_Event_Recording_With_ID = 0",
+        "Vault.SLAMEvent.Attendance_Type_ID IN (7, 12)",
+        "Vault.SLAMEvent.Start_Date <= GETDATE()",
+        "Vault.SLAMEvent.Location_ID NOT IN (1333, 1373)",
+        "Vault.SLAMEvent.Location_ID NOT IN (402, 482, 513, 832)",
+        "Vault.SLAMEvent.Location_ID NOT IN (1272)",
+        "Vault.SLAMEvent.Location_ID NOT IN (1318)",
+        "Vault.DimSD.Location_ID NOT IN (1314, 1315, 1316, 1317)",
+        "Vault.SLAMEvent.Location_ID = Vault.Episode.Location_ID",
+        "Vault.DimSD.[Care Option] = 'No'",
+        "Vault.CAMHSEvent.Event_Type_Of_Contact_ID IN ('Phone', 'Face to Face', 'Face-to-face', 'Video link', 'Talk type for a Person unable to speak', 'Web')",
+        "Vault.CAMHSEvent.CYP_IAPT_Appt_Attended_ID IN (0, 4, 6)",
+        "Vault.CAMHSEvent.IsDeleted = 'N'",
+        "Vault.CAMHSEvent.TestRecord = 'N'",
+        "Vault.CAMHSEvent.Start_Date <= GETDATE()",
+        "Vault.DimSD.Location_ID NOT IN (402, 482, 513, 832)",
+        "Vault.DimSD.Location_ID NOT IN (1272)",
+        "Vault.DimSD.Location_ID NOT IN (1318)",
+        "Vault.DimSD.Location_ID = Vault.Episode.Location_ID",
+        "Vault.Appointment.Attendance_Type_ID IN ('Attended', 'Arrived late but was seen')",
+        "Vault.Appointment.IsDeleted = 'N'",
+        "Vault.Appointment.TestRecord = 'N'",
+        "Vault.Appointment.Clinic_Date <= GETDATE()",
+        "Vault.DimSD.[Care Option] = 'Yes'",
+        "Vault.Appointment.Location_ID NOT IN (402, 482, 513, 832)",
+        "Vault.Appointment.Location_ID NOT IN (1272)",
+        "Vault.Appointment.Location_ID NOT IN (1318)",
+        "Vault.Appointment.Location_ID = Vault.Episode.Location_ID",
+        "(Vault.AddictionsEvent.KeyworkingCheckboxID = 1 OR Vault.AddictionsEvent.AssessmentCheckboxID = 1 OR Vault.AddictionsEvent.MedicalReviewCheckboxID = 1 OR Vault.AddictionsEvent.NursingReviewCheckboxID = 1 OR Vault.AddictionsEvent.ConsultantReviewCheckboxID = 1 OR Vault.AddictionsEvent.StrategicReviewCheckboxID = 1 OR Vault.AddictionsEvent.CarePlanReviewCheckboxID = 1 OR Vault.AddictionsEvent.PsychTherapyCheckboxID = 1 OR Vault.AddictionsEvent.AdhocDutyAttendanceCheckboxID = 1 OR Vault.AddictionsEvent.GroupWorkCheckboxID = 1 OR Vault.AddictionsEvent.CriminalJusticeCheckboxID = 1 OR Vault.AddictionsEvent.SmokingCessationCheckboxID = 1 OR Vault.AddictionsEvent.NMPReviewCheckboxID = 1 OR Vault.AddictionsEvent.VideoCallCheckBoxID = 1 OR Vault.AddictionsEvent.TelephoneCheckboxID = 1)",
+        "Vault.AddictionsEvent.Attendance_Type_ID IN (7)",
+        "Vault.AddictionsEvent.IsDeleted = 'N'",
+        "Vault.AddictionsEvent.TestRecord = 'N'",
+        "Vault.AddictionsEvent.EventDate <= GETDATE()",
+        "Vault.AddictionsEvent.LocationID NOT IN (1333, 1373)",
+        "Vault.DimSD.[Care Option] = 'No'",
+        "Vault.DimSD.Location_ID NOT IN (402, 482, 513, 832)",
+        "Vault.DimSD.Location_ID NOT IN (1272)",
+        "Vault.DimSD.Location_ID NOT IN (1318)",
+        "Vault.DimSD.Location_ID = Vault.Episode.Location_ID",
+        "Vault.FactInpatientActivity.Admissions = 1",
+        "Vault.FactInpatientActivity.AdmissionDate <= GETDATE()",
+        "Vault.DimSD.Location_ID NOT IN (1314, 1315, 1316, 1317)",
+        "Vault.Referral.Discharge_Date IS NOT NULL",
+        "Vault.Patient.Date_Of_Death IS NOT NULL",
+        "Vault.Referral.Rejection_Date IS NOT NULL",
+        "Vault.Referral.Accepted_Date IS NOT NULL",
+        "Vault.udfAdultLiaisonProforma.IsDeleted = 'N'",
+        "Vault.udfAdultLiaisonProforma.TestRecord = 'N'",
+        "Vault.DimSD.Location_ID IN (402, 482, 513, 832)",
+        "Vault.udfAdultLiaisonProforma.Invalid_Flag_ID = 0",
+        "Vault.TeamEpisode.IsDeleted = 'N'",
+        "Vault.TeamEpisode.TestRecord = 'N'",
+        "Vault.Episode.Episode_Priority_Desc = 'Crisis'",
+        "Vault.TeamEpisode.Location_ID NOT IN (1333, 1373)",
+        "Vault.TeamEpisode.Location_ID NOT IN (402, 482, 513, 832)",
+        "Vault.TeamEpisode.Location_ID NOT IN (1272)",
+        "Vault.TeamEpisode.Location_ID NOT IN (1318)",
+        "DIM.EpisodeDetails.EpisodePriorityDesc = 'Crisis'",
+        "count(case when Vault.TrustAccessEvents.MilestoneTypeId=1 or Vault.TrustAccessEvents.MilestoneTypeId=5 or Vault.TrustAccessEvents.MilestoneTypeId=7 then Vault.TrustAccessEvents.MilestoneDate END) > 0"
+      ],
+      "grouping": [
+        "PathwayId",
+        "PatientId"
+      ],
+      "extraction_method": "gemini",
+      "source_file": "Vault.TrustAccessEvents.sql"
+    },
+    {
+      "procedure_name": "Vault.LoadEpisode",
+      "target_table": "Vault.Episode",
+      "source_tables": [
+        "Raw.tblEpisode",
+        "Vault.LinkEpisode",
+        "Vault.Patient",
+        "Raw.tblEpisodePriorityValues",
+        "Raw.tblEpisodeAdminStatusValues",
+        "Raw.tblEpisodeTypeValues"
+      ],
+      "column_mappings": [
+        {
+          "target_column": "LinkEpisodePK",
+          "source_table": "Vault.LinkEpisode",
+          "source_column": "LinkEpisodePK",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "RecordSource",
+          "source_table": null,
+          "source_column": null,
+          "transformation_type": "constant",
+          "transformation_logic": "Assigned constant value 'PJS'"
+        },
+        {
+          "target_column": "Episode_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Episode_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "cnreferral_id",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "cnreferral_id",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "cnepisode_id",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "cnepisode_id",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "cn_doc_id",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "cn_doc_id",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "cnobject_type_id",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "cnobject_type_id",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Episode_Type_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Episode_Type_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Patient_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Patient_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Referral_Date",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Referral_Date",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Referral_Time",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Referral_Time",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Referral_Received_Date",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Referral_Received_Date",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Episode_Status",
+          "source_table": "Raw.tblEpisodeAdminStatusValues",
+          "source_column": "Episode_Admin_Status_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Episode_Type",
+          "source_table": "Raw.tblEpisodeTypeValues",
+          "source_column": "Episode_Type_Desc",
+          "transformation_type": "calculation",
+          "transformation_logic": "Casted to VARCHAR(255)"
+        },
+        {
+          "target_column": "Last_Contact_Date",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Last_Contact_Date",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Referral_Source_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Referral_Source_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Referral_Source_Type_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Referral_Source_Type_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Agency_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Agency_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Contact_Name",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Contact_Name",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Contact_Job_Title",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Contact_Job_Title",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Contact_Telephone",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Contact_Telephone",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "GP_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "GP_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Practice_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Practice_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "GP_Code",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "GP_Code",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Practice_Code",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Practice_Code",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "School_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "School_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Contact_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Contact_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Staff_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Staff_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Episode_Priority_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Episode_Priority_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Referral_Reason_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Referral_Reason_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Presentation_Reason_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Presentation_Reason_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Referrer_Address1",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Referrer_Address1",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Referrer_Address2",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Referrer_Address2",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Referrer_Address3",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Referrer_Address3",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Referrer_Address4",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Referrer_Address4",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Referrer_Address5",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Referrer_Address5",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Referrer_Post_Code",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Referrer_Post_Code",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Referrer_Telephone",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Referrer_Telephone",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Referrer_Fax",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Referrer_Fax",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Referrer_Email",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Referrer_Email",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Referrer_PCT_Code",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Referrer_PCT_Code",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Referrer_PCT_Name",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Referrer_PCT_Name",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Service_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Service_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Location_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Location_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Client_Normally_Seen_At_Location_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Client_Normally_Seen_At_Location_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Referral_Format_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Referral_Format_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Referral_Status_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Referral_Status_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Referral_Admin_Status_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Referral_Admin_Status_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Referral_Administrative_Category_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Referral_Administrative_Category_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Episode_Admin_Priority_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Episode_Admin_Priority_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Accepted_Date",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Accepted_Date",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Accepted_By_Staff_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Accepted_By_Staff_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Accepted_By_Staff_Name",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Accepted_By_Staff_Name",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Wait_Weeks",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Wait_Weeks",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Open_Weeks",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Open_Weeks",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Start_Date",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Start_Date",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Accommodation_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Accommodation_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Employment_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Employment_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Administration_Comments",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Administration_Comments",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Rejection_Date",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Rejection_Date",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Rejection_Reason_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Rejection_Reason_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Rejection_Detail",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Rejection_Detail",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Rejected_By_Staff_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Rejected_By_Staff_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Rejected_By_Staff_Name",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Rejected_By_Staff_Name",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Discharge_Date",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Discharge_Date",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Discharge_Time",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Discharge_Time",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Discharge_Method_Episode_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Discharge_Method_Episode_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Discharge_Destination_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Discharge_Destination_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Healthcare_Resource_Group_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Healthcare_Resource_Group_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Discharge_Agreed_By_Staff_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Discharge_Agreed_By_Staff_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Discharge_Agreed_By_Staff_Name",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Discharge_Agreed_By_Staff_Name",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Discharge_Detail",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Discharge_Detail",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Comments",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Comments",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Transport_Required_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Transport_Required_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "User_Created",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "User_Created",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Create_Dttm",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Create_Dttm",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "User_Updated",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "User_Updated",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Updated_Dttm",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Updated_Dttm",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Referrer_CCG_Code",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Referrer_CCG_Code",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Referrer_CCG_Name",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Referrer_CCG_Name",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Referral_Received_Time",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Referral_Received_Time",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Agency_Staff_Category_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Agency_Staff_Category_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Staff_Professional_Group_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Staff_Professional_Group_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Discharge_Letter_Issued_Date",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Discharge_Letter_Issued_Date",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Referral_Closure_Reason_ID",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "Referral_Closure_Reason_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "NHS_Service_Agreement_Line_Number",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "NHS_Service_Agreement_Line_Number",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Episode_Priority_Desc",
+          "source_table": "Raw.tblEpisodePriorityValues",
+          "source_column": "Episode_Priority_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "extracteddate",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "extracteddate",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "IsDeleted",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "IsDeleted",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "TestRecord",
+          "source_table": "Raw.tblEpisode",
+          "source_column": "TestRecord",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "VaultLoaddate",
+          "source_table": null,
+          "source_column": null,
+          "transformation_type": "constant",
+          "transformation_logic": "Set to current datetime (GETDATE()) on insert"
+        },
+        {
+          "target_column": "VaultUpdateDate",
+          "source_table": null,
+          "source_column": null,
+          "transformation_type": "constant",
+          "transformation_logic": "Set to current datetime (GETDATE()) on update or insert"
+        }
+      ],
+      "joins": [
+        {
+          "left_table": "Raw.tblEpisode",
+          "right_table": "Vault.LinkEpisode",
+          "join_type": "INNER",
+          "condition": "Vault.LinkEpisode].Episode_ID = [Raw.tblEpisode].Episode_ID"
+        },
+        {
+          "left_table": "Raw.tblEpisode",
+          "right_table": "Vault.Patient",
+          "join_type": "INNER",
+          "condition": "Vault.Patient].Patient_ID = [Raw.tblEpisode].Patient_ID"
+        },
+        {
+          "left_table": "Raw.tblEpisode",
+          "right_table": "Raw.tblEpisodePriorityValues",
+          "join_type": "LEFT",
+          "condition": "Raw.tblEpisodePriorityValues].Episode_Priority_ID = [Raw.tblEpisode].Episode_Priority_ID"
+        },
+        {
+          "left_table": "Raw.tblEpisode",
+          "right_table": "Raw.tblEpisodeAdminStatusValues",
+          "join_type": "LEFT",
+          "condition": "Raw.tblEpisodeAdminStatusValues].Referral_Status_ID = [Raw.tblEpisode].Referral_Status_ID"
+        },
+        {
+          "left_table": "Raw.tblEpisode",
+          "right_table": "Raw.tblEpisodeTypeValues",
+          "join_type": "LEFT",
+          "condition": "Raw.tblEpisodeTypeValues].Episode_Type_ID = [Raw.tblEpisode].Episode_Type_ID"
+        }
+      ],
+      "filters": [
+        "CAST([Raw.tblEpisode].Updated_Dttm AS DATE) >= CAST(@LastExtractedDate AS DATE)"
+      ],
+      "grouping": [],
+      "extraction_method": "gemini",
+      "source_file": "Vault.LoadEpisode.sql"
+    },
+    {
+      "procedure_name": "Vault.LoadFactTrustAccessWaitingTimes",
+      "target_table": "Vault.TrustAccessWaitingTimes",
+      "source_tables": [
+        "Vault.TrustAccessEvents",
+        "Vault.Referral",
+        "Vault.DimSD",
+        "Vault.Patient",
+        "Vault.TeamEpisode",
+        "Dim.Priority"
+      ],
+      "column_mappings": [
+        {
+          "target_column": "TrustID",
+          "source_table": "Vault.Patient",
+          "source_column": "TrustID",
+          "transformation_type": "calculation",
+          "transformation_logic": "Formats the TrustID by taking parts of Patient.TrustID and concatenating them with hyphens."
+        },
+        {
+          "target_column": "PathwayId",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "PathwayId",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is sourced from Vault.TrustAccessEvents (derived via UNION ALL from Referral, SLAMEvent, CAMHSEvent, Appointment, AddictionsEvent, FactInpatientActivity, udfAdultLiaisonProforma, TeamEpisode tables)."
+        },
+        {
+          "target_column": "PatientId",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "PatientId",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is sourced from Vault.TrustAccessEvents (derived via UNION ALL from Referral, SLAMEvent, CAMHSEvent, Appointment, AddictionsEvent, FactInpatientActivity, udfAdultLiaisonProforma, TeamEpisode, Patient tables)."
+        },
+        {
+          "target_column": "RTT StartID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "RTT StartID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of SourceId from Vault.TrustAccessEvents where MilestoneTypeId is 1."
+        },
+        {
+          "target_column": "RTT Start Date",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "RTT Start Date",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of MilestoneDate from Vault.TrustAccessEvents where MilestoneTypeId is 1."
+        },
+        {
+          "target_column": "RTT Start Type",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "RTT Start Type",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of EventType from Vault.TrustAccessEvents where MilestoneTypeId is 1."
+        },
+        {
+          "target_column": "First ContactID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "First ContactID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of SourceId from Vault.TrustAccessEvents where MilestoneTypeId is 2."
+        },
+        {
+          "target_column": "First Contact Date",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "First Contact Date",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of MilestoneDate from Vault.TrustAccessEvents where MilestoneTypeId is 2."
+        },
+        {
+          "target_column": "First Contact Type",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "First Contact Type",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of EventType from Vault.TrustAccessEvents where MilestoneTypeId is 2."
+        },
+        {
+          "target_column": "First Contact LocationID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "First Contact LocationID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of EventLocationId from Vault.TrustAccessEvents where MilestoneTypeId is 2."
+        },
+        {
+          "target_column": "First Contact EpisodeID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "First Contact EpisodeID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of EventEpisodeId from Vault.TrustAccessEvents where MilestoneTypeId is 2."
+        },
+        {
+          "target_column": "RTT StopID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "RTT StopID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of SourceId from Vault.TrustAccessEvents where MilestoneTypeId is 3."
+        },
+        {
+          "target_column": "RTT Stop Date",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "RTT Stop Date",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of MilestoneDate from Vault.TrustAccessEvents where MilestoneTypeId is 3."
+        },
+        {
+          "target_column": "RTT Stop Type",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "RTT Stop Type",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of EventType from Vault.TrustAccessEvents where MilestoneTypeId is 3."
+        },
+        {
+          "target_column": "RTT Stop LocationID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "RTT Stop LocationID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of EventLocationId from Vault.TrustAccessEvents where MilestoneTypeId is 3."
+        },
+        {
+          "target_column": "Rtt Stop EpisodeID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "Rtt Stop EpisodeID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of EventEpisodeId from Vault.TrustAccessEvents where MilestoneTypeId is 3."
+        },
+        {
+          "target_column": "Ref TriageID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "Ref TriageID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of SourceId from Vault.TrustAccessEvents where MilestoneTypeId is 4."
+        },
+        {
+          "target_column": "Ref Triage Date",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "Ref Triage Date",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of MilestoneDate from Vault.TrustAccessEvents where MilestoneTypeId is 4."
+        },
+        {
+          "target_column": "Ref Triage LocationID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "Ref Triage LocationID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of EventLocationId from Vault.TrustAccessEvents where MilestoneTypeId is 4."
+        },
+        {
+          "target_column": "Ref Triage EpisodeID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "Ref Triage EpisodeID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of EventEpisodeId from Vault.TrustAccessEvents where MilestoneTypeId is 4."
+        },
+        {
+          "target_column": "A&E Liaison RefID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "A&E Liaison RefID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of SourceId from Vault.TrustAccessEvents where MilestoneTypeId is 5."
+        },
+        {
+          "target_column": "A&E Liaison Ref Date",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "A&E Liaison Ref Date",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of MilestoneDate from Vault.TrustAccessEvents where MilestoneTypeId is 5."
+        },
+        {
+          "target_column": "A&E Liaison Ref LocationID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "A&E Liaison Ref LocationID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of EventLocationId from Vault.TrustAccessEvents where MilestoneTypeId is 5."
+        },
+        {
+          "target_column": "A&E Liaison Ref EpisodeID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "A&E Liaison Ref EpisodeID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of EventEpisodeId from Vault.TrustAccessEvents where MilestoneTypeId is 5."
+        },
+        {
+          "target_column": "A&E Liaison ContactID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "A&E Liaison ContactID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of SourceId from Vault.TrustAccessEvents where MilestoneTypeId is 6."
+        },
+        {
+          "target_column": "A&E Liaison Contact Date",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "A&E Liaison Contact Date",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of MilestoneDate from Vault.TrustAccessEvents where MilestoneTypeId is 6."
+        },
+        {
+          "target_column": "A&E Liaison Contact LocationID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "A&E Liaison Contact LocationID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of EventLocationId from Vault.TrustAccessEvents where MilestoneTypeId is 6."
+        },
+        {
+          "target_column": "A&E Liaison Contact EpisodeID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "A&E Liaison Contact EpisodeID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of EventEpisodeId from Vault.TrustAccessEvents where MilestoneTypeId is 6."
+        },
+        {
+          "target_column": "Crisis RefID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "Crisis RefID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of SourceId from Vault.TrustAccessEvents where MilestoneTypeId is 7."
+        },
+        {
+          "target_column": "Crisis Ref Date",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "Crisis Ref Date",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of MilestoneDate from Vault.TrustAccessEvents where MilestoneTypeId is 7."
+        },
+        {
+          "target_column": "Crisis Ref Priority",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "Crisis Ref Priority",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of EventTypeDetail from Vault.TrustAccessEvents where MilestoneTypeId is 7."
+        },
+        {
+          "target_column": "Crisis Ref LocationID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "Crisis Ref LocationID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of EventLocationId from Vault.TrustAccessEvents where MilestoneTypeId is 7."
+        },
+        {
+          "target_column": "Crisis Ref EpisodeID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "Crisis Ref EpisodeID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of EventEpisodeId from Vault.TrustAccessEvents where MilestoneTypeId is 7."
+        },
+        {
+          "target_column": "Crisis ContactID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "Crisis ContactID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of SourceId from Vault.TrustAccessEvents where MilestoneTypeId is 8."
+        },
+        {
+          "target_column": "Crisis Contact Date",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "Crisis Contact Date",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of MilestoneDate from Vault.TrustAccessEvents where MilestoneTypeId is 8."
+        },
+        {
+          "target_column": "Crisis Contact LocationID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "Crisis Contact LocationID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of EventLocationId from Vault.TrustAccessEvents where MilestoneTypeId is 8."
+        },
+        {
+          "target_column": "Crisis Contact EpisodeID",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "Crisis Contact EpisodeID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Vault.TrustAccessEvents. This column is the maximum of EventEpisodeId from Vault.TrustAccessEvents where MilestoneTypeId is 8."
+        },
+        {
+          "target_column": "ReferralID",
+          "source_table": "Vault.Referral",
+          "source_column": "Referral_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of Referral_ID from Vault.Referral."
+        },
+        {
+          "target_column": "Referral SourceID",
+          "source_table": "Vault.Referral",
+          "source_column": "Referral_Source_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of Referral_Source_ID from Vault.Referral."
+        },
+        {
+          "target_column": "Referral Priority",
+          "source_table": "Vault.Referral",
+          "source_column": "Referral_Priority_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of Referral_Priority_ID from Vault.Referral."
+        },
+        {
+          "target_column": "Referral Team",
+          "source_table": "Vault.DimSD",
+          "source_column": "Team Name",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of [Team Name] from Vault.DimSD, joined on Referral.Referred_To_Location_ID."
+        },
+        {
+          "target_column": "Referral Directorate",
+          "source_table": "Vault.DimSD",
+          "source_column": "Directorate",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of Directorate from Vault.DimSD, joined on Referral.Referred_To_Location_ID."
+        },
+        {
+          "target_column": "Referral Division",
+          "source_table": "Vault.DimSD",
+          "source_column": "Division",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of Division from Vault.DimSD, joined on Referral.Referred_To_Location_ID."
+        },
+        {
+          "target_column": "Referral Service Type",
+          "source_table": "Vault.DimSD",
+          "source_column": "Service Type",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of [Service Type] from Vault.DimSD, joined on Referral.Referred_To_Location_ID."
+        },
+        {
+          "target_column": "Referral Sub Service Line",
+          "source_table": "Vault.DimSD",
+          "source_column": "Sub Service Line",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of [Sub Service Line] from Vault.DimSD, joined on Referral.Referred_To_Location_ID."
+        },
+        {
+          "target_column": "Referral Received Time",
+          "source_table": "Vault.Referral",
+          "source_column": "Referral_Received_Time",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of Referral_Received_Time from Vault.Referral."
+        },
+        {
+          "target_column": "First Contact Team",
+          "source_table": "Vault.DimSD",
+          "source_column": "Team Name",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of [Team Name] from Vault.DimSD, joined on [First Contact LocationID] and [First Contact Type]."
+        },
+        {
+          "target_column": "First Contact Directorate",
+          "source_table": "Vault.DimSD",
+          "source_column": "Directorate",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of Directorate from Vault.DimSD, joined on [First Contact LocationID] and [First Contact Type]."
+        },
+        {
+          "target_column": "First Contact Division",
+          "source_table": "Vault.DimSD",
+          "source_column": "Division",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of Division from Vault.DimSD, joined on [First Contact LocationID] and [First Contact Type]."
+        },
+        {
+          "target_column": "First Contact Service Type",
+          "source_table": "Vault.DimSD",
+          "source_column": "Service Type",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of [Service Type] from Vault.DimSD, joined on [First Contact LocationID] and [First Contact Type]."
+        },
+        {
+          "target_column": "First Contact Sub Service Line",
+          "source_table": "Vault.DimSD",
+          "source_column": "Sub Service Line",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of [Sub Service Line] from Vault.DimSD, joined on [First Contact LocationID] and [First Contact Type]."
+        },
+        {
+          "target_column": "Earliest Accepted Episode Team",
+          "source_table": "Vault.DimSD",
+          "source_column": "Team Name",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of [Team Name] from Vault.DimSD, joined on EarliestAcceptedEpisode's Location_ID."
+        },
+        {
+          "target_column": "Earliest Accepted Episode Directorate",
+          "source_table": "Vault.DimSD",
+          "source_column": "Directorate",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of Directorate from Vault.DimSD, joined on EarliestAcceptedEpisode's Location_ID."
+        },
+        {
+          "target_column": "Earliest Accepted Episode Division",
+          "source_table": "Vault.DimSD",
+          "source_column": "Division",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of Division from Vault.DimSD, joined on EarliestAcceptedEpisode's Location_ID."
+        },
+        {
+          "target_column": "Earliest Accepted Episode Service Type",
+          "source_table": "Vault.DimSD",
+          "source_column": "Service Type",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of [Service Type] from Vault.DimSD, joined on EarliestAcceptedEpisode's Location_ID."
+        },
+        {
+          "target_column": "Earliest Accepted Episode Sub Service Line",
+          "source_table": "Vault.DimSD",
+          "source_column": "Sub Service Line",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of [Sub Service Line] from Vault.DimSD, joined on EarliestAcceptedEpisode's Location_ID."
+        },
+        {
+          "target_column": "Earliest Accepted Episode Referral Status",
+          "source_table": "Vault.TeamEpisode",
+          "source_column": "Referral_Admin_Status_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of Referral_Admin_Status_ID from Vault.TeamEpisode."
+        },
+        {
+          "target_column": "Earliest Accepted EpisodeID",
+          "source_table": "Vault.TeamEpisode",
+          "source_column": "Episode_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of Episode_ID from Vault.TeamEpisode."
+        },
+        {
+          "target_column": "Latest Active Episode Team",
+          "source_table": "Vault.DimSD",
+          "source_column": "Team Name",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of [Team Name] from Vault.DimSD, joined on LatestActiveEpisode's Location_ID."
+        },
+        {
+          "target_column": "Latest Active Episode Directorate",
+          "source_table": "Vault.DimSD",
+          "source_column": "Directorate",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of Directorate from Vault.DimSD, joined on LatestActiveEpisode's Location_ID."
+        },
+        {
+          "target_column": "Latest Active Episode Division",
+          "source_table": "Vault.DimSD",
+          "source_column": "Division",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of Division from Vault.DimSD, joined on LatestActiveEpisode's Location_ID."
+        },
+        {
+          "target_column": "Latest Active Episode Service Type",
+          "source_table": "Vault.DimSD",
+          "source_column": "Service Type",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of [Service Type] from Vault.DimSD, joined on LatestActiveEpisode's Location_ID."
+        },
+        {
+          "target_column": "Latest Active Episode Sub Service Line",
+          "source_table": "Vault.DimSD",
+          "source_column": "Sub Service Line",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of [Sub Service Line] from Vault.DimSD, joined on LatestActiveEpisode's Location_ID."
+        },
+        {
+          "target_column": "Latest Active Episode ID",
+          "source_table": "Vault.TeamEpisode",
+          "source_column": "Episode_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of Episode_ID from Vault.TeamEpisode."
+        },
+        {
+          "target_column": "Team Triaged Date",
+          "source_table": "Vault.TeamEpisode",
+          "source_column": "Accepted_Date",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of Accepted_Date from Vault.TeamEpisode."
+        },
+        {
+          "target_column": "Days With Latest Active Team",
+          "source_table": "Vault.TeamEpisode",
+          "source_column": "EReferral_Date",
+          "transformation_type": "calculation",
+          "transformation_logic": "Calculates days difference between current date (GETDATE()) and EReferral_Date from Vault.TeamEpisode."
+        },
+        {
+          "target_column": "Latest Team Referred To Date",
+          "source_table": "Vault.TeamEpisode",
+          "source_column": "EReferral_Date",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of EReferral_Date from Vault.TeamEpisode."
+        },
+        {
+          "target_column": "Latest Team Priority",
+          "source_table": "Dim.Priority",
+          "source_column": "PriorityDescription",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of PriorityDescription from Dim.Priority."
+        },
+        {
+          "target_column": "Latest Team Referral Status",
+          "source_table": "Vault.TeamEpisode",
+          "source_column": "Referral_Admin_Status_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of Referral_Admin_Status_ID from Vault.TeamEpisode."
+        },
+        {
+          "target_column": "A&E Liaison Contact Team",
+          "source_table": "Vault.DimSD",
+          "source_column": "Team Name",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of [Team Name] from Vault.DimSD, joined on [A&E Liaison Contact LocationID]."
+        },
+        {
+          "target_column": "A&E Liaison Contact Directorate",
+          "source_table": "Vault.DimSD",
+          "source_column": "Directorate",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of Directorate from Vault.DimSD, joined on [A&E Liaison Contact LocationID]."
+        },
+        {
+          "target_column": "A&E Liaison Contact Division",
+          "source_table": "Vault.DimSD",
+          "source_column": "Division",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of Division from Vault.DimSD, joined on [A&E Liaison Contact LocationID]."
+        },
+        {
+          "target_column": "A&E Liaison Contact Service Type",
+          "source_table": "Vault.DimSD",
+          "source_column": "Service Type",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of [Service Type] from Vault.DimSD, joined on [A&E Liaison Contact LocationID]."
+        },
+        {
+          "target_column": "A&E Liaison Contact Sub Service Line",
+          "source_table": "Vault.DimSD",
+          "source_column": "Sub Service Line",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of [Sub Service Line] from Vault.DimSD, joined on [A&E Liaison Contact LocationID]."
+        },
+        {
+          "target_column": "Crisis Contact Team",
+          "source_table": "Vault.DimSD",
+          "source_column": "Team Name",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of [Team Name] from Vault.DimSD, joined on [Crisis Contact LocationID]."
+        },
+        {
+          "target_column": "Crisis Contact Directorate",
+          "source_table": "Vault.DimSD",
+          "source_column": "Directorate",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of Directorate from Vault.DimSD, joined on [Crisis Contact LocationID]."
+        },
+        {
+          "target_column": "Crisis Contact Division",
+          "source_table": "Vault.DimSD",
+          "source_column": "Division",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of Division from Vault.DimSD, joined on [Crisis Contact LocationID]."
+        },
+        {
+          "target_column": "Crisis Contact Service Type",
+          "source_table": "Vault.DimSD",
+          "source_column": "Service Type",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of [Service Type] from Vault.DimSD, joined on [Crisis Contact LocationID]."
+        },
+        {
+          "target_column": "Crisis Contact Sub Service Line",
+          "source_table": "Vault.DimSD",
+          "source_column": "Sub Service Line",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of [Sub Service Line] from Vault.DimSD, joined on [Crisis Contact LocationID]."
+        },
+        {
+          "target_column": "Age",
+          "source_table": "Vault.Patient",
+          "source_column": "Date_Of_Birth",
+          "transformation_type": "calculation",
+          "transformation_logic": "Calculates age in years from Patient.Date_Of_Birth and current date (GETDATE())."
+        },
+        {
+          "target_column": "EthnicityID",
+          "source_table": "Vault.Patient",
+          "source_column": "Ethnicity_ID",
+          "transformation_type": "conditional",
+          "transformation_logic": "Returns Patient.Ethnicity_ID if not null, otherwise 1009."
+        },
+        {
+          "target_column": "Patient GenderID",
+          "source_table": "Vault.Patient",
+          "source_column": "Gender_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy of Gender_ID from Vault.Patient."
+        },
+        {
+          "target_column": "Deceased",
+          "source_table": "Vault.Patient",
+          "source_column": "Date_Of_Death",
+          "transformation_type": "conditional",
+          "transformation_logic": "Sets to 'Deceased' if Patient.Date_Of_Death is not null, otherwise null."
+        },
+        {
+          "target_column": "First Contact Month",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "First Contact Date",
+          "transformation_type": "calculation",
+          "transformation_logic": "Calculates the first day of the month for [First Contact Date]."
+        },
+        {
+          "target_column": "Days Waited For First Contact",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "RTT Start Date",
+          "transformation_type": "conditional",
+          "transformation_logic": "Calculates days difference between [RTT Start Date] and [First Contact Date] (or GETDATE() if null), conditionally null if [RTT Stop Date] is not null and [First Contact Date] is null."
+        },
+        {
+          "target_column": "Weeks Waited For First Contact",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "RTT Start Date",
+          "transformation_type": "calculation",
+          "transformation_logic": "Calculates weeks by dividing [Days Waited For First Contact] by 7 and taking the ceiling."
+        },
+        {
+          "target_column": "Weeks Waited Group For First Contact",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "RTT Start Date",
+          "transformation_type": "conditional",
+          "transformation_logic": "Categorizes [Weeks Waited For First Contact] into predefined ranges (e.g., '0-12', '13-18')."
+        },
+        {
+          "target_column": "Weeks Waited Group For First Contact Order",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "RTT Start Date",
+          "transformation_type": "conditional",
+          "transformation_logic": "Assigns an order number to [Weeks Waited Group For First Contact] categories."
+        },
+        {
+          "target_column": "Days Ref To Triage",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "RTT Start Date",
+          "transformation_type": "calculation",
+          "transformation_logic": "Calculates days difference between [RTT Start Date] and [Ref Triage Date] (or GETDATE() if null)."
+        },
+        {
+          "target_column": "Days Triage To First Contact",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "Ref Triage Date",
+          "transformation_type": "conditional",
+          "transformation_logic": "Calculates days difference between [Ref Triage Date] and [First Contact Date] (or GETDATE() if null), conditionally null if [RTT Stop Date] is not null and [First Contact Date] is null."
+        },
+        {
+          "target_column": "Days Waited",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "RTT Start Date",
+          "transformation_type": "calculation",
+          "transformation_logic": "Calculates days difference between [RTT Start Date] and [RTT Stop Date] (or GETDATE() if null)."
+        },
+        {
+          "target_column": "Weeks Waited",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "RTT Start Date",
+          "transformation_type": "calculation",
+          "transformation_logic": "Calculates weeks by dividing [Days Waited] by 7 and taking the ceiling."
+        },
+        {
+          "target_column": "Weeks Waited Group",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "RTT Start Date",
+          "transformation_type": "conditional",
+          "transformation_logic": "Categorizes [Weeks Waited] into predefined ranges (e.g., '0-12', '13-18')."
+        },
+        {
+          "target_column": "Weeks Waited Group Order",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "RTT Start Date",
+          "transformation_type": "conditional",
+          "transformation_logic": "Assigns an order number to [Weeks Waited Group] categories."
+        },
+        {
+          "target_column": "Waiting For First Contact",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "RTT Start Date",
+          "transformation_type": "conditional",
+          "transformation_logic": "Determines if a patient is waiting for first contact based on the presence of [RTT Start Date], [First Contact Date], and [RTT Stop Date]."
+        },
+        {
+          "target_column": "First Contact 52 Week Breach",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "RTT Start Date",
+          "transformation_type": "conditional",
+          "transformation_logic": "Flags if the wait time for first contact exceeds 364 days."
+        },
+        {
+          "target_column": "A&E Liaison Wait Time",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "A&E Liaison Ref Date",
+          "transformation_type": "calculation",
+          "transformation_logic": "Calculates the time difference in HH:MM format between [A&E Liaison Ref Date] and [A&E Liaison Contact Date] (or GETDATE() if null)."
+        },
+        {
+          "target_column": "A&E Liaison Wait Breach Flag",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "A&E Liaison Ref Date",
+          "transformation_type": "conditional",
+          "transformation_logic": "Flags 'Y' if the A&E Liaison wait time exceeds 60 minutes, otherwise 'N'."
+        },
+        {
+          "target_column": "Crisis Wait Time",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "Crisis Ref Date",
+          "transformation_type": "calculation",
+          "transformation_logic": "Calculates the time difference in HH:MM format between [Crisis Ref Date] and [Crisis Contact Date] (or GETDATE() if null)."
+        },
+        {
+          "target_column": "Crisis Wait Breach Flag",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "Crisis Ref Date",
+          "transformation_type": "conditional",
+          "transformation_logic": "Flags 'Y' if the Crisis wait time exceeds 24 hours, otherwise 'N'."
+        },
+        {
+          "target_column": "Census Date",
+          "source_table": "Vault.TrustAccessEvents",
+          "source_column": "First Contact Date",
+          "transformation_type": "conditional",
+          "transformation_logic": "Selects the first non-null date among [First Contact Date], [RTT Stop Date], [A&E Liaison Contact Date], [Crisis Contact Date], or GETDATE() if all are null."
+        },
+        {
+          "target_column": "Exclusion Flag",
+          "source_table": "Vault.DimSD",
+          "source_column": "Division",
+          "transformation_type": "conditional",
+          "transformation_logic": "Sets flag to 1 if Referral Division is '02b. Addictions', else 0."
+        },
+        {
+          "target_column": "Exclusion Reason",
+          "source_table": "Vault.DimSD",
+          "source_column": "Division",
+          "transformation_type": "conditional",
+          "transformation_logic": "Sets reason to 'Addictions Referral' if Referral Division is '02b. Addictions', else null."
+        }
+      ],
+      "joins": [
+        {
+          "left_table": "Vault.TrustAccessEvents",
+          "right_table": "Vault.Referral",
+          "join_type": "LEFT",
+          "condition": "ISNULL(Vault.TrustAccessEvents.[RTT StartID], ISNULL(Vault.TrustAccessEvents.[A&E Liaison RefID], Vault.TrustAccessEvents.[Crisis RefId])) = Vault.Referral.Referral_ID"
+        },
+        {
+          "left_table": "Vault.TrustAccessEvents",
+          "right_table": "Vault.Patient",
+          "join_type": "LEFT",
+          "condition": "Vault.TrustAccessEvents.PatientId = Vault.Patient.Patient_ID"
+        },
+        {
+          "left_table": "Vault.TrustAccessEvents",
+          "right_table": "Vault.DimSD",
+          "join_type": "LEFT",
+          "condition": "((Vault.TrustAccessEvents.[First Contact LocationID] = Vault.DimSD.Location_ID AND Vault.TrustAccessEvents.[First Contact Type] != 'CAMHSEvent') OR (Vault.TrustAccessEvents.[First Contact LocationID] = Vault.DimSD.[Team Code] AND Vault.TrustAccessEvents.[First Contact Type] = 'CAMHSEvent')) AND Vault.DimSD.[Team Status] = 'Active'"
+        },
+        {
+          "left_table": "Vault.Referral",
+          "right_table": "Vault.TeamEpisode",
+          "join_type": "LEFT",
+          "condition": "Vault.Referral.Referral_ID = Vault.TeamEpisode.cnreferral_id AND Vault.TeamEpisode.EarliestAcceptedEpisode = 1"
+        },
+        {
+          "left_table": "Vault.Referral",
+          "right_table": "Vault.TeamEpisode",
+          "join_type": "LEFT",
+          "condition": "Vault.Referral.Referral_ID = Vault.TeamEpisode.cnreferral_id AND Vault.TeamEpisode.LatestActiveEpisode = 1"
+        },
+        {
+          "left_table": "Vault.TeamEpisode",
+          "right_table": "Dim.Priority",
+          "join_type": "LEFT",
+          "condition": "Vault.TeamEpisode.Episode_Priority_ID = Dim.Priority.PriorityID"
+        },
+        {
+          "left_table": "Vault.Referral",
+          "right_table": "Vault.DimSD",
+          "join_type": "LEFT",
+          "condition": "Vault.Referral.Referred_To_Location_ID = Vault.DimSD.[Team Name] AND Vault.DimSD.[Team Status] = 'Active'"
+        },
+        {
+          "left_table": "Vault.TeamEpisode",
+          "right_table": "Vault.DimSD",
+          "join_type": "LEFT",
+          "condition": "Vault.TeamEpisode.Location_ID = Vault.DimSD.Location_ID AND Vault.DimSD.[Team Status] = 'Active'"
+        },
+        {
+          "left_table": "Vault.TeamEpisode",
+          "right_table": "Vault.DimSD",
+          "join_type": "LEFT",
+          "condition": "Vault.TeamEpisode.Location_ID = Vault.DimSD.Location_ID AND Vault.DimSD.[Team Status] = 'Active'"
+        },
+        {
+          "left_table": "Vault.TrustAccessEvents",
+          "right_table": "Vault.DimSD",
+          "join_type": "LEFT",
+          "condition": "Vault.TrustAccessEvents.[A&E Liaison Contact LocationID] = Vault.DimSD.Location_ID AND Vault.DimSD.[Team Status] = 'Active'"
+        },
+        {
+          "left_table": "Vault.TrustAccessEvents",
+          "right_table": "Vault.DimSD",
+          "join_type": "LEFT",
+          "condition": "Vault.TrustAccessEvents.[Crisis Contact LocationID] = Vault.DimSD.Location_ID AND Vault.DimSD.[Team Status] = 'Active'"
+        }
+      ],
+      "filters": [
+        "(Vault.TrustAccessEvents.[RTT Start Date] > '19991231' AND DATEDIFF(DD, Vault.TrustAccessEvents.[RTT Start Date], ISNULL(Vault.TrustAccessEvents.[RTT Stop Date], GETDATE())) >= 0)",
+        "(Vault.TrustAccessEvents.[RTT Start Date] IS NULL AND (Vault.TrustAccessEvents.[A&E Liaison Ref Date] IS NOT NULL OR Vault.TrustAccessEvents.[Crisis Ref Date] IS NOT NULL))"
+      ],
+      "grouping": [],
+      "extraction_method": "gemini",
+      "source_file": "Vault.LoadFactTrustAccessWaitingTimes.sql"
+    },
+    {
+      "procedure_name": "Vault.LoadReferralStatusValues",
+      "target_table": "Vault.ReferralStatusValues",
+      "source_tables": [
+        "Raw.TblReferralStatusValues",
+        "Vault.ReferralStatusValues"
+      ],
+      "column_mappings": [
+        {
+          "target_column": "RecordSource",
+          "source_table": null,
+          "source_column": null,
+          "transformation_type": "constant",
+          "transformation_logic": "Set to 'PJS'"
+        },
+        {
+          "target_column": "Create_Dttm",
+          "source_table": "Raw.TblReferralStatusValues",
+          "source_column": "Create_Dttm",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "User_Created",
+          "source_table": "Raw.TblReferralStatusValues",
+          "source_column": "User_Created",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "User_Updated",
+          "source_table": "Raw.TblReferralStatusValues",
+          "source_column": "User_Updated",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Updated_Dttm",
+          "source_table": "Raw.TblReferralStatusValues",
+          "source_column": "Updated_Dttm",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Active",
+          "source_table": "Raw.TblReferralStatusValues",
+          "source_column": "Active",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Default_Flag",
+          "source_table": "Raw.TblReferralStatusValues",
+          "source_column": "Default_Flag",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "External_Code1",
+          "source_table": "Raw.TblReferralStatusValues",
+          "source_column": "External_Code1",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "External_Code2",
+          "source_table": "Raw.TblReferralStatusValues",
+          "source_column": "External_Code2",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Display_Order",
+          "source_table": "Raw.TblReferralStatusValues",
+          "source_column": "Display_Order",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Referral_Status_ID",
+          "source_table": "Raw.TblReferralStatusValues",
+          "source_column": "Referral_Status_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "Referral_Status_Desc",
+          "source_table": "Raw.TblReferralStatusValues",
+          "source_column": "Referral_Status_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from source"
+        },
+        {
+          "target_column": "VaultLoaddate",
+          "source_table": null,
+          "source_column": null,
+          "transformation_type": "constant",
+          "transformation_logic": "Set to current system date/time (GETDATE())"
+        },
+        {
+          "target_column": "VaultUpdateDate",
+          "source_table": null,
+          "source_column": null,
+          "transformation_type": "constant",
+          "transformation_logic": "Set to current system date/time (GETDATE())"
+        }
+      ],
+      "joins": [
+        {
+          "left_table": "VaultInterim.ReferralStatusValues_Interim",
+          "right_table": "Vault.ReferralStatusValues",
+          "join_type": "INNER",
+          "condition": "VaultInterim.ReferralStatusValues_Interim.Referral_Status_ID = [Vault.ReferralStatusValues].Referral_Status_ID"
+        }
+      ],
+      "filters": [
+        "Raw.TblReferralStatusValues].Updated_Dttm > (SELECT ISNULL(max(Updated_Dttm), '01-01-1900') FROM [Vault.ReferralStatusValues])"
+      ],
+      "grouping": [],
+      "extraction_method": "gemini",
+      "source_file": "Vault.LoadReferral.sql"
+    },
+    {
+      "procedure_name": "Vault.UspWaitingTimes",
+      "target_table": "Vault.WaitingTimes",
+      "source_tables": [
+        "Vault.SecContacts",
+        "Vault.TeamEpisode",
+        "Vault.Referral",
+        "Vault.patient",
+        "vault.dimsD",
+        "raw.tbllocationflags",
+        "raw.tbllocationflagvalues"
+      ],
+      "column_mappings": [
+        {
+          "target_column": "Trust_Id",
+          "source_table": "Vault.patient",
+          "source_column": "Other_ID1",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from patient's Other_ID1."
+        },
+        {
+          "target_column": "Patient_Id",
+          "source_table": "Vault.TeamEpisode",
+          "source_column": "Patient_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from TeamEpisode's Patient_ID."
+        },
+        {
+          "target_column": "Episode_Id",
+          "source_table": "Vault.TeamEpisode",
+          "source_column": "Episode_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from TeamEpisode's Episode_ID."
+        },
+        {
+          "target_column": "Referral_ID",
+          "source_table": "Vault.TeamEpisode",
+          "source_column": "Referral_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from TeamEpisode's Referral_ID."
+        },
+        {
+          "target_column": "Location_Id",
+          "source_table": "Vault.TeamEpisode",
+          "source_column": "Location_Id",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from TeamEpisode's Location_Id."
+        },
+        {
+          "target_column": "Episode_Referral_Received_Date",
+          "source_table": "Vault.TeamEpisode",
+          "source_column": "EReferral_date",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from TeamEpisode's EReferral_date."
+        },
+        {
+          "target_column": "Episode_Referral_Accepted_Date",
+          "source_table": "Vault.TeamEpisode",
+          "source_column": "Accepted_Date",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from TeamEpisode's Accepted_Date."
+        },
+        {
+          "target_column": "Episode_Referral_Discharged_Date",
+          "source_table": "Vault.TeamEpisode",
+          "source_column": "discharge_Date",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from TeamEpisode's discharge_Date."
+        },
+        {
+          "target_column": "Episode_Referral_Rejection_Date",
+          "source_table": "Vault.TeamEpisode",
+          "source_column": "rejection_Date",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from TeamEpisode's rejection_Date."
+        },
+        {
+          "target_column": "Referral_Referral_Received_Date",
+          "source_table": "Vault.Referral",
+          "source_column": "Referral_Received_Date",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Referral's Referral_Received_Date."
+        },
+        {
+          "target_column": "Referral_Referral_Discharged_Date",
+          "source_table": "Vault.Referral",
+          "source_column": "Discharge_Date",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Referral's Discharge_Date."
+        },
+        {
+          "target_column": "Referral_Referral_Rejection_Date",
+          "source_table": "Vault.Referral",
+          "source_column": "Rejection_Date",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Referral's Rejection_Date."
+        },
+        {
+          "target_column": "WaitingTimeScope",
+          "source_table": "Vault.TeamEpisode",
+          "source_column": "Movement_Type_ID",
+          "transformation_type": "conditional",
+          "transformation_logic": "Set to 'External' if Movement_Type_ID is 'Initial Referral', otherwise 'Internal'."
+        },
+        {
+          "target_column": "First_Attended_Date",
+          "source_table": "Vault.SecContacts",
+          "source_column": "EventDate, StartTime, ClinicDate",
+          "transformation_type": "conditional",
+          "transformation_logic": "Initially derived from EventDate + StartTime from first ranked F2F/Phone/Video event. Updated to ClinicDate from first ranked attended appointment if original value is NULL."
+        },
+        {
+          "target_column": "First_Attended_ContactID",
+          "source_table": "Vault.SecContacts",
+          "source_column": "CnDocId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Initially derived from CnDocId from first ranked F2F/Phone/Video event. Updated to CnDocId from first ranked attended appointment if original value is NULL."
+        },
+        {
+          "target_column": "First_Attended_Medium",
+          "source_table": "Vault.SecContacts",
+          "source_column": "FaceToFace, Phone, Video",
+          "transformation_type": "conditional",
+          "transformation_logic": "Initially set to 'Inperson', 'Phone', or 'Video' based on contact type. Updated to 'Appointment' if original value is NULL."
+        },
+        {
+          "target_column": "First_Attended_Happened",
+          "source_table": "Vault.SecContacts",
+          "source_column": "CnDocId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Set to 'YES' if a contact ID exists, otherwise 'NO'. Updated from first ranked attended appointment if original value is NULL."
+        },
+        {
+          "target_column": "Second_Attended_Date",
+          "source_table": "Vault.SecContacts",
+          "source_column": "EventDate, StartTime, ClinicDate",
+          "transformation_type": "conditional",
+          "transformation_logic": "Initially derived from EventDate + StartTime from second ranked F2F/Phone/Video event. Updated to ClinicDate from second ranked attended appointment if original value is NULL."
+        },
+        {
+          "target_column": "Second_Attended_ContactID",
+          "source_table": "Vault.SecContacts",
+          "source_column": "CnDocId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Initially derived from CnDocId from second ranked F2F/Phone/Video event. Updated to CnDocId from second ranked attended appointment if original value is NULL."
+        },
+        {
+          "target_column": "Second_Attended_Medium",
+          "source_table": "Vault.SecContacts",
+          "source_column": "FaceToFace, Phone, Video",
+          "transformation_type": "conditional",
+          "transformation_logic": "Initially set to 'Inperson', 'Phone', or 'Video' based on contact type. Updated to 'Appointment' if original value is NULL."
+        },
+        {
+          "target_column": "Second_Attended_Happened",
+          "source_table": "Vault.SecContacts",
+          "source_column": "CnDocId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Set to 'YES' if a contact ID exists, otherwise 'NO'. Updated from second ranked attended appointment if original value is NULL."
+        },
+        {
+          "target_column": "First_Attended_InPerson_Date",
+          "source_table": "Vault.SecContacts",
+          "source_column": "EventDate, StartTime",
+          "transformation_type": "calculation",
+          "transformation_logic": "Calculated as CAST(CAST(EventDate AS DATE) AS DATETIME) + CAST(StartTime AS DATETIME) from the first ranked FaceToFace event."
+        },
+        {
+          "target_column": "First_Attended_InPerson_ContactID",
+          "source_table": "Vault.SecContacts",
+          "source_column": "CnDocId",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from CnDocId from the first ranked FaceToFace event."
+        },
+        {
+          "target_column": "First_Attended_InPerson_Happened",
+          "source_table": "Vault.SecContacts",
+          "source_column": "CnDocId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Set to 'YES' if CnDocId is not NULL, otherwise 'NO'."
+        },
+        {
+          "target_column": "First_Attended_Telephone_Date",
+          "source_table": "Vault.SecContacts",
+          "source_column": "EventDate, StartTime",
+          "transformation_type": "calculation",
+          "transformation_logic": "Calculated as CAST(CAST(EventDate AS DATE) AS DATETIME) + CAST(StartTime AS DATETIME) from the first ranked Phone event."
+        },
+        {
+          "target_column": "First_Attended_Telephone_ContactID",
+          "source_table": "Vault.SecContacts",
+          "source_column": "CnDocId",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from CnDocId from the first ranked Phone event."
+        },
+        {
+          "target_column": "First_Attended_Telephone_Happened",
+          "source_table": "Vault.SecContacts",
+          "source_column": "CnDocId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Set to 'YES' if CnDocId is not NULL, otherwise 'NO'."
+        },
+        {
+          "target_column": "First_Attended_Video_Date",
+          "source_table": "Vault.SecContacts",
+          "source_column": "EventDate, StartTime",
+          "transformation_type": "calculation",
+          "transformation_logic": "Calculated as CAST(CAST(EventDate AS DATE) AS DATETIME) + CAST(StartTime AS DATETIME) from the first ranked Video event."
+        },
+        {
+          "target_column": "First_Attended_Video_ContactID",
+          "source_table": "Vault.SecContacts",
+          "source_column": "CnDocId",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from CnDocId from the first ranked Video event."
+        },
+        {
+          "target_column": "First_Attended_Video_Happened",
+          "source_table": "Vault.SecContacts",
+          "source_column": "CnDocId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Set to 'YES' if CnDocId is not NULL, otherwise 'NO'."
+        },
+        {
+          "target_column": "Second_Attended_InPerson_Date",
+          "source_table": "Vault.SecContacts",
+          "source_column": "EventDate, StartTime",
+          "transformation_type": "calculation",
+          "transformation_logic": "Calculated as CAST(CAST(EventDate AS DATE) AS DATETIME) + CAST(StartTime AS DATETIME) from the second ranked FaceToFace event, or NULL if it's the same date as the first F2F event."
+        },
+        {
+          "target_column": "Second_Attended_InPerson_ContactID",
+          "source_table": "Vault.SecContacts",
+          "source_column": "CnDocId",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from CnDocId from the second ranked FaceToFace event, or NULL if it's the same date as the first F2F event."
+        },
+        {
+          "target_column": "Second_Attended_InPerson_Happened",
+          "source_table": "Vault.SecContacts",
+          "source_column": "CnDocId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Set to 'YES' if CnDocId is not NULL and date is different from first F2F event, otherwise 'NO'."
+        },
+        {
+          "target_column": "Second_Attended_Telephone_Date",
+          "source_table": "Vault.SecContacts",
+          "source_column": "EventDate, StartTime",
+          "transformation_type": "calculation",
+          "transformation_logic": "Calculated as CAST(CAST(EventDate AS DATE) AS DATETIME) + CAST(StartTime AS DATETIME) from the second ranked Phone event, or NULL if it's the same date as the first Phone event."
+        },
+        {
+          "target_column": "Second_Attended_Telephone_ContactID",
+          "source_table": "Vault.SecContacts",
+          "source_column": "CnDocId",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from CnDocId from the second ranked Phone event, or NULL if it's the same date as the first Phone event."
+        },
+        {
+          "target_column": "Second_Attended_Telephone_Happened",
+          "source_table": "Vault.SecContacts",
+          "source_column": "CnDocId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Set to 'YES' if CnDocId is not NULL and date is different from first Phone event, otherwise 'NO'."
+        },
+        {
+          "target_column": "Second_Attended_Video_Date",
+          "source_table": "Vault.SecContacts",
+          "source_column": "EventDate, StartTime",
+          "transformation_type": "calculation",
+          "transformation_logic": "Calculated as CAST(CAST(EventDate AS DATE) AS DATETIME) + CAST(StartTime AS DATETIME) from the second ranked Video event, or NULL if it's the same date as the first Video event."
+        },
+        {
+          "target_column": "Second_Attended_Video_ContactID",
+          "source_table": "Vault.SecContacts",
+          "source_column": "CnDocId",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from CnDocId from the second ranked Video event, or NULL if it's the same date as the first Video event."
+        },
+        {
+          "target_column": "Second_Attended_Video_Happened",
+          "source_table": "Vault.SecContacts",
+          "source_column": "CnDocId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Set to 'YES' if CnDocId is not NULL and date is different from first Video event, otherwise 'NO'."
+        },
+        {
+          "target_column": "Episode_Priority_ID",
+          "source_table": "Vault.TeamEpisode",
+          "source_column": "Episode_Priority_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from TeamEpisode's Episode_Priority_ID."
+        },
+        {
+          "target_column": "Referral_First_Attended_InPerson_Date",
+          "source_table": "Vault.SecContacts",
+          "source_column": "EventDate, StartTime",
+          "transformation_type": "calculation",
+          "transformation_logic": "Calculated as CAST(CAST(EventDate AS DATE) AS DATETIME) + CAST(StartTime AS DATETIME) from the first ranked FaceToFace event for the referral (excluding 'Care Option Contract Required' locations)."
+        },
+        {
+          "target_column": "Referral_First_Attended_InPerson_ContactID",
+          "source_table": "Vault.SecContacts",
+          "source_column": "CnDocId",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from CnDocId from the first ranked FaceToFace event for the referral (excluding 'Care Option Contract Required' locations)."
+        },
+        {
+          "target_column": "Referral_First_Attended_InPerson_Location_ID",
+          "source_table": "Vault.TeamEpisode",
+          "source_column": "Location_Id",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Location_Id associated with the first ranked FaceToFace event for the referral (excluding 'Care Option Contract Required' locations)."
+        },
+        {
+          "target_column": "Referral_First_Attended_Telephone_Date",
+          "source_table": "Vault.SecContacts",
+          "source_column": "EventDate, StartTime",
+          "transformation_type": "calculation",
+          "transformation_logic": "Calculated as CAST(CAST(EventDate AS DATE) AS DATETIME) + CAST(StartTime AS DATETIME) from the first ranked Phone event for the referral (excluding 'Care Option Contract Required' locations)."
+        },
+        {
+          "target_column": "Referral_First_Attended_Telephone_ContactID",
+          "source_table": "Vault.SecContacts",
+          "source_column": "CnDocId",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from CnDocId from the first ranked Phone event for the referral (excluding 'Care Option Contract Required' locations)."
+        },
+        {
+          "target_column": "Referral_First_Attended_Telephone_Location_ID",
+          "source_table": "Vault.TeamEpisode",
+          "source_column": "Location_Id",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Location_Id associated with the first ranked Phone event for the referral (excluding 'Care Option Contract Required' locations)."
+        },
+        {
+          "target_column": "Referral_First_Attended_Video_Date",
+          "source_table": "Vault.SecContacts",
+          "source_column": "EventDate, StartTime",
+          "transformation_type": "calculation",
+          "transformation_logic": "Calculated as CAST(CAST(EventDate AS DATE) AS DATETIME) + CAST(StartTime AS DATETIME) from the first ranked Video event for the referral (excluding 'Care Option Contract Required' locations)."
+        },
+        {
+          "target_column": "Referral_First_Attended_Video_ContactID",
+          "source_table": "Vault.SecContacts",
+          "source_column": "CnDocId",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from CnDocId from the first ranked Video event for the referral (excluding 'Care Option Contract Required' locations)."
+        },
+        {
+          "target_column": "Referral_First_Attended_Video_Location_ID",
+          "source_table": "Vault.TeamEpisode",
+          "source_column": "Location_Id",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Location_Id associated with the first ranked Video event for the referral (excluding 'Care Option Contract Required' locations)."
+        },
+        {
+          "target_column": "Referral_Second_Attended_InPerson_Date",
+          "source_table": "Vault.SecContacts",
+          "source_column": "EventDate, StartTime",
+          "transformation_type": "calculation",
+          "transformation_logic": "Calculated as CAST(CAST(EventDate AS DATE) AS DATETIME) + CAST(StartTime AS DATETIME) from the second ranked FaceToFace event for the referral (excluding 'Care Option Contract Required' locations)."
+        },
+        {
+          "target_column": "Referral_Second_Attended_InPerson_ContactID",
+          "source_table": "Vault.SecContacts",
+          "source_column": "CnDocId",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from CnDocId from the second ranked FaceToFace event for the referral (excluding 'Care Option Contract Required' locations)."
+        },
+        {
+          "target_column": "Referral_Second_Attended_InPerson_Location_ID",
+          "source_table": "Vault.TeamEpisode",
+          "source_column": "Location_Id",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Location_Id associated with the second ranked FaceToFace event for the referral (excluding 'Care Option Contract Required' locations)."
+        },
+        {
+          "target_column": "Referral_Second_Attended_Telephone_Date",
+          "source_table": "Vault.SecContacts",
+          "source_column": "EventDate, StartTime",
+          "transformation_type": "calculation",
+          "transformation_logic": "Calculated as CAST(CAST(EventDate AS DATE) AS DATETIME) + CAST(StartTime AS DATETIME) from the second ranked Phone event for the referral (excluding 'Care Option Contract Required' locations)."
+        },
+        {
+          "target_column": "Referral_Second_Attended_Telephone_ContactID",
+          "source_table": "Vault.SecContacts",
+          "source_column": "CnDocId",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from CnDocId from the second ranked Phone event for the referral (excluding 'Care Option Contract Required' locations)."
+        },
+        {
+          "target_column": "Referral_Second_Attended_Telephone_Location_ID",
+          "source_table": "Vault.TeamEpisode",
+          "source_column": "Location_Id",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Location_Id associated with the second ranked Phone event for the referral (excluding 'Care Option Contract Required' locations)."
+        },
+        {
+          "target_column": "Referral_Second_Attended_Video_Date",
+          "source_table": "Vault.SecContacts",
+          "source_column": "EventDate, StartTime",
+          "transformation_type": "calculation",
+          "transformation_logic": "Calculated as CAST(CAST(EventDate AS DATE) AS DATETIME) + CAST(StartTime AS DATETIME) from the second ranked Video event for the referral (excluding 'Care Option Contract Required' locations)."
+        },
+        {
+          "target_column": "Referral_Second_Attended_Video_ContactID",
+          "source_table": "Vault.SecContacts",
+          "source_column": "CnDocId",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from CnDocId from the second ranked Video event for the referral (excluding 'Care Option Contract Required' locations)."
+        },
+        {
+          "target_column": "Referral_Second_Attended_Video_Location_ID",
+          "source_table": "Vault.TeamEpisode",
+          "source_column": "Location_Id",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from Location_Id associated with the second ranked Video event for the referral (excluding 'Care Option Contract Required' locations)."
+        },
+        {
+          "target_column": "Referral_First_Attended_Date",
+          "source_table": "Vault.SecContacts",
+          "source_column": "EventDate, StartTime, ClinicDate",
+          "transformation_type": "conditional",
+          "transformation_logic": "Initially derived from EventDate + StartTime from the first ranked F2F/Phone/Video event for the referral. Updated to ClinicDate from the first ranked attended appointment for the referral if original value is NULL."
+        },
+        {
+          "target_column": "Referral_First_Attended_ContactID",
+          "source_table": "Vault.SecContacts",
+          "source_column": "CnDocId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Initially derived from CnDocId from the first ranked F2F/Phone/Video event for the referral. Updated to CnDocId from the first ranked attended appointment for the referral if original value is NULL."
+        },
+        {
+          "target_column": "Referral_First_Attended_Medium",
+          "source_table": "Vault.SecContacts",
+          "source_column": "FaceToFace, Phone, Video",
+          "transformation_type": "conditional",
+          "transformation_logic": "Initially set to 'Inperson', 'Telephone', or 'Video' based on contact type for the referral. Updated to 'Appointment' if original value is NULL."
+        },
+        {
+          "target_column": "Referral_First_Attended_Location_ID",
+          "source_table": "Vault.TeamEpisode",
+          "source_column": "Location_Id",
+          "transformation_type": "conditional",
+          "transformation_logic": "Initially derived from Location_Id from the first ranked F2F/Phone/Video event for the referral. Updated to Location_Id from the first ranked attended appointment for the referral if original value is NULL."
+        },
+        {
+          "target_column": "Referral_Second_Attended_Date",
+          "source_table": "Vault.SecContacts",
+          "source_column": "EventDate, StartTime, ClinicDate",
+          "transformation_type": "conditional",
+          "transformation_logic": "Initially derived from EventDate + StartTime from the second ranked F2F/Phone/Video event for the referral. Updated to ClinicDate from the second ranked attended appointment for the referral if original value is NULL."
+        },
+        {
+          "target_column": "Referral_Second_Attended_ContactID",
+          "source_table": "Vault.SecContacts",
+          "source_column": "CnDocId",
+          "transformation_type": "conditional",
+          "transformation_logic": "Initially derived from CnDocId from the second ranked F2F/Phone/Video event for the referral. Updated to CnDocId from the second ranked attended appointment for the referral if original value is NULL."
+        },
+        {
+          "target_column": "Referral_Second_Attended_Medium",
+          "source_table": "Vault.SecContacts",
+          "source_column": "FaceToFace, Phone, Video",
+          "transformation_type": "conditional",
+          "transformation_logic": "Initially set to 'Inperson', 'Telephone', or 'Video' based on contact type for the referral. Updated to 'Appointment' if original value is NULL."
+        },
+        {
+          "target_column": "Referral_Second_Attended_Location_ID",
+          "source_table": "Vault.TeamEpisode",
+          "source_column": "Location_Id",
+          "transformation_type": "conditional",
+          "transformation_logic": "Initially derived from Location_Id from the second ranked F2F/Phone/Video event for the referral. Updated to Location_Id from the second ranked attended appointment for the referral if original value is NULL."
+        },
+        {
+          "target_column": "Created_Dttm",
+          "source_table": null,
+          "source_column": null,
+          "transformation_type": "constant",
+          "transformation_logic": "Set to current system date and time (GETDATE())."
+        },
+        {
+          "target_column": "Updated_Dttm",
+          "source_table": null,
+          "source_column": null,
+          "transformation_type": "constant",
+          "transformation_logic": "Set to current system date and time (GETDATE())."
+        }
+      ],
+      "joins": [
+        {
+          "left_table": "Vault.SecContacts",
+          "right_table": "vault.dimsD",
+          "join_type": "LEFT",
+          "condition": "Vault.SecContacts.ClintEam = vault.dimsD.Location_ID"
+        },
+        {
+          "left_table": "vault.dimsD",
+          "right_table": "raw.tbllocationflags",
+          "join_type": "LEFT",
+          "condition": "vault.dimsD.Location_ID = raw.tbllocationflags.location_ID"
+        },
+        {
+          "left_table": "raw.tbllocationflags",
+          "right_table": "raw.tbllocationflagvalues",
+          "join_type": "LEFT",
+          "condition": "raw.tbllocationflags.Location_Flag_ID = raw.tbllocationflagvalues.Location_Flag_ID"
+        },
+        {
+          "left_table": "MI_tempdb].dbo.UspWaitingTimes_Events",
+          "right_table": "Vault.TeamEpisode",
+          "join_type": "INNER",
+          "condition": "MI_tempdb].dbo.UspWaitingTimes_Events.PatientId = Vault.TeamEpisode.Patient_ID AND [MI_tempdb].dbo.UspWaitingTimes_Events.EpisodeId = Vault.TeamEpisode.Episode_ID AND [MI_tempdb].dbo.UspWaitingTimes_Events.Location_ID = Vault.TeamEpisode.Location_ID"
+        },
+        {
+          "left_table": "Vault.TeamEpisode",
+          "right_table": "Vault.Referral",
+          "join_type": "INNER",
+          "condition": "Vault.TeamEpisode.Referral_id = Vault.Referral.referral_id"
+        },
+        {
+          "left_table": "Vault.TeamEpisode",
+          "right_table": "Vault.patient",
+          "join_type": "INNER",
+          "condition": "Vault.TeamEpisode.Patient_ID = Vault.patient.Patient_ID"
+        },
+        {
+          "left_table": "Vault.TeamEpisode",
+          "right_table": "MI_tempdb].dbo.UspWaitingTimes_Events_Order",
+          "join_type": "LEFT OUTER",
+          "condition": "MI_tempdb].dbo.UspWaitingTimes_Events_Order.episodeid = Vault.TeamEpisode.episode_id AND [MI_tempdb].dbo.UspWaitingTimes_Events_Order.F2F_1 = 1 AND Vault.TeamEpisode.patient_id = [MI_tempdb].dbo.UspWaitingTimes_Events_Order.PatientId AND [MI_tempdb].dbo.UspWaitingTimes_Events_Order.Location_ID = Vault.TeamEpisode.Location_ID"
+        },
+        {
+          "left_table": "Vault.TeamEpisode",
+          "right_table": "MI_tempdb].dbo.UspWaitingTimes_Events_Order",
+          "join_type": "LEFT OUTER",
+          "condition": "MI_tempdb].dbo.UspWaitingTimes_Events_Order.episodeid = Vault.TeamEpisode.episode_id AND [MI_tempdb].dbo.UspWaitingTimes_Events_Order.F2F_2 = 1 AND Vault.TeamEpisode.patient_id = [MI_tempdb].dbo.UspWaitingTimes_Events_Order.PatientId AND [MI_tempdb].dbo.UspWaitingTimes_Events_Order.Location_ID = Vault.TeamEpisode.Location_ID"
+        },
+        {
+          "left_table": "Vault.TeamEpisode",
+          "right_table": "MI_tempdb].dbo.UspWaitingTimes_Events_Order",
+          "join_type": "LEFT OUTER",
+          "condition": "MI_tempdb].dbo.UspWaitingTimes_Events_Order.episodeid = Vault.TeamEpisode.episode_id AND [MI_tempdb].dbo.UspWaitingTimes_Events_Order.PH_1 = 1 AND Vault.TeamEpisode.patient_id = [MI_tempdb].dbo.UspWaitingTimes_Events_Order.PatientID AND [MI_tempdb].dbo.UspWaitingTimes_Events_Order.Location_ID = Vault.TeamEpisode.Location_ID"
+        },
+        {
+          "left_table": "Vault.TeamEpisode",
+          "right_table": "MI_tempdb].dbo.UspWaitingTimes_Events_Order",
+          "join_type": "LEFT OUTER",
+          "condition": "MI_tempdb].dbo.UspWaitingTimes_Events_Order.episodeid = Vault.TeamEpisode.episode_id AND [MI_tempdb].dbo.UspWaitingTimes_Events_Order.PH_2 = 1 AND Vault.TeamEpisode.patient_id = [MI_tempdb].dbo.UspWaitingTimes_Events_Order.PatientID AND [MI_tempdb].dbo.UspWaitingTimes_Events_Order.Location_ID = Vault.TeamEpisode.Location_ID"
+        },
+        {
+          "left_table": "Vault.TeamEpisode",
+          "right_table": "MI_tempdb].dbo.UspWaitingTimes_Events_Order",
+          "join_type": "LEFT OUTER",
+          "condition": "MI_tempdb].dbo.UspWaitingTimes_Events_Order.episodeid = Vault.TeamEpisode.episode_id AND [MI_tempdb].dbo.UspWaitingTimes_Events_Order.VID_1 = 1 AND Vault.TeamEpisode.patient_id = [MI_tempdb].dbo.UspWaitingTimes_Events_Order.PatientID AND [MI_tempdb].dbo.UspWaitingTimes_Events_Order.Location_ID = Vault.TeamEpisode.Location_ID"
+        },
+        {
+          "left_table": "Vault.TeamEpisode",
+          "right_table": "MI_tempdb].dbo.UspWaitingTimes_Events_Order",
+          "join_type": "LEFT OUTER",
+          "condition": "MI_tempdb].dbo.UspWaitingTimes_Events_Order.episodeid = Vault.TeamEpisode.episode_id AND [MI_tempdb].dbo.UspWaitingTimes_Events_Order.VID_2 = 1 AND Vault.TeamEpisode.patient_id = [MI_tempdb].dbo.UspWaitingTimes_Events_Order.PatientID AND [MI_tempdb].dbo.UspWaitingTimes_Events_Order.Location_ID = Vault.TeamEpisode.Location_ID"
+        },
+        {
+          "left_table": "Vault.SecContacts",
+          "right_table": "vault.dimsD",
+          "join_type": "INNER",
+          "condition": "Vault.SecContacts.LocationName = vault.dimsD.Team Name"
+        },
+        {
+          "left_table": "vault.dimsD",
+          "right_table": "raw.tbllocationflags",
+          "join_type": "INNER",
+          "condition": "vault.dimsD.Location_ID = raw.tbllocationflags.location_ID"
+        },
+        {
+          "left_table": "raw.tbllocationflags",
+          "right_table": "raw.tbllocationflagvalues",
+          "join_type": "INNER",
+          "condition": "raw.tbllocationflags.Location_Flag_ID = raw.tbllocationflagvalues.Location_Flag_ID"
+        },
+        {
+          "left_table": "MI_tempdb].dbo.UspWaitingTimes_Appts",
+          "right_table": "Vault.TeamEpisode",
+          "join_type": "INNER",
+          "condition": "MI_tempdb].dbo.UspWaitingTimes_Appts.PatientId = Vault.TeamEpisode.Patient_ID AND [MI_tempdb].dbo.UspWaitingTimes_Appts.EpisodeId = Vault.TeamEpisode.Episode_ID AND [MI_tempdb].dbo.UspWaitingTimes_Appts.Location_ID = Vault.TeamEpisode.Location_ID"
+        },
+        {
+          "left_table": "Vault.TeamEpisode",
+          "right_table": "MI_tempdb].dbo.UspWaitingTimes_Appts",
+          "join_type": "LEFT OUTER",
+          "condition": "MI_tempdb].dbo.UspWaitingTimes_Appts.episodeid = Vault.TeamEpisode.episode_id AND Vault.TeamEpisode.patient_id = [MI_tempdb].dbo.UspWaitingTimes_Appts.PatientId AND [MI_tempdb].dbo.UspWaitingTimes_Appts.First_Attended_Appointment = 1 AND [MI_tempdb].dbo.UspWaitingTimes_Appts.location_id = Vault.TeamEpisode.Location_ID"
+        },
+        {
+          "left_table": "Vault.TeamEpisode",
+          "right_table": "MI_tempdb].dbo.UspWaitingTimes_Appts",
+          "join_type": "LEFT OUTER",
+          "condition": "MI_tempdb].dbo.UspWaitingTimes_Appts.episodeid = Vault.TeamEpisode.episode_id AND Vault.TeamEpisode.patient_id = [MI_tempdb].dbo.UspWaitingTimes_Appts.PatientId AND [MI_tempdb].dbo.UspWaitingTimes_Appts.Second_Attended_Appointment = 1 AND [MI_tempdb].dbo.UspWaitingTimes_Appts.location_id = Vault.TeamEpisode.Location_ID"
+        },
+        {
+          "left_table": "MI_tempdb].dbo.UspWaitingTimes_Events2",
+          "right_table": "CTE F2F",
+          "join_type": "LEFT",
+          "condition": "MI_tempdb].dbo.UspWaitingTimes_Events2.PatientId = F2F.PatientId AND [MI_tempdb].dbo.UspWaitingTimes_Events2.EpisodeId = F2F.EpisodeId AND [MI_tempdb].dbo.UspWaitingTimes_Events2.RecordId = F2F.RecordId"
+        },
+        {
+          "left_table": "MI_tempdb].dbo.UspWaitingTimes_Events2",
+          "right_table": "CTE PH",
+          "join_type": "LEFT",
+          "condition": "MI_tempdb].dbo.UspWaitingTimes_Events2.PatientId = PH.PatientId AND [MI_tempdb].dbo.UspWaitingTimes_Events2.EpisodeId = PH.EpisodeId AND [MI_tempdb].dbo.UspWaitingTimes_Events2.RecordId = PH.RecordId"
+        },
+        {
+          "left_table": "MI_tempdb].dbo.UspWaitingTimes_Events2",
+          "right_table": "CTE VID",
+          "join_type": "LEFT",
+          "condition": "MI_tempdb].dbo.UspWaitingTimes_Events2.PatientId = VID.PatientId AND [MI_tempdb].dbo.UspWaitingTimes_Events2.EpisodeId = VID.EpisodeId AND [MI_tempdb].dbo.UspWaitingTimes_Events2.RecordId = VID.RecordId"
+        },
+        {
+          "left_table": "#epiFirstContacts",
+          "right_table": "#epicontacts",
+          "join_type": "LEFT OUTER",
+          "condition": "#epiFirstContacts.episode_id = #epicontacts.episode_id"
+        },
+        {
+          "left_table": "#epiFirstContacts",
+          "right_table": "#refallcontacts",
+          "join_type": "LEFT OUTER",
+          "condition": "#epiFirstContacts.referral_id = #refallcontacts.referral_id"
+        },
+        {
+          "left_table": "#epiFirstContacts",
+          "right_table": "#refallcontactsranks",
+          "join_type": "LEFT OUTER",
+          "condition": "#epiFirstContacts.referral_id = #refallcontactsranks.referral_id"
+        },
+        {
+          "left_table": "Vault.WaitingTimes",
+          "right_table": "#TEMP1",
+          "join_type": "INNER",
+          "condition": "Vault.WaitingTimes.Trust_Id = #TEMP1.Trust_Id AND Vault.WaitingTimes.Episode_Id = #TEMP1.Episode_ID AND Vault.WaitingTimes.Location_Id = #TEMP1.First_Attended_Appointment_location_id"
+        },
+        {
+          "left_table": "Vault.WaitingTimes",
+          "right_table": "#TEMP1",
+          "join_type": "INNER",
+          "condition": "Vault.WaitingTimes.Referral_Id = #TEMP1.Referral_ID"
+        },
+        {
+          "left_table": "Vault.WaitingTimes",
+          "right_table": "#refApptcontacts",
+          "join_type": "INNER",
+          "condition": "Vault.WaitingTimes.REFERRAL_ID = #refApptcontacts.REFERRAL_ID"
+        }
+      ],
+      "filters": [
+        "ISNULL(Location_Flag_Desc, '') <> 'Care Option Contract Required'",
+        "((ContactType = 'Event' AND Vault.SecContacts.SLAM_Event_Recording_With_ID = 0) OR (ContactType <> 'Event' AND ContactType <> 'Appointment' AND Vault.SecContacts.SLAM_Event_Recording_With_ID IS NULL))",
+        "Vault.patient.TestRecord = 'N'",
+        "Vault.patient.IsDeleted = 'N'",
+        "FaceToFace = 1 OR FirstFaceToFace = 1 OR SecondFacetoFace = 1 OR LastFacetoFace = 1",
+        "Phone = 1 OR FirstPhone = 1 OR SecondPhone = 1 OR LastPhone = 1",
+        "Video = 1 OR FirstVideo = 1 OR SecondVideo = 1 OR LastVideo = 1",
+        "Location_Flag_Desc = 'Care Option Contract Required'",
+        "Location_ID NOT IN (SELECT Location_ID FROM [MI_tempdb].dbo.UspWaitingTimes_Contract_locations)",
+        "First_Attended_InPerson_Date IS NOT NULL",
+        "Second_Attended_InPerson_Date IS NOT NULL",
+        "First_Attended_Telephone_Date IS NOT NULL",
+        "Second_Attended_Telephone_Date IS NOT NULL",
+        "First_Attended_Video_Date IS NOT NULL",
+        "Second_Attended_Video_Date IS NOT NULL",
+        "((First_Attended_InPerson_Date IS NOT NULL AND Second_Attended_InPerson_Date IS NULL) OR (First_Attended_Telephone_Date IS NOT NULL AND Second_Attended_Telephone_Date IS NULL) OR (First_Attended_Video_Date IS NOT NULL AND Second_Attended_Video_Date IS NULL))",
+        "Episode_Referral_Discharged_Date IS NULL",
+        "Episode_Referral_Rejection_Date IS NULL",
+        "Referral_Referral_Rejection_Date IS NULL",
+        "Referral_Referral_Discharged_Date IS NULL",
+        "(refcf2f1.Attended_InPerson_Date IS NOT NULL OR refcphone1.Attended_Telephone_Date IS NOT NULL OR refcvidEO1.Attended_Video_Date IS NOT NULL)",
+        "(rcr1.Attended_Date IS NOT NULL OR rcr2.Attended_Date IS NOT NULL)",
+        "ContactType = 'Appointment'",
+        "ClinicDate IS NOT NULL",
+        "AttendanceType IN ('Attended', 'Arrived late but was seen')",
+        "#TEMP1.First_Attended_Appointment_Date IS NOT NULL AND Vault.WaitingTimes.First_Attended_Medium IS NULL AND Vault.WaitingTimes.First_Attended_Date IS NULL",
+        "#TEMP1.Second_Attended_Appointment_Date IS NOT NULL AND Vault.WaitingTimes.Second_Attended_Medium IS NULL AND Vault.WaitingTimes.Second_Attended_Date IS NULL",
+        "#refApptcontacts.Attended_Appointment_Date IS NOT NULL",
+        "#refApptcontacts.Referral_First_Attended_Appointment_Date IS NOT NULL AND Vault.WaitingTimes.Referral_First_Attended_Medium IS NULL AND Vault.WaitingTimes.Referral_First_Attended_Date IS NULL",
+        "#refApptcontacts.Referral_Second_Attended_Appointment_Date IS NOT NULL AND Vault.WaitingTimes.Referral_Second_Attended_Medium IS NULL AND Vault.WaitingTimes.Referral_Second_Attended_Date IS NULL"
+      ],
+      "grouping": [],
+      "extraction_method": "gemini",
+      "source_file": "Vautl.USpWaitingTimes.sql"
+    },
+    {
+      "procedure_name": "Vault.LoadCostCentre",
+      "target_table": "Vault.CostCentre",
+      "source_tables": [
+        "efinl.COST_CENTRE_HIERARCHIES",
+        "efinl.COST_CENTRES",
+        "efinl.COST_CENTRE_TYPES",
+        "SD.CostCentreFriendlyName",
+        "SD.ServiceDirectoryMappingPJS",
+        "vault.HubCostCentre",
+        "vault.CostCentre"
+      ],
+      "column_mappings": [
+        {
+          "target_column": "HubCostCentrePK",
+          "source_table": "vault.HubCostCentre",
+          "source_column": "HubCostCentrePK",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from vault.HubCostCentre.HubCostCentrePK"
+        },
+        {
+          "target_column": "CostCentreCode",
+          "source_table": "efinl.COST_CENTRE_HIERARCHIES",
+          "source_column": "CH_COST_CENTRE",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from efinl.COST_CENTRE_HIERARCHIES.CH_COST_CENTRE"
+        },
+        {
+          "target_column": "CostCentreName",
+          "source_table": "efinl.COST_CENTRES",
+          "source_column": "CS_COST_CENTRE_NAME",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from efinl.COST_CENTRES.CS_COST_CENTRE_NAME (alias CC)"
+        },
+        {
+          "target_column": "CostCentreLevel",
+          "source_table": "efinl.COST_CENTRE_HIERARCHIES",
+          "source_column": "CH_COST_CENTRE_LEVEL",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from efinl.COST_CENTRE_HIERARCHIES.CH_COST_CENTRE_LEVEL"
+        },
+        {
+          "target_column": "CostCentreParent",
+          "source_table": "efinl.COST_CENTRE_HIERARCHIES",
+          "source_column": "CH_HIGHER_COST_CENTRE",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from efinl.COST_CENTRE_HIERARCHIES.CH_HIGHER_COST_CENTRE"
+        },
+        {
+          "target_column": "L1Code",
+          "source_table": "efinl.COST_CENTRE_HIERARCHIES",
+          "source_column": "CH_LEVEL1",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from efinl.COST_CENTRE_HIERARCHIES.CH_LEVEL1"
+        },
+        {
+          "target_column": "L1Name",
+          "source_table": "efinl.COST_CENTRES",
+          "source_column": "CS_COST_CENTRE_NAME",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from efinl.COST_CENTRES.CS_COST_CENTRE_NAME (alias CC1)"
+        },
+        {
+          "target_column": "L2Code",
+          "source_table": "efinl.COST_CENTRE_HIERARCHIES",
+          "source_column": "CH_LEVEL2",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from efinl.COST_CENTRE_HIERARCHIES.CH_LEVEL2"
+        },
+        {
+          "target_column": "L2Name",
+          "source_table": "efinl.COST_CENTRES",
+          "source_column": "CS_COST_CENTRE_NAME",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from efinl.COST_CENTRES.CS_COST_CENTRE_NAME (alias CC2)"
+        },
+        {
+          "target_column": "L3Code",
+          "source_table": "efinl.COST_CENTRE_HIERARCHIES",
+          "source_column": "CH_LEVEL3",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from efinl.COST_CENTRE_HIERARCHIES.CH_LEVEL3"
+        },
+        {
+          "target_column": "L3Name",
+          "source_table": "SD.CostCentreFriendlyName",
+          "source_column": "CostCentreFriendlyName",
+          "transformation_type": "conditional",
+          "transformation_logic": "Takes CostCentreFriendlyName from SD.CostCentreFriendlyName; if NULL, falls back to CS_COST_CENTRE_NAME from efinl.COST_CENTRES (alias CC3)"
+        },
+        {
+          "target_column": "L4Code",
+          "source_table": "efinl.COST_CENTRE_HIERARCHIES",
+          "source_column": "CH_LEVEL4",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from efinl.COST_CENTRE_HIERARCHIES.CH_LEVEL4"
+        },
+        {
+          "target_column": "L4Name",
+          "source_table": "efinl.COST_CENTRES",
+          "source_column": "CS_COST_CENTRE_NAME",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from efinl.COST_CENTRES.CS_COST_CENTRE_NAME (alias CC4)"
+        },
+        {
+          "target_column": "L5Code",
+          "source_table": "efinl.COST_CENTRE_HIERARCHIES",
+          "source_column": "CH_LEVEL5",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from efinl.COST_CENTRE_HIERARCHIES.CH_LEVEL5"
+        },
+        {
+          "target_column": "L5Name",
+          "source_table": "efinl.COST_CENTRES",
+          "source_column": "CS_COST_CENTRE_NAME",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from efinl.COST_CENTRES.CS_COST_CENTRE_NAME (alias CC5)"
+        },
+        {
+          "target_column": "L6Code",
+          "source_table": "efinl.COST_CENTRE_HIERARCHIES",
+          "source_column": "CH_LEVEL6",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from efinl.COST_CENTRE_HIERARCHIES.CH_LEVEL6"
+        },
+        {
+          "target_column": "L6Name",
+          "source_table": "efinl.COST_CENTRES",
+          "source_column": "CS_COST_CENTRE_NAME",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from efinl.COST_CENTRES.CS_COST_CENTRE_NAME (alias CC6)"
+        },
+        {
+          "target_column": "L7Code",
+          "source_table": "efinl.COST_CENTRE_HIERARCHIES",
+          "source_column": "CH_LEVEL7",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from efinl.COST_CENTRE_HIERARCHIES.CH_LEVEL7"
+        },
+        {
+          "target_column": "L7Name",
+          "source_table": "efinl.COST_CENTRES",
+          "source_column": "CS_COST_CENTRE_NAME",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from efinl.COST_CENTRES.CS_COST_CENTRE_NAME (alias CC7)"
+        },
+        {
+          "target_column": "L8Code",
+          "source_table": "efinl.COST_CENTRE_HIERARCHIES",
+          "source_column": "CH_LEVEL8",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from efinl.COST_CENTRE_HIERARCHIES.CH_LEVEL8"
+        },
+        {
+          "target_column": "L8Name",
+          "source_table": "efinl.COST_CENTRES",
+          "source_column": "CS_COST_CENTRE_NAME",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from efinl.COST_CENTRES.CS_COST_CENTRE_NAME (alias CC8)"
+        },
+        {
+          "target_column": "L9Code",
+          "source_table": "efinl.COST_CENTRE_HIERARCHIES",
+          "source_column": "CH_LEVEL9",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from efinl.COST_CENTRE_HIERARCHIES.CH_LEVEL9"
+        },
+        {
+          "target_column": "L9Name",
+          "source_table": "efinl.COST_CENTRES",
+          "source_column": "CS_COST_CENTRE_NAME",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from efinl.COST_CENTRES.CS_COST_CENTRE_NAME (alias CC9)"
+        },
+        {
+          "target_column": "Postable",
+          "source_table": "efinl.COST_CENTRES",
+          "source_column": "CS_POSTABLE",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from efinl.COST_CENTRES.CS_POSTABLE"
+        },
+        {
+          "target_column": "CostTypeID",
+          "source_table": "efinl.COST_CENTRES",
+          "source_column": "CS_TYPE_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from efinl.COST_CENTRES.CS_TYPE_ID (alias CC9)"
+        },
+        {
+          "target_column": "CostTypeDescription",
+          "source_table": "efinl.COST_CENTRE_TYPES",
+          "source_column": "CCT_DESCRIPTION",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from efinl.COST_CENTRE_TYPES.CCT_DESCRIPTION"
+        },
+        {
+          "target_column": "Level9BottomYN",
+          "source_table": "efinl.COST_CENTRE_HIERARCHIES",
+          "source_column": "CH_COST_CENTRE, CH_LEVEL9, CH_COST_CENTRE_LEVEL",
+          "transformation_type": "conditional",
+          "transformation_logic": "Set to 'Y' if CH_COST_CENTRE equals CH_LEVEL9 and CH_COST_CENTRE_LEVEL is 'B', otherwise 'N'"
+        },
+        {
+          "target_column": "HasPjsTeam",
+          "source_table": "SD.ServiceDirectoryMappingPJS",
+          "source_column": "CostCentreCode",
+          "transformation_type": "conditional",
+          "transformation_logic": "Set to 'Y' if SD.ServiceDirectoryMappingPJS.CostCentreCode equals efinl.COST_CENTRE_HIERARCHIES.CH_LEVEL9 (other source: efinl.COST_CENTRE_HIERARCHIES.CH_LEVEL9)"
+        },
+        {
+          "target_column": "L4FriendlyName",
+          "source_table": "N/A",
+          "source_column": "N/A",
+          "transformation_type": "constant",
+          "transformation_logic": "Always NULL"
+        },
+        {
+          "target_column": "L6FriendlyName",
+          "source_table": "N/A",
+          "source_column": "N/A",
+          "transformation_type": "constant",
+          "transformation_logic": "Always NULL"
+        },
+        {
+          "target_column": "L7FriendlyName",
+          "source_table": "N/A",
+          "source_column": "N/A",
+          "transformation_type": "constant",
+          "transformation_logic": "Always NULL"
+        },
+        {
+          "target_column": "L8FriendlyName",
+          "source_table": "N/A",
+          "source_column": "N/A",
+          "transformation_type": "constant",
+          "transformation_logic": "Always NULL"
+        },
+        {
+          "target_column": "LastExtractDate",
+          "source_table": "efinl.COST_CENTRE_HIERARCHIES",
+          "source_column": "LastExtractDate",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Direct copy from efinl.COST_CENTRE_HIERARCHIES.LastExtractDate"
+        },
+        {
+          "target_column": "VaultLoadDate",
+          "source_table": "N/A",
+          "source_column": "N/A",
+          "transformation_type": "constant",
+          "transformation_logic": "Set to current system date and time (GETDATE()) on insert"
+        },
+        {
+          "target_column": "VaultUpdateDate",
+          "source_table": "N/A",
+          "source_column": "N/A",
+          "transformation_type": "constant",
+          "transformation_logic": "Set to current system date and time (GETDATE()) on update and insert"
+        },
+        {
+          "target_column": "L5FriendlyName",
+          "source_table": "N/A",
+          "source_column": "N/A",
+          "transformation_type": "constant",
+          "transformation_logic": "Always NULL for new records; unchanged for existing records."
+        }
+      ],
+      "joins": [
+        {
+          "left_table": "efinl.COST_CENTRE_HIERARCHIES",
+          "right_table": "efinl.COST_CENTRES",
+          "join_type": "LEFT",
+          "condition": "efinl.COST_CENTRES.CS_COST_CENTRE = efinl.COST_CENTRE_HIERARCHIES.CH_COST_CENTRE"
+        },
+        {
+          "left_table": "efinl.COST_CENTRE_HIERARCHIES",
+          "right_table": "efinl.COST_CENTRES",
+          "join_type": "LEFT",
+          "condition": "efinl.COST_CENTRES.CS_COST_CENTRE = efinl.COST_CENTRE_HIERARCHIES.CH_LEVEL1"
+        },
+        {
+          "left_table": "efinl.COST_CENTRE_HIERARCHIES",
+          "right_table": "efinl.COST_CENTRES",
+          "join_type": "LEFT",
+          "condition": "efinl.COST_CENTRES.CS_COST_CENTRE = efinl.COST_CENTRE_HIERARCHIES.CH_LEVEL2"
+        },
+        {
+          "left_table": "efinl.COST_CENTRE_HIERARCHIES",
+          "right_table": "efinl.COST_CENTRES",
+          "join_type": "LEFT",
+          "condition": "efinl.COST_CENTRES.CS_COST_CENTRE = efinl.COST_CENTRE_HIERARCHIES.CH_LEVEL3"
+        },
+        {
+          "left_table": "efinl.COST_CENTRE_HIERARCHIES",
+          "right_table": "efinl.COST_CENTRES",
+          "join_type": "LEFT",
+          "condition": "efinl.COST_CENTRES.CS_COST_CENTRE = efinl.COST_CENTRE_HIERARCHIES.CH_LEVEL4"
+        },
+        {
+          "left_table": "efinl.COST_CENTRE_HIERARCHIES",
+          "right_table": "efinl.COST_CENTRES",
+          "join_type": "LEFT",
+          "condition": "efinl.COST_CENTRES.CS_COST_CENTRE = efinl.COST_CENTRE_HIERARCHIES.CH_LEVEL5"
+        },
+        {
+          "left_table": "efinl.COST_CENTRE_HIERARCHIES",
+          "right_table": "efinl.COST_CENTRES",
+          "join_type": "LEFT",
+          "condition": "efinl.COST_CENTRES.CS_COST_CENTRE = efinl.COST_CENTRE_HIERARCHIES.CH_LEVEL6"
+        },
+        {
+          "left_table": "efinl.COST_CENTRE_HIERARCHIES",
+          "right_table": "efinl.COST_CENTRES",
+          "join_type": "LEFT",
+          "condition": "efinl.COST_CENTRES.CS_COST_CENTRE = efinl.COST_CENTRE_HIERARCHIES.CH_LEVEL7"
+        },
+        {
+          "left_table": "efinl.COST_CENTRE_HIERARCHIES",
+          "right_table": "efinl.COST_CENTRES",
+          "join_type": "LEFT",
+          "condition": "efinl.COST_CENTRES.CS_COST_CENTRE = efinl.COST_CENTRE_HIERARCHIES.CH_LEVEL8"
+        },
+        {
+          "left_table": "efinl.COST_CENTRE_HIERARCHIES",
+          "right_table": "efinl.COST_CENTRES",
+          "join_type": "LEFT",
+          "condition": "efinl.COST_CENTRES.CS_COST_CENTRE = efinl.COST_CENTRE_HIERARCHIES.CH_LEVEL9"
+        },
+        {
+          "left_table": "efinl.COST_CENTRES",
+          "right_table": "efinl.COST_CENTRE_TYPES",
+          "join_type": "LEFT",
+          "condition": "efinl.COST_CENTRE_TYPES.CCT_TYPE_ID = efinl.COST_CENTRES.CS_TYPE_ID"
+        },
+        {
+          "left_table": "efinl.COST_CENTRE_HIERARCHIES",
+          "right_table": "SD.CostCentreFriendlyName",
+          "join_type": "LEFT",
+          "condition": "SD.CostCentreFriendlyName.CostCentreCode = efinl.COST_CENTRE_HIERARCHIES.CH_LEVEL3"
+        },
+        {
+          "left_table": "efinl.COST_CENTRE_HIERARCHIES",
+          "right_table": "SD.ServiceDirectoryMappingPJS",
+          "join_type": "LEFT",
+          "condition": "SD.ServiceDirectoryMappingPJS.CostCentreCode = efinl.COST_CENTRE_HIERARCHIES.CH_LEVEL9"
+        },
+        {
+          "left_table": "efinl.COST_CENTRE_HIERARCHIES",
+          "right_table": "vault.HubCostCentre",
+          "join_type": "LEFT",
+          "condition": "vault.HubCostCentre.CostCentreCode = efinl.COST_CENTRE_HIERARCHIES.CH_COST_CENTRE"
+        }
+      ],
+      "filters": [
+        "efinl.COST_CENTRE_HIERARCHIES.CH_STRUCTURE_ID = '4'",
+        "CAST(efinl.COST_CENTRE_HIERARCHIES.LastExtractDate AS DATE) >= CAST(@LastExtractedDate AS DATE)"
+      ],
+      "grouping": [],
+      "extraction_method": "gemini",
+      "source_file": "Vault.LoadCostCentre.sql"
+    },
+    {
+      "procedure_name": "Vault.LoadDimSD",
+      "target_table": "Vault.DimSD",
+      "source_tables": [
+        "Vault.team",
+        "Vault.CostCentre",
+        "sd.WardsTeamsAddInfo",
+        "sd.ReportAttributes",
+        "Vault.MHSDSDCode"
+      ],
+      "column_mappings": [
+        {
+          "target_column": "TeamPK",
+          "source_table": "Vault.team",
+          "source_column": "TeamPK",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.team.TeamPK"
+        },
+        {
+          "target_column": "HubTeamPK",
+          "source_table": "Vault.team",
+          "source_column": "HubTeamPK",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.team.HubTeamPK"
+        },
+        {
+          "target_column": "Location_ID",
+          "source_table": "Vault.team",
+          "source_column": "Location_ID",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.team.Location_ID"
+        },
+        {
+          "target_column": "Team Name",
+          "source_table": "Vault.team",
+          "source_column": "Location_Name",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.team.Location_Name"
+        },
+        {
+          "target_column": "Team Status",
+          "source_table": "Vault.team",
+          "source_column": "Location_Status_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.team.Location_Status_Desc"
+        },
+        {
+          "target_column": "Team or Ward",
+          "source_table": "Vault.team",
+          "source_column": "Location_Team_Ward_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.team.Location_Team_Ward_Desc"
+        },
+        {
+          "target_column": "Team Postcode",
+          "source_table": "Vault.team",
+          "source_column": "Post_Code",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.team.Post_Code"
+        },
+        {
+          "target_column": "Address1",
+          "source_table": "Vault.team",
+          "source_column": "Address1",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.team.Address1"
+        },
+        {
+          "target_column": "Address2",
+          "source_table": "Vault.team",
+          "source_column": "Address2",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.team.Address2"
+        },
+        {
+          "target_column": "Address3",
+          "source_table": "Vault.team",
+          "source_column": "Address3",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.team.Address3"
+        },
+        {
+          "target_column": "Address4",
+          "source_table": "Vault.team",
+          "source_column": "Address4",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.team.Address4"
+        },
+        {
+          "target_column": "Address5",
+          "source_table": "Vault.team",
+          "source_column": "Address5",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.team.Address5"
+        },
+        {
+          "target_column": "Phone",
+          "source_table": "Vault.team",
+          "source_column": "Phone",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.team.Phone"
+        },
+        {
+          "target_column": "National Site Code",
+          "source_table": "Vault.team",
+          "source_column": "NationalSiteCode",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.team.NationalSiteCode"
+        },
+        {
+          "target_column": "National Team Type",
+          "source_table": "Vault.team",
+          "source_column": "Clinical_Team_Classification_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.team.Clinical_Team_Classification_Desc"
+        },
+        {
+          "target_column": "Beds",
+          "source_table": "Vault.team",
+          "source_column": "Location_Beds",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.team.Location_Beds"
+        },
+        {
+          "target_column": "National Ward Type",
+          "source_table": "Vault.team",
+          "source_column": "WARDTYPE",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.team.WARDTYPE"
+        },
+        {
+          "target_column": "Ward Intended Age Group",
+          "source_table": "Vault.team",
+          "source_column": "Location_Intended_Age_Group_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.team.Location_Intended_Age_Group_Desc"
+        },
+        {
+          "target_column": "Ward Gender",
+          "source_table": "Vault.team",
+          "source_column": "Location_Gender_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.team.Location_Gender_Desc"
+        },
+        {
+          "target_column": "Ward Care Intensity",
+          "source_table": "Vault.team",
+          "source_column": "Clinical_Care_Intensity_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.team.Clinical_Care_Intensity_Desc"
+        },
+        {
+          "target_column": "Ward Security Level",
+          "source_table": "Vault.team",
+          "source_column": "Location_Ward_Security_Level_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.team.Location_Ward_Security_Level_Desc"
+        },
+        {
+          "target_column": "Ward Locked Indicator",
+          "source_table": "Vault.team",
+          "source_column": "Ward_Locked_ID_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.team.Ward_Locked_ID_Desc"
+        },
+        {
+          "target_column": "National Bed Type",
+          "source_table": "sd.WardsTeamsAddInfo",
+          "source_column": "HospitalBedTypeMH_desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from sd.WardsTeamsAddInfo.HospitalBedTypeMH_desc"
+        },
+        {
+          "target_column": "Ward Type",
+          "source_table": "sd.ReportAttributes",
+          "source_column": "Ward Type",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from sd.ReportAttributes.Ward Type"
+        },
+        {
+          "target_column": "Ward Care Group",
+          "source_table": "sd.ReportAttributes",
+          "source_column": "Ward Care Group",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from sd.ReportAttributes.Ward Care Group"
+        },
+        {
+          "target_column": "Ward Pathway",
+          "source_table": "sd.ReportAttributes, Vault.team",
+          "source_column": "Ward Pathway, Location_ID",
+          "transformation_type": "conditional",
+          "transformation_logic": "If sd.ReportAttributes.Ward Pathway] is 'Triage' or Vault.team.Location_ID is 1471, then 'Acute'; otherwise, sd.ReportAttributes.Ward Pathway"
+        },
+        {
+          "target_column": "Service Type",
+          "source_table": "sd.ReportAttributes",
+          "source_column": "Service Type",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from sd.ReportAttributes.Service Type"
+        },
+        {
+          "target_column": "Clustering",
+          "source_table": "sd.ReportAttributes",
+          "source_column": "Clustering",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from sd.ReportAttributes.Clustering"
+        },
+        {
+          "target_column": "Care Group",
+          "source_table": "sd.ReportAttributes",
+          "source_column": "Care Group",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from sd.ReportAttributes.Care Group"
+        },
+        {
+          "target_column": "Speciality",
+          "source_table": "Vault.team",
+          "source_column": "Specialty_Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.team.Specialty_Desc"
+        },
+        {
+          "target_column": "Contract Service Line",
+          "source_table": "sd.ReportAttributes",
+          "source_column": "Contract Service Line",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from sd.ReportAttributes.Contract Service Line"
+        },
+        {
+          "target_column": "LSLC Contract",
+          "source_table": "sd.ReportAttributes",
+          "source_column": "LSLC Contract",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from sd.ReportAttributes.LSLC Contract"
+        },
+        {
+          "target_column": "Case Management Team",
+          "source_table": "sd.ReportAttributes",
+          "source_column": "Case Management Team",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from sd.ReportAttributes.Case Management Team"
+        },
+        {
+          "target_column": "Borough",
+          "source_table": "sd.ReportAttributes",
+          "source_column": "Borough",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from sd.ReportAttributes.Borough"
+        },
+        {
+          "target_column": "CAG",
+          "source_table": "sd.ReportAttributes",
+          "source_column": "CAG",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from sd.ReportAttributes.CAG"
+        },
+        {
+          "target_column": "Directorate",
+          "source_table": "Vault.CostCentre",
+          "source_column": "L3Name",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.CostCentre.L3Name"
+        },
+        {
+          "target_column": "CAP",
+          "source_table": "Vault.CostCentre",
+          "source_column": "L3Name",
+          "transformation_type": "conditional",
+          "transformation_logic": "If Vault.CostCentre.L3Name is '06. Child & Adolescent Service', then 'CAMHS'; if '05. PMOA', then 'PMOA'; otherwise, 'Adult'"
+        },
+        {
+          "target_column": "Division",
+          "source_table": "Vault.CostCentre",
+          "source_column": "L4Name",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.CostCentre.L4Name"
+        },
+        {
+          "target_column": "Service Line",
+          "source_table": "Vault.CostCentre",
+          "source_column": "L6Name",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.CostCentre.L6Name"
+        },
+        {
+          "target_column": "Sub Service Line",
+          "source_table": "Vault.CostCentre",
+          "source_column": "L7Name",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.CostCentre.L7Name"
+        },
+        {
+          "target_column": "Financial Service Unit Name",
+          "source_table": "Vault.CostCentre",
+          "source_column": "L8Name",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.CostCentre.L8Name"
+        },
+        {
+          "target_column": "Financial Service Unit Code",
+          "source_table": "Vault.CostCentre",
+          "source_column": "L8Code",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.CostCentre.L8Code"
+        },
+        {
+          "target_column": "Cost Centre Code",
+          "source_table": "Vault.team",
+          "source_column": "Cost_Code",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.team.Cost_Code"
+        },
+        {
+          "target_column": "Cost Centre Name",
+          "source_table": "Vault.CostCentre",
+          "source_column": "CostCentrename",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.CostCentre.CostCentrename"
+        },
+        {
+          "target_column": "Site Location",
+          "source_table": "sd.ReportAttributes",
+          "source_column": "Site Location",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from sd.ReportAttributes.Site Location"
+        },
+        {
+          "target_column": "Funding",
+          "source_table": "sd.ReportAttributes",
+          "source_column": "funding",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from sd.ReportAttributes.funding"
+        },
+        {
+          "target_column": "Commissioning",
+          "source_table": "sd.ReportAttributes",
+          "source_column": "Commissioning",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from sd.ReportAttributes.Commissioning"
+        },
+        {
+          "target_column": "Team Code",
+          "source_table": "Vault.team",
+          "source_column": "Site_Code",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.team.Site_Code"
+        },
+        {
+          "target_column": "Monitor Group",
+          "source_table": "sd.ReportAttributes",
+          "source_column": "Monitor Group",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from sd.ReportAttributes.Monitor Group"
+        },
+        {
+          "target_column": "Monitor LOS Group",
+          "source_table": "sd.ReportAttributes",
+          "source_column": "Monitor LOS Group",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from sd.ReportAttributes.Monitor LOS Group"
+        },
+        {
+          "target_column": "CQC Core Service Provided",
+          "source_table": "sd.ReportAttributes",
+          "source_column": "CQC Core Service Provided",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from sd.ReportAttributes.CQC Core Service Provided"
+        },
+        {
+          "target_column": "Date_Added",
+          "source_table": null,
+          "source_column": null,
+          "transformation_type": "constant",
+          "transformation_logic": "System current timestamp (GETDATE())"
+        },
+        {
+          "target_column": "Service Category",
+          "source_table": "sd.ReportAttributes",
+          "source_column": "Service Category",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from sd.ReportAttributes.Service Category"
+        },
+        {
+          "target_column": "Care Option",
+          "source_table": "Vault.team",
+          "source_column": "CareOption_Team_Flag",
+          "transformation_type": "conditional",
+          "transformation_logic": "If Vault.team.CareOption_Team_Flag is 1, then 'Yes'; otherwise, 'No'"
+        },
+        {
+          "target_column": "MHSDS Service Team Type",
+          "source_table": "Vault.MHSDSDCode",
+          "source_column": "MHSDS Service Team Type Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.MHSDSDCode.MHSDS Service Team Type Desc"
+        },
+        {
+          "target_column": "MHSDS Team Intended Age Group",
+          "source_table": "Vault.MHSDSDCode",
+          "source_column": "MHSDS Team Intended Age Group Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.MHSDSDCode.MHSDS Team Intended Age Group Desc"
+        },
+        {
+          "target_column": "MHSDS Ward Intended Age Group",
+          "source_table": "Vault.MHSDSDCode",
+          "source_column": "MHSDS Ward Intended Age Group Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.MHSDSDCode.MHSDS Ward Intended Age Group Desc"
+        },
+        {
+          "target_column": "MHSDS Ward Intended Gender",
+          "source_table": "Vault.MHSDSDCode",
+          "source_column": "MHSDS Ward Intended Gender Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.MHSDSDCode.MHSDS Ward Intended Gender Desc"
+        },
+        {
+          "target_column": "MHSDS Ward Care Intensity Code",
+          "source_table": "Vault.MHSDSDCode",
+          "source_column": "MHSDS Ward Care Intensity Code Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.MHSDSDCode.MHSDS Ward Care Intensity Code Desc"
+        },
+        {
+          "target_column": "MHSDS Ward Setting Type",
+          "source_table": "Vault.MHSDSDCode",
+          "source_column": "MHSDS Ward Setting Type Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.MHSDSDCode.MHSDS Ward Setting Type Desc"
+        },
+        {
+          "target_column": "MHSDS Ward Sec Level",
+          "source_table": "Vault.MHSDSDCode",
+          "source_column": "MHSDS Ward Sec Level Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.MHSDSDCode.MHSDS Ward Sec Level Desc"
+        },
+        {
+          "target_column": "MHSDS Admitted Patient Classification Type",
+          "source_table": "Vault.MHSDSDCode",
+          "source_column": "MHSDS Admitted Patient Classification Type Desc",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.MHSDSDCode.MHSDS Admitted Patient Classification Type Desc"
+        },
+        {
+          "target_column": "MHSDS Site Code of Treat",
+          "source_table": "Vault.MHSDSDCode",
+          "source_column": "MHSDS Site Code of Treat",
+          "transformation_type": "direct_copy",
+          "transformation_logic": "Copied directly from Vault.MHSDSDCode.MHSDS Site Code of Treat"
+        }
+      ],
+      "joins": [
+        {
+          "left_table": "Vault.team",
+          "right_table": "Vault.CostCentre",
+          "join_type": "LEFT",
+          "condition": "Vault.CostCentre.CostCentreCode = Vault.team.Cost_Code"
+        },
+        {
+          "left_table": "Vault.team",
+          "right_table": "sd.WardsTeamsAddInfo",
+          "join_type": "LEFT",
+          "condition": "sd.WardsTeamsAddInfo.locationid = Vault.team.Location_ID"
+        },
+        {
+          "left_table": "Vault.team",
+          "right_table": "sd.ReportAttributes",
+          "join_type": "LEFT",
+          "condition": "CAST(sd.ReportAttributes.Location_ID AS VARCHAR) = CAST(Vault.team.Location_ID AS VARCHAR)"
+        },
+        {
+          "left_table": "Vault.team",
+          "right_table": "Vault.MHSDSDCode",
+          "join_type": "LEFT",
+          "condition": "Vault.MHSDSDCode.Location ID] = Vault.team.location_id"
+        },
+        {
+          "left_table": "Vault].DimSD",
+          "right_table": "Vault.team",
+          "join_type": "INNER",
+          "condition": "Vault].DimSD.Location_ID = Vault.team.Location_ID"
+        }
+      ],
+      "filters": [
+        "ISNULL([Vault].DimSD.[TeamPK], '') <> ISNULL(b.[TeamPK], '')",
+        "ISNULL([Vault].DimSD.[HubTeamPK], '') <> ISNULL(b.[HubTeamPK], '')",
+        "ISNULL([Vault].DimSD.[Location_ID], '') <> ISNULL(b.[Location_ID], '')",
+        "ISNULL([Vault].DimSD.[Team Name], '') <> ISNULL(b.[Team Name], '')",
+        "ISNULL([Vault].DimSD.[Team Status], '') <> ISNULL(b.[Team Status], '')",
+        "ISNULL([Vault].DimSD.[Team or Ward], '') <> ISNULL(b.[Team or Ward], '')",
+        "ISNULL([Vault].DimSD.[Team Postcode], '') <> ISNULL(b.[Team Postcode], '')",
+        "ISNULL([Vault].DimSD.[Address1], '') <> ISNULL(b.[Address1], '')",
+        "ISNULL([Vault].DimSD.[Address2], '') <> ISNULL(b.[Address2], '')",
+        "ISNULL([Vault].DimSD.[Address3], '') <> ISNULL(b.[Address3], '')",
+        "ISNULL([Vault].DimSD.[Address4], '') <> ISNULL(b.[Address4], '')",
+        "ISNULL([Vault].DimSD.[Address5], '') <> ISNULL(b.[Address5], '')",
+        "ISNULL([Vault].DimSD.[Phone], '') <> ISNULL(b.[Phone], '')",
+        "ISNULL([Vault].DimSD.[National Site Code], '') <> ISNULL(b.[National Site Code], '')",
+        "ISNULL([Vault].DimSD.[National Team Type], '') <> ISNULL(b.[National Team Type], '')",
+        "ISNULL([Vault].DimSD.[Beds], '') <> ISNULL(b.[Beds], '')",
+        "ISNULL([Vault].DimSD.[National Ward Type], '') <> ISNULL(b.[National Ward Type], '')",
+        "ISNULL([Vault].DimSD.[Ward Intended Age Group], '') <> ISNULL(b.[Ward Intended Age Group], '')",
+        "ISNULL([Vault].DimSD.[Ward Gender], '') <> ISNULL(b.[Ward Gender], '')",
+        "ISNULL([Vault].DimSD.[Ward Care Intensity], '') <> ISNULL(b.[Ward Care Intensity], '')",
+        "ISNULL([Vault].DimSD.[Ward Security Level], '') <> ISNULL(b.[Ward Security Level], '')",
+        "ISNULL([Vault].DimSD.[Ward Locked Indicator], '') <> ISNULL(b.[Ward Locked Indicator], '')",
+        "ISNULL([Vault].DimSD.[National Bed Type], '') <> ISNULL(b.[National Bed Type], '')",
+        "ISNULL([Vault].DimSD.[Ward Type], '') <> ISNULL(b.[Ward Type], '')",
+        "ISNULL([Vault].DimSD.[Ward Care Group], '') <> ISNULL(b.[Ward Care Group], '')",
+        "ISNULL([Vault].DimSD.[Ward Pathway], '') <> ISNULL(b.[Ward Pathway], '')",
+        "ISNULL([Vault].DimSD.[Service Type], '') <> ISNULL(b.[Service Type], '')",
+        "ISNULL([Vault].DimSD.[Clustering], '') <> ISNULL(b.[Clustering], '')",
+        "ISNULL([Vault].DimSD.[Care Group], '') <> ISNULL(b.[Care Group], '')",
+        "ISNULL([Vault].DimSD.[Speciality], '') <> ISNULL(b.[Speciality], '')",
+        "ISNULL([Vault].DimSD.[Contract Service Line], '') <> ISNULL(b.[Contract Service Line], '')",
+        "ISNULL([Vault].DimSD.[LSLC Contract], '') <> ISNULL(b.[LSLC Contract], '')",
+        "ISNULL([Vault].DimSD.[Case Management Team], '') <> ISNULL(b.[Case Management Team], '')",
+        "ISNULL([Vault].DimSD.[Borough], '') <> ISNULL(b.[Borough], '')",
+        "ISNULL([Vault].DimSD.[CAG], '') <> ISNULL(b.[CAG], '')",
+        "ISNULL([Vault].DimSD.[Directorate], '') <> ISNULL(b.[Directorate], '')",
+        "ISNULL([Vault].DimSD.[CAP], '') <> ISNULL(b.[CAP], '')",
+        "ISNULL([Vault].DimSD.[Division], '') <> ISNULL(b.[Division], '')",
+        "ISNULL([Vault].DimSD.[Service Line], '') <> ISNULL(b.[Service Line], '')",
+        "ISNULL([Vault].DimSD.[Sub Service Line], '') <> ISNULL(b.[Sub Service Line], '')",
+        "ISNULL([Vault].DimSD.[Financial Service Unit Name], '') <> ISNULL(b.[Financial Service Unit Name], '')",
+        "ISNULL([Vault].DimSD.[Financial Service Unit Code], '') <> ISNULL(b.[Financial Service Unit Code], '')",
+        "ISNULL([Vault].DimSD.[Cost Centre Code], '') <> ISNULL(b.[Cost Centre Code], '')",
+        "ISNULL([Vault].DimSD.[Cost Centre Name], '') <> ISNULL(b.[Cost Centre Name], '')",
+        "ISNULL([Vault].DimSD.[Site Location], '') <> ISNULL(b.[Site Location], '')",
+        "ISNULL([Vault].DimSD.[Funding], '') <> ISNULL(b.[Funding], '')",
+        "ISNULL([Vault].DimSD.[Commissioning], '') <> ISNULL(b.[Commissioning], '')",
+        "ISNULL([Vault].DimSD.[Team Code], '') <> ISNULL(b.[Team Code], '')",
+        "ISNULL([Vault].DimSD.[Monitor Group], '') <> ISNULL(b.[Monitor Group], '')",
+        "ISNULL([Vault].DimSD.[Monitor LOS Group], '') <> ISNULL(b.[Monitor LOS Group], '')",
+        "ISNULL([Vault].DimSD.[CQC Core Service Provided], '') <> ISNULL(b.[CQC Core Service Provided], '')",
+        "ISNULL([Vault].DimSD.[Service Category], '') <> ISNULL(b.[Service Category], '')",
+        "ISNULL([Vault].DimSD.[Care Option], '') <> ISNULL(b.[Care Option], '')",
+        "ISNULL([Vault].DimSD.[MHSDS Service Team Type], '') <> ISNULL(b.[MHSDS Service Team Type Desc], '')",
+        "ISNULL([Vault].DimSD.[MHSDS Team Intended Age Group], '') <> ISNULL(b.[MHSDS Team Intended Age Group Desc], '')",
+        "ISNULL([Vault].DimSD.[MHSDS Ward Intended Age Group], '') <> ISNULL(b.[MHSDS Ward Intended Age Group Desc], '')",
+        "ISNULL([Vault].DimSD.[MHSDS Ward Intended Gender], '') <> ISNULL(b.[MHSDS Ward Intended Gender Desc], '')",
+        "ISNULL([Vault].DimSD.[MHSDS Ward Care Intensity Code], '') <> ISNULL(b.[MHSDS Ward Care Intensity Code Desc], '')",
+        "ISNULL([Vault].DimSD.[MHSDS Ward Setting Type], '') <> ISNULL(b.[MHSDS Ward Setting Type Desc], '')",
+        "ISNULL([Vault].DimSD.[MHSDS Ward Sec Level], '') <> ISNULL(b.[MHSDS Ward Sec Level Desc], '')",
+        "ISNULL([Vault].DimSD.[MHSDS Admitted Patient Classification Type], '') <> ISNULL(b.[MHSDS Admitted Patient Classification Type Desc], '')",
+        "ISNULL([Vault].DimSD.[MHSDS Site Code of Treat], '') <> ISNULL(b.[MHSDS Site Code of Treat], '')"
+      ],
+      "grouping": [],
+      "extraction_method": "gemini",
+      "source_file": "Vault.loadDimSD.sql"
+    },
+    {
       "procedure_name": "Vault.LoadPatient",
       "target_table": "Vault.Patient",
       "source_tables": [
@@ -25,7 +3734,7 @@
         "raw.tblHasATwinValues",
         "raw.tblSpell",
         "raw.tblSexualityValues",
-        "vault.HubPatient",
+        "Vault.HubPatient",
         "raw.tblExternalCodeMapping",
         "raw.tblExternalCodeMappingDataSource",
         "raw.tblExternalCodeMappingContextValues",
@@ -40,7 +3749,7 @@
       "column_mappings": [
         {
           "target_column": "HubPatientPK",
-          "source_table": "vault.HubPatient",
+          "source_table": "Vault.HubPatient",
           "source_column": "HubPatientPK",
           "transformation_type": "direct_copy",
           "transformation_logic": "Direct copy of HubPatientPK from HubPatient table."
@@ -614,7 +4323,7 @@
         },
         {
           "left_table": "raw.tblPatient",
-          "right_table": "vault.HubPatient",
+          "right_table": "Vault.HubPatient",
           "join_type": "INNER",
           "condition": "HP.PatientID = PAT.Patient_ID"
         },
@@ -799,7 +4508,7 @@
           "condition": "PCT.PCT_ID = Prac.PCT_ID"
         },
         {
-          "left_table": "vault.Patient",
+          "left_table": "Vault.Patient",
           "right_table": "VaultInterim.Patient_Interim",
           "join_type": "MERGE",
           "condition": "SRC.Patient_ID = TGT.Patient_ID"
@@ -828,16 +4537,16 @@
       "source_file": "Vault.Loadpatient.sql"
     },
     {
-      "procedure_name": "vault.LoadTrustAccessWaits",
-      "target_table": "vault.TrustAccessWaits",
+      "procedure_name": "Vault.LoadTrustAccessWaits",
+      "target_table": "Vault.TrustAccessWaits",
       "source_tables": [
-        "SLAMBI.Vault.WaitingTimes",
-        "SLAMBI.Vault.Patient",
-        "SLAMBI.Vault.Episode",
-        "SLAMBI.Vault.TrustAccessWaitingTimes",
-        "SLAMBI.Vault.DimSD",
-        "SLAMBI.Dim.Priority",
-        "SLAMBI.Vault.ReferralStatusValues"
+        "Vault.WaitingTimes",
+        "Vault.Patient",
+        "Vault.Episode",
+        "Vault.TrustAccessWaitingTimes",
+        "Vault.DimSD",
+        "Dim.Priority",
+        "Vault.ReferralStatusValues"
       ],
       "column_mappings": [
         {
@@ -849,175 +4558,175 @@
         },
         {
           "target_column": "Trust_Id",
-          "source_table": "SLAMBI.Vault.WaitingTimes",
+          "source_table": "Vault.WaitingTimes",
           "source_column": "Trust_Id",
           "transformation_type": "direct_copy",
           "transformation_logic": "Direct copy from Trust_Id column in WaitingTimes table."
         },
         {
           "target_column": "Gender_ID",
-          "source_table": "SLAMBI.Vault.Patient",
+          "source_table": "Vault.Patient",
           "source_column": "Gender_ID",
           "transformation_type": "direct_copy",
           "transformation_logic": "Direct copy from Gender_ID column in Patient table."
         },
         {
           "target_column": "Ethnicitycleaned",
-          "source_table": "SLAMBI.Vault.Patient",
+          "source_table": "Vault.Patient",
           "source_column": "Ethnicity_Desc",
           "transformation_type": "direct_copy",
           "transformation_logic": "Direct copy from Ethnicity_Desc column in Patient table."
         },
         {
           "target_column": "Trust Referral Received Date",
-          "source_table": "SLAMBI.Vault.TrustAccessWaitingTimes",
+          "source_table": "Vault.TrustAccessWaitingTimes",
           "source_column": "RTT Start Date",
           "transformation_type": "direct_copy",
           "transformation_logic": "Direct copy from RTT Start Date column in TrustAccessWaitingTimes table."
         },
         {
           "target_column": "Trust Referral Priority",
-          "source_table": "SLAMBI.Vault.TrustAccessWaitingTimes",
+          "source_table": "Vault.TrustAccessWaitingTimes",
           "source_column": "Referral Priority",
           "transformation_type": "direct_copy",
           "transformation_logic": "Direct copy from Referral Priority column in TrustAccessWaitingTimes table."
         },
         {
           "target_column": "Trust Access Wait flag",
-          "source_table": "SLAMBI.Vault.TrustAccessWaitingTimes",
+          "source_table": "Vault.TrustAccessWaitingTimes",
           "source_column": "Waiting For First Contact",
           "transformation_type": "direct_copy",
           "transformation_logic": "Direct copy from Waiting For First Contact column in TrustAccessWaitingTimes table."
         },
         {
           "target_column": "Trust Access Wait Weeks",
-          "source_table": "SLAMBI.Vault.TrustAccessWaitingTimes",
+          "source_table": "Vault.TrustAccessWaitingTimes",
           "source_column": "Weeks Waited For First Contact",
           "transformation_type": "direct_copy",
           "transformation_logic": "Direct copy from Weeks Waited For First Contact column in TrustAccessWaitingTimes table."
         },
         {
           "target_column": "Team",
-          "source_table": "SLAMBI.Vault.DimSD",
+          "source_table": "Vault.DimSD",
           "source_column": "Team Name",
           "transformation_type": "direct_copy",
           "transformation_logic": "Direct copy from Team Name column in DimSD table (aliased wtsd)."
         },
         {
           "target_column": "Team Name",
-          "source_table": "SLAMBI.Vault.DimSD",
+          "source_table": "Vault.DimSD",
           "source_column": "Team Name",
           "transformation_type": "direct_copy",
           "transformation_logic": "Direct copy from Team Name column in DimSD table (aliased epsd)."
         },
         {
           "target_column": "Directorate",
-          "source_table": "SLAMBI.Vault.DimSD",
+          "source_table": "Vault.DimSD",
           "source_column": "Directorate",
           "transformation_type": "direct_copy",
           "transformation_logic": "Direct copy from Directorate column in DimSD table (aliased wtsd)."
         },
         {
           "target_column": "Division",
-          "source_table": "SLAMBI.Vault.DimSD",
+          "source_table": "Vault.DimSD",
           "source_column": "Division",
           "transformation_type": "direct_copy",
           "transformation_logic": "Direct copy from Division column in DimSD table (aliased wtsd)."
         },
         {
           "target_column": "Sub Service Line",
-          "source_table": "SLAMBI.Vault.DimSD",
+          "source_table": "Vault.DimSD",
           "source_column": "Sub Service Line",
           "transformation_type": "direct_copy",
           "transformation_logic": "Direct copy from Sub Service Line column in DimSD table (aliased wtsd)."
         },
         {
           "target_column": "Episode Priority",
-          "source_table": "SLAMBI.Dim.Priority",
+          "source_table": "Dim.Priority",
           "source_column": "PriorityDescription",
           "transformation_type": "direct_copy",
           "transformation_logic": "Direct copy from PriorityDescription column in Priority table."
         },
         {
           "target_column": "Latest Team Flag",
-          "source_table": "SLAMBI.Vault.TrustAccessWaitingTimes, SLAMBI.Vault.DimSD",
+          "source_table": "Vault.TrustAccessWaitingTimes, Vault.DimSD",
           "source_column": "Team Name",
           "transformation_type": "conditional",
           "transformation_logic": "'YES' if Latest Active Episode Team from TrustAccessWaitingTimes matches Team Name from DimSD (wtsd), otherwise 'NO'."
         },
         {
           "target_column": "Episode Referral Received Date",
-          "source_table": "SLAMBI.Vault.WaitingTimes",
+          "source_table": "Vault.WaitingTimes",
           "source_column": "Episode_Referral_Received_Date",
           "transformation_type": "direct_copy",
           "transformation_logic": "Direct copy from Episode_Referral_Received_Date column in WaitingTimes table."
         },
         {
           "target_column": "Team Wait Flag",
-          "source_table": "SLAMBI.Vault.WaitingTimes, SLAMBI.Vault.Episode",
+          "source_table": "Vault.WaitingTimes, Vault.Episode",
           "source_column": "First_Attended_Date,Episode_Referral_Rejection_Date",
           "transformation_type": "conditional",
           "transformation_logic": "'YES' if First_Attended_Date from WaitingTimes and Episode_Referral_Rejection_Date (from Episode) are both NULL, otherwise 'NO'."
         },
         {
           "target_column": "Team Wait Weeks",
-          "source_table": "SLAMBI.Vault.WaitingTimes",
+          "source_table": "Vault.WaitingTimes",
           "source_column": "Episode_Referral_Received_Date",
           "transformation_type": "calculation",
           "transformation_logic": "Calculates the number of full weeks between Episode_Referral_Received_Date from WaitingTimes and the current date."
         },
         {
           "target_column": "Trust Referral ID",
-          "source_table": "SLAMBI.Vault.TrustAccessWaitingTimes",
+          "source_table": "Vault.TrustAccessWaitingTimes",
           "source_column": "ReferralId",
           "transformation_type": "direct_copy",
           "transformation_logic": "Direct copy from ReferralId column in TrustAccessWaitingTimes table."
         },
         {
           "target_column": "Episode ID",
-          "source_table": "SLAMBI.Vault.WaitingTimes",
+          "source_table": "Vault.WaitingTimes",
           "source_column": "Episode_Id",
           "transformation_type": "direct_copy",
           "transformation_logic": "Direct copy from Episode_Id column in WaitingTimes table."
         },
         {
           "target_column": "Deceased",
-          "source_table": "SLAMBI.Vault.Patient",
+          "source_table": "Vault.Patient",
           "source_column": "Date_of_Death",
           "transformation_type": "conditional",
           "transformation_logic": "'Deceased' if Date_of_Death from Patient is not NULL, otherwise NULL."
         },
         {
           "target_column": "Trust 52+ wks",
-          "source_table": "SLAMBI.Vault.TrustAccessWaitingTimes",
+          "source_table": "Vault.TrustAccessWaitingTimes",
           "source_column": "Weeks Waited For First Contact",
           "transformation_type": "conditional",
           "transformation_logic": "1 if Weeks Waited For First Contact from TrustAccessWaitingTimes is 52 or more, otherwise 0."
         },
         {
           "target_column": "Trust 26+ wks",
-          "source_table": "SLAMBI.Vault.TrustAccessWaitingTimes",
+          "source_table": "Vault.TrustAccessWaitingTimes",
           "source_column": "Weeks Waited For First Contact",
           "transformation_type": "conditional",
           "transformation_logic": "1 if Weeks Waited For First Contact from TrustAccessWaitingTimes is 26 or more, otherwise 0."
         },
         {
           "target_column": "Trust 10+ wks",
-          "source_table": "SLAMBI.Vault.TrustAccessWaitingTimes",
+          "source_table": "Vault.TrustAccessWaitingTimes",
           "source_column": "Weeks Waited For First Contact",
           "transformation_type": "conditional",
           "transformation_logic": "1 if Weeks Waited For First Contact from TrustAccessWaitingTimes is 10 or more, otherwise 0."
         },
         {
           "target_column": "Trust 4+ wks",
-          "source_table": "SLAMBI.Vault.TrustAccessWaitingTimes",
+          "source_table": "Vault.TrustAccessWaitingTimes",
           "source_column": "Weeks Waited For First Contact",
           "transformation_type": "conditional",
           "transformation_logic": "1 if Weeks Waited For First Contact from TrustAccessWaitingTimes is 4 or more, otherwise 0."
         },
         {
           "target_column": "Referral_Status_Desc",
-          "source_table": "SLAMBI.Vault.ReferralStatusValues",
+          "source_table": "Vault.ReferralStatusValues",
           "source_column": "Referral_Status_Desc",
           "transformation_type": "direct_copy",
           "transformation_logic": "Direct copy from Referral_Status_Desc column in ReferralStatusValues table."
@@ -1025,44 +4734,44 @@
       ],
       "joins": [
         {
-          "left_table": "SLAMBI.Vault.WaitingTimes",
-          "right_table": "SLAMBI.Vault.Patient",
+          "left_table": "Vault.WaitingTimes",
+          "right_table": "Vault.Patient",
           "join_type": "LEFT",
           "condition": "wt.Patient_Id = vp.Patient_ID"
         },
         {
-          "left_table": "SLAMBI.Vault.WaitingTimes",
-          "right_table": "SLAMBI.Vault.Episode",
+          "left_table": "Vault.WaitingTimes",
+          "right_table": "Vault.Episode",
           "join_type": "LEFT",
           "condition": "wt.Episode_Id = ep.Episode_ID"
         },
         {
-          "left_table": "SLAMBI.Vault.WaitingTimes",
-          "right_table": "SLAMBI.Vault.TrustAccessWaitingTimes",
+          "left_table": "Vault.WaitingTimes",
+          "right_table": "Vault.TrustAccessWaitingTimes",
           "join_type": "LEFT",
           "condition": "wt.Referral_ID = ta.ReferralID and ta.Crisis RefID is null"
         },
         {
-          "left_table": "SLAMBI.Vault.WaitingTimes",
-          "right_table": "SLAMBI.Vault.DimSD",
+          "left_table": "Vault.WaitingTimes",
+          "right_table": "Vault.DimSD",
           "join_type": "LEFT",
           "condition": "wt.Location_Id = wtsd.Location_ID"
         },
         {
-          "left_table": "SLAMBI.Vault.Episode",
-          "right_table": "SLAMBI.Vault.DimSD",
+          "left_table": "Vault.Episode",
+          "right_table": "Vault.DimSD",
           "join_type": "LEFT",
           "condition": "ep.Location_Id = epsd.Location_ID"
         },
         {
-          "left_table": "SLAMBI.Vault.Episode",
-          "right_table": "SLAMBI.Dim.Priority",
+          "left_table": "Vault.Episode",
+          "right_table": "Dim.Priority",
           "join_type": "LEFT",
           "condition": "ep.Episode_Priority_ID = pri.PriorityID"
         },
         {
-          "left_table": "SLAMBI.Vault.Episode",
-          "right_table": "SLAMBI.Vault.ReferralStatusValues",
+          "left_table": "Vault.Episode",
+          "right_table": "Vault.ReferralStatusValues",
           "join_type": "LEFT",
           "condition": "ep.Referral_Status_ID = rsv.Referral_Status_ID"
         }
@@ -1081,8 +4790,7 @@
       "source_file": "Vault.TrustAccessWaits.sql"
     }
   ],
-  "catalogue": {
-    "PRIORITY": {
+  "catalogue": {"PRIORITY": {
       "qualified_name": "DIM.Priority",
       "database": "",
       "schema": "DIM",

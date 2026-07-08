@@ -502,7 +502,7 @@ class SPAgent:
             "    {\n"
             '      "target_column": "<column in target table>",\n'
             '      "source_table":  "<full qualified name as it appears>",\n'
-            '      "source_column": "<original column name or full expression>",\n'
+            '      "source_column": "<actual column name NOT the SQL alias -- e.g. Gender_ID not a.Gender_ID or p.Gender_ID>",\n'
             '      "transformation_type": "direct_copy | aggregation | calculation | conditional | constant",\n'
             '      "transformation_logic": "<brief plain-English description>"\n'
             "    }\n"
@@ -512,12 +512,20 @@ class SPAgent:
             '      "left_table":  "<full qualified name as it appears>",\n'
             '      "right_table": "<full qualified name as it appears>",\n'
             '      "join_type":   "INNER | LEFT | RIGHT | FULL | CROSS",\n'
-            '      "condition":   "<the ON clause verbatim>"\n'
+            '      "condition":   "<the ON clause using real table names, NOT aliases -- e.g. Patient.PatientID = Referral.PatientID not a.PatientID = b.PatientID>"\n'
             "    }\n"
             "  ],\n"
             '  "filters":  ["<each WHERE condition as a string>"],\n'
             '  "grouping": ["<each GROUP BY expression as a string>"]\n'
             "}\n\n"
+            "CRITICAL RULE — NO ALIASES:\n"
+            "SQL aliases (like 'a', 'b', 'p', 't1') are shorthand used inside the SP, but they are "
+            "meaningless outside its context. You MUST resolve every alias to the actual table name it "
+            "refers to:\n"
+            "  - In source_column: use TableName.ColumnName, never alias.ColumnName\n"
+            "  - In condition: use real table names, never alias-prefixed columns\n"
+            "  - Example: if the SP says 'SELECT a.Gender_ID FROM [Vault].Patient a', the "
+            "source_column must be 'Gender_ID', NOT 'a.Gender_ID'\n\n"
             "STORED PROCEDURE:\n"
             "```sql\n%s\n```\n\n"
             "KNOWN TABLE CATALOGUE (for reference only -- use qualified names from SP, not these):\n%s"
@@ -572,7 +580,7 @@ class SPAgent:
             "    {\n"
             '      "target_column": "<column in target table>",\n'
             '      "source_table":  "<full qualified name as it appears>",\n'
-            '      "source_column": "<original column name or full expression>",\n'
+            '      "source_column": "<actual column name, NOT the SQL alias -- e.g. Gender_ID not a.Gender_ID or p.Gender_ID>",\n'
             '      "transformation_type": "direct_copy | aggregation | calculation | conditional | constant",\n'
             '      "transformation_logic": "<brief plain-English description>"\n'
             "    }\n"
@@ -582,12 +590,20 @@ class SPAgent:
             '      "left_table":  "<full qualified name as it appears>",\n'
             '      "right_table": "<full qualified name as it appears>",\n'
             '      "join_type":   "INNER | LEFT | RIGHT | FULL | CROSS",\n'
-            '      "condition":   "<the ON clause verbatim>"\n'
+            '      "condition":   "<the ON clause using real table names, NOT aliases -- e.g. Patient.PatientID = Referral.PatientID not a.PatientID = b.PatientID>"\n'
             "    }\n"
             "  ],\n"
             '  "filters":  ["<each WHERE condition as a string>"],\n'
             '  "grouping": ["<each GROUP BY expression as a string>"]\n'
             "}\n\n"
+            "CRITICAL RULE — NO ALIASES:\n"
+            "SQL aliases (like 'a', 'b', 'p', 't1') are shorthand used inside the SP, but they are "
+            "meaningless outside its context. You MUST resolve every alias to the actual table name it "
+            "refers to:\n"
+            "  - In source_column: use TableName.ColumnName, never alias.ColumnName\n"
+            "  - In condition: use real table names, never alias-prefixed columns\n"
+            "  - Example: if the SP says 'SELECT a.Gender_ID FROM [Vault].Patient a', the "
+            "source_column must be 'Gender_ID', NOT 'a.Gender_ID'\n\n"
             "STORED PROCEDURE:\n"
             "```sql\n%s\n```\n\n"
             "KNOWN TABLE CATALOGUE (for reference only -- use qualified names from SP, not these):\n%s"
@@ -648,7 +664,7 @@ class SPAgent:
             "    {\n"
             '      "target_column": "<column in target table>",\n'
             '      "source_table":  "<full qualified name as it appears>",\n'
-            '      "source_column": "<original column name or full expression>",\n'
+            '      "source_column": "<actual column name, NOT the SQL alias -- e.g. Gender_ID not a.Gender_ID or p.Gender_ID>",\n'
             '      "transformation_type": "direct_copy | aggregation | calculation | conditional | constant",\n'
             '      "transformation_logic": "<brief plain-English description>"\n'
             "    }\n"
@@ -658,12 +674,20 @@ class SPAgent:
             '      "left_table":  "<full qualified name as it appears>",\n'
             '      "right_table": "<full qualified name as it appears>",\n'
             '      "join_type":   "INNER | LEFT | RIGHT | FULL | CROSS",\n'
-            '      "condition":   "<the ON clause verbatim>"\n'
+            '      "condition":   "<the ON clause using real table names, NOT aliases -- e.g. Patient.PatientID = Referral.PatientID not a.PatientID = b.PatientID>"\n'
             "    }\n"
             "  ],\n"
             '  "filters":  ["<each WHERE condition as a string>"],\n'
             '  "grouping": ["<each GROUP BY expression as a string>"]\n'
             "}\n\n"
+            "CRITICAL RULE — NO ALIASES:\n"
+            "SQL aliases (like 'a', 'b', 'p', 't1') are shorthand used inside the SP, but they are "
+            "meaningless outside its context. You MUST resolve every alias to the actual table name it "
+            "refers to:\n"
+            "  - In source_column: use TableName.ColumnName, never alias.ColumnName\n"
+            "  - In condition: use real table names, never alias-prefixed columns\n"
+            "  - Example: if the SP says 'SELECT a.Gender_ID FROM [Vault].Patient a', the "
+            "source_column must be 'Gender_ID', NOT 'a.Gender_ID'\n\n"
             "STORED PROCEDURE:\n"
             "```sql\n%s\n```\n\n"
             "KNOWN TABLE CATALOGUE (for reference only -- use qualified names from SP, not these):\n%s"
